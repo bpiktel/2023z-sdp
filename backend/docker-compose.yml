@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   sound-localization-tester-backend:
-    container_name: sound-localization-teste-backend
+    container_name: sound-localization-tester-backend
     build: .
     ports:
       - 3000:3000
