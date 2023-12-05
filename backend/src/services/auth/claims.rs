@@ -27,8 +27,8 @@ pub struct Claims {
 
 impl Claims {
     pub fn try_into_token(self, key: &EncodingKey) -> Result<String, AuthError> {
-        encode(&Header::new(Algorithm::RS256), &self, key).map_err(|e| {
-            error!("{}", e);
+        encode(&Header::new(Algorithm::RS256), &self, key).map_err(|error| {
+            error!({error = ?error}, "Error encoding JWT token");
             AuthError::TokenCreation
         })
     }
@@ -36,8 +36,8 @@ impl Claims {
     pub fn try_from_token(token: &str, key: &DecodingKey) -> Result<Self, AuthError> {
         let mut validation = Validation::new(Algorithm::RS256);
         validation.validate_nbf = true;
-        let token_data = decode::<Claims>(token, key, &validation).map_err(|e| {
-            error!("{}", e);
+        let token_data = decode::<Claims>(token, key, &validation).map_err(|error| {
+            error!({error = ?error}, "Error decoding JWT token");
             AuthError::InvalidToken
         })?;
         Ok(token_data.claims)

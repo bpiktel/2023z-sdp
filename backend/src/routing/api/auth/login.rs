@@ -1,8 +1,15 @@
-use axum::{debug_handler, extract::State, http::StatusCode};
+use axum::{extract::State, Json};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use tracing::error;
+use uuid::Uuid;
 use validator::Validate;
 
-use crate::services::{auth::AuthKeys, util::ValidatedJson};
+use crate::services::{
+    auth::{claims::Claims, error::AuthError, AuthKeys},
+    database::{repositories::user::UserRepository, surreal::SurrealDb},
+    util::ValidatedJson,
+};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,11 +32,21 @@ pub struct AuthorizeRequest {
     password: String,
 }
 
-#[debug_handler]
 pub async fn login(
-    State(_keys): State<AuthKeys>,
+    State(keys): State<AuthKeys>,
+    user_repo: UserRepository,
     ValidatedJson(data): ValidatedJson<AuthorizeRequest>,
-) -> StatusCode {
-    dbg!(data); // WE LEAKIN THE ADMIN LOGIN DATA MUAHAHAHA
-    StatusCode::OK
+) -> Result<Json<AuthorizeResponse>, AuthError> {
+    //user_repo.is_admin(&data.username, &data.password)
+
+    let now = Utc::now().timestamp() as u64;
+    let claims = Claims {
+        exp: now + 60 * 60 * 24,
+        nbf: now,
+        iat: now,
+        user_id: Uuid::nil(),
+        username: data.username,
+    };
+    let token = claims.try_into_token(&keys.encoding)?;
+    Ok(Json(AuthorizeResponse::new(token)))
 }

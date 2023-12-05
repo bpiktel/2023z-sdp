@@ -11,5 +11,13 @@
     "auth_keys": {
         "encoding": "devkeys/priv.pem",
         "decoding": "devkeys/pub.pem"
+    },
+    "surreal_db": {
+        "address": "file://surreal.db",
+        "namespace": "default",
+        "database": "default"
+    },
+    "file_storage": {
+        "folder": "storage"
     }
 }

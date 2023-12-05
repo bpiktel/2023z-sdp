@@ -4,13 +4,18 @@ pub mod auth;
 
 use axum::{extract::FromRef, http::StatusCode, response::IntoResponse, Router};
 
-use crate::services::auth::AuthKeys;
+use crate::services::{
+    auth::AuthKeys,
+    database::{files::FileStorage, surreal::SurrealDb},
+};
 
 use self::auth::auth_router;
 
 pub fn api_router<T>() -> Router<T>
 where
     AuthKeys: FromRef<T>,
+    SurrealDb: FromRef<T>,
+    FileStorage: FromRef<T>,
     T: 'static + Send + Sync + Clone,
 {
     Router::new()

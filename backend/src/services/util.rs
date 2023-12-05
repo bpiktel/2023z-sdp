@@ -8,16 +8,18 @@ use axum::{
 use serde::de::DeserializeOwned;
 use validator::{Validate, ValidationErrors};
 
-pub enum Res2 {
-    Msg((StatusCode, &'static str)),
-    NoMsg(StatusCode),
+pub enum ResponseType<T = ()> {
+    Data(T),
+    Status(StatusCode),
+    DataStatus((StatusCode, T)),
 }
 
-impl IntoResponse for Res2 {
+impl<T: IntoResponse> IntoResponse for ResponseType<T> {
     fn into_response(self) -> axum::response::Response {
         match self {
-            Res2::Msg(r) => r.into_response(),
-            Res2::NoMsg(r) => r.into_response(),
+            ResponseType::Status(r) => r.into_response(),
+            ResponseType::Data(r) => r.into_response(),
+            ResponseType::DataStatus(r) => r.into_response(),
         }
     }
 }
