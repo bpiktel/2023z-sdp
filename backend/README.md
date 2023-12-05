@@ -1,6 +1,8 @@
-# Aplikacja do przeprowadzania testów lokalizacji
+# Aplikacja backend
 
-## Uruchamianie
+Dostarcza proste API oraz tymczasową persystencje audio i danych eksperymentów.
+
+## Uruchomienie (do testowania frontendu)
 
 ```sh
 # Uruchom
@@ -13,4 +15,4 @@ docker compose down
 docker compose down -v
 ```
 
-Aplikacja będzie dostępna pod `http://localhost:3000`.
+API będzie dostępne pod `http://localhost:3000`.
