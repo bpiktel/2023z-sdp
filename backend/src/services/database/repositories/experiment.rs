@@ -4,7 +4,6 @@ use axum::{
     http::request::Parts,
 };
 use hyper::StatusCode;
-use surrealdb::{engine::any::Any, Surreal};
 
 use crate::services::database::surreal::SurrealDb;
 

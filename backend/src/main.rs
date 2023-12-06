@@ -17,7 +17,9 @@ async fn main() {
     let surreal_db = SurrealDb::setup(&config.surreal_db)
         .await
         .expect("Failed to setup SurrealDb");
-    let file_storage = FileStorage::setup(&config.file_storage);
+    let file_storage = FileStorage::setup(&config.file_storage)
+        .await
+        .expect("Failed to setup FileStorage");
     let state = AppState {
         auth_keys,
         surreal_db,
