@@ -1,5 +1,4 @@
 pub mod claims;
-pub mod error;
 
 use std::{error::Error, fs::read, path::PathBuf};
 

@@ -8,6 +8,7 @@ use surrealdb::{
     sql::{Id, Thing},
     Surreal,
 };
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct SurrealDbConfig {
@@ -88,21 +89,21 @@ pub struct Record<T = ()> {
 }
 
 impl<T> Record<T> {
-    pub fn id(&self) -> u64 {
-        self.id.to_u64()
+    pub fn id(&self) -> Uuid {
+        self.id.to_uuid()
     }
 }
 
-pub trait ThingToU64 {
-    fn to_u64(&self) -> u64;
+pub trait ThingToUuid {
+    fn to_uuid(&self) -> Uuid;
 }
 
-impl ThingToU64 for Thing {
-    fn to_u64(&self) -> u64 {
-        let Id::Number(id) = self.id else {
-            panic!("Expected numeric id")
+impl ThingToUuid for Thing {
+    fn to_uuid(&self) -> Uuid {
+        let Id::String(ref uuid) = self.id else {
+            panic!("Expected string ID")
         };
-        id.try_into().expect("Failed cast")
+        uuid.parse().expect("Failed to parse ID as UUID")
     }
 }
 

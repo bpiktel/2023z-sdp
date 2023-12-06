@@ -4,16 +4,14 @@ use axum::{
     http::request::Parts,
     RequestPartsExt,
 };
-use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
-    TypedHeader,
-};
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use axum_extra::extract::CookieJar;
+use hyper::StatusCode;
+use jsonwebtoken::{decode, encode, Algorithm, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use tracing::error;
+use tracing::{debug, error};
 use uuid::Uuid;
 
-use super::{error::AuthError, AuthKeys};
+use super::AuthKeys;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,24 +23,15 @@ pub struct Claims {
     pub username: String,
 }
 
-impl Claims {
-    pub fn try_into_token(self, key: &EncodingKey) -> Result<String, AuthError> {
-        encode(&Header::new(Algorithm::RS256), &self, key).map_err(|error| {
-            error!({error = ?error}, "Error encoding JWT token");
-            AuthError::TokenCreation
+pub fn create_token(claims: Claims, key: &EncodingKey) -> Option<String> {
+    encode(&Header::new(Algorithm::RS256), &claims, key)
+        .map_err(|e| {
+            error!({error = ?e}, "Error encoding JWT token");
         })
-    }
-
-    pub fn try_from_token(token: &str, key: &DecodingKey) -> Result<Self, AuthError> {
-        let mut validation = Validation::new(Algorithm::RS256);
-        validation.validate_nbf = true;
-        let token_data = decode::<Claims>(token, key, &validation).map_err(|error| {
-            error!({error = ?error}, "Error decoding JWT token");
-            AuthError::InvalidToken
-        })?;
-        Ok(token_data.claims)
-    }
+        .ok()
 }
+
+pub const JWT_TOKEN_COOKIE: &str = "jwt_token";
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Claims
@@ -50,18 +39,24 @@ where
     AuthKeys: FromRef<S>,
     S: Send + Sync,
 {
-    type Rejection = AuthError;
+    type Rejection = StatusCode;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let TypedHeader(Authorization(bearer)) = parts
-            .extract::<TypedHeader<Authorization<Bearer>>>()
-            .await
-            .map_err(|_| AuthError::InvalidToken)?;
+        let cookies = parts.extract::<CookieJar>().await.unwrap();
+        let Some(cookie) = cookies.get(JWT_TOKEN_COOKIE) else {
+            debug!("Missing JWT token cookie");
+            return Err(StatusCode::UNAUTHORIZED);
+        };
 
         let keys = AuthKeys::from_ref(state);
 
-        let token_data = decode::<Claims>(bearer.token(), &keys.decoding, &Validation::default())
-            .map_err(|_| AuthError::InvalidToken)?;
+        let mut validation = Validation::new(Algorithm::RS256);
+        validation.validate_nbf = true;
+        let token_data = decode::<Claims>(cookie.value_trimmed(), &keys.decoding, &validation)
+            .map_err(|e| {
+                debug!({error = ?e}, "Error decoding JWT token");
+                StatusCode::UNAUTHORIZED
+            })?;
 
         Ok(token_data.claims)
     }
