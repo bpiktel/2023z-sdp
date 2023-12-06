@@ -3,6 +3,7 @@ use axum::{
     extract::{FromRef, FromRequestParts},
     http::request::Parts,
 };
+use bytes::Bytes;
 use hyper::StatusCode;
 
 use crate::services::database::{files::FileStorage, surreal::SurrealDb};
@@ -13,18 +14,23 @@ pub struct AudioRepository {
 }
 
 impl AudioRepository {
-    /// Create sample and return ID
-    pub async fn create_sample(&self, name: String, data: &[u8]) -> AudioSample {
+    /// Create sample
+    pub async fn create_sample(&self, name: String, data: Bytes) -> AudioSample {
         todo!();
     }
 
-    /// Get samples
+    /// List samples
     pub async fn list_samples(&self) -> Vec<AudioSample> {
         todo!();
     }
 
+    /// Delete sample
+    pub async fn delete_sample(&self, name: String, data: Bytes) -> AudioSample {
+        todo!();
+    }
+
     /// Get sample data
-    pub async fn get_sample_data(&self, id: String) -> &[u8] {
+    pub async fn get_sample_data(&self, id: String) -> Bytes {
         todo!();
     }
 }
