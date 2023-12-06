@@ -1,5 +1,6 @@
 //! Api server
 
+pub mod audio;
 pub mod auth;
 
 use axum::{extract::FromRef, http::StatusCode, response::IntoResponse, Router};
@@ -9,6 +10,7 @@ use crate::services::{
     database::{files::FileStorage, surreal::SurrealDb},
 };
 
+use self::audio::audio_router;
 use self::auth::auth_router;
 
 pub fn api_router<T>() -> Router<T>
@@ -20,6 +22,7 @@ where
 {
     Router::new()
         .nest("/auth", auth_router())
+        .nest("/audio", audio_router())
         .fallback(handler_404)
 }
 

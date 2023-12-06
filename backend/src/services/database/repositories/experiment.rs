@@ -44,8 +44,6 @@ pub struct Experiment {
 }
 
 pub struct Sample {
-    pub azimunth: f32,
-    pub elevation: f32,
     pub sample_id: String,
 }
 

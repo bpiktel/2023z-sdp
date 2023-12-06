@@ -45,7 +45,7 @@ impl IntoResponse for ValidatedJsonRejection {
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-pub struct ValidatedJson<T>(pub T);
+pub struct ValidatedJson<T: DeserializeOwned + Validate>(pub T);
 
 #[async_trait]
 impl<T, S> FromRequest<S> for ValidatedJson<T>

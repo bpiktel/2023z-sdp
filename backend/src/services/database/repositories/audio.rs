@@ -5,6 +5,7 @@ use axum::{
 };
 use bytes::Bytes;
 use hyper::StatusCode;
+use serde::Serialize;
 
 use crate::services::database::{files::FileStorage, surreal::SurrealDb};
 
@@ -15,29 +16,53 @@ pub struct AudioRepository {
 
 impl AudioRepository {
     /// Create sample
-    pub async fn create_sample(&self, name: String, data: Bytes) -> AudioSample {
+    pub async fn create_sample(
+        &self,
+        name: String,
+        data: Bytes,
+        azimuth: f32,
+        elevation: f32,
+    ) -> Result<AudioSample, ()> {
+        todo!();
+    }
+
+    /// Create many samples
+    pub async fn create_samples(
+        &self,
+        datas: Vec<(String, Bytes, f32, f32)>,
+    ) -> Result<Vec<AudioSample>, ()> {
         todo!();
     }
 
     /// List samples
-    pub async fn list_samples(&self) -> Vec<AudioSample> {
+    pub async fn list_samples(&self) -> Result<Vec<AudioSample>, ()> {
+        // TODO errors :)
         todo!();
     }
 
     /// Delete sample
-    pub async fn delete_sample(&self, name: String, data: Bytes) -> AudioSample {
+    pub async fn delete_sample(&self, name: String) -> Result<AudioSample, ()> {
+        todo!();
+    }
+
+    /// Delete many samples
+    pub async fn delete_samples(&self, ids: Vec<String>) -> Result<(), ()> {
         todo!();
     }
 
     /// Get sample data
-    pub async fn get_sample_data(&self, id: String) -> Bytes {
+    pub async fn get_sample_data(&self, id: String) -> Result<Bytes, ()> {
         todo!();
     }
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AudioSample {
     id: String,
     name: String,
+    azimuth: f32,
+    elevation: f32,
 }
 
 #[async_trait]
