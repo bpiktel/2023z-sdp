@@ -6,6 +6,7 @@ use axum::{
 use bytes::Bytes;
 use hyper::StatusCode;
 use serde::Serialize;
+use utoipa::ToSchema;
 
 use crate::services::database::{files::FileStorage, surreal::SurrealDb};
 
@@ -56,7 +57,7 @@ impl AudioRepository {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct AudioSample {
     id: String,

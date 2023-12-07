@@ -27,3 +27,36 @@ async fn main() {
     };
     run(config.app.url, main_route(&config).with_state(state)).await;
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs::OpenOptions;
+
+    use utoipa::OpenApi;
+    use crate::routing;
+    use crate::services;
+
+    #[test]
+    fn make_openapi_json() {
+        #[derive(OpenApi)]
+        #[openapi(
+            paths(
+                routing::api::audio::create_audio,
+                routing::api::audio::delete_audio,
+                routing::api::audio::get_audio,
+            ),
+            components(
+                schemas(
+                    routing::api::audio::DeleteSamplesRequest,
+                    services::database::repositories::audio::AudioSample,
+                )
+            ),
+            tags(
+                (name = "todo", description = "chghckgj")
+            )
+        )]
+        pub struct ApiDoc;
+        let file = OpenOptions::new().write(true).truncate(true).create(true).open("openapi.json").unwrap();
+        serde_json::to_writer_pretty(file, &ApiDoc::openapi()).unwrap();
+    }
+}
