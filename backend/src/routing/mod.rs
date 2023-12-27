@@ -1,6 +1,6 @@
 pub mod api;
-mod healthcheck;
-mod static_files;
+pub mod healthcheck;
+pub mod static_files;
 
 use axum::{extract::FromRef, Router};
 use tower_http::{cors::CorsLayer, trace::TraceLayer};

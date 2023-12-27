@@ -42,7 +42,7 @@ pub struct AuthorizeRequest {
     password: String,
 }
 
-async fn login(
+pub async fn login(
     State(keys): State<AuthKeys>,
     user_repo: UserRepository,
     ValidatedJson(data): ValidatedJson<AuthorizeRequest>,
@@ -79,11 +79,11 @@ async fn login(
     ResponseType::Data(cookies.add(cookie))
 }
 
-async fn logout() -> CookieJar {
+pub async fn logout() -> CookieJar {
     let cookies = CookieJar::new();
     cookies.remove(Cookie::from(JWT_TOKEN_COOKIE))
 }
 
-async fn status(claims: Claims) -> Json<Claims> {
+pub async fn status(claims: Claims) -> Json<Claims> {
     Json(claims)
 }

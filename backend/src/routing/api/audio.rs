@@ -7,14 +7,11 @@ use axum_extra::extract::Multipart;
 use hyper::StatusCode;
 use serde::Deserialize;
 use tracing::error;
-use validator::Validate;
 use utoipa::{IntoParams, ToSchema};
+use validator::Validate;
 
 use crate::services::{
-    auth::{
-        claims::Claims,
-        AuthKeys,
-    },
+    auth::{claims::Claims, AuthKeys},
     database::{
         files::FileStorage,
         repositories::audio::{AudioRepository, AudioSample},
@@ -36,13 +33,13 @@ where
         .route("/get", get(get_audio))
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateSamplesRequest {
     samples: Vec<CreateSampleRequest>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateSampleRequest {
     name: String,
@@ -66,7 +63,7 @@ pub struct DeleteSamplesRequest {
         (status = 200, description = "Upload all audio samples successfully", body = [AudioSample])
     )
 )]
-async fn create_audio(
+pub async fn create_audio(
     audio_repo: AudioRepository,
     _: Claims,
     mut multipart: Multipart,
@@ -96,7 +93,7 @@ async fn create_audio(
         (status = 200, description = "Delete listed audio samples successfully", body = DeleteSamplesRequest)
     )
 )]
-async fn delete_audio(
+pub async fn delete_audio(
     audio_repo: AudioRepository,
     _: Claims,
     ValidatedJson(data): ValidatedJson<DeleteSamplesRequest>,
@@ -122,7 +119,10 @@ async fn delete_audio(
         (status = 200, description = "List all audio samples successfully", body = [AudioSample])
     )
 )]
-async fn get_audio(audio_repo: AudioRepository, _: Claims) -> ResponseType<Json<Vec<AudioSample>>> {
+pub async fn get_audio(
+    audio_repo: AudioRepository,
+    _: Claims,
+) -> ResponseType<Json<Vec<AudioSample>>> {
     let Ok(samples) = audio_repo
         .list_samples()
         .await

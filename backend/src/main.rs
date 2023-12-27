@@ -1,5 +1,5 @@
-mod routing;
-mod services;
+pub mod routing;
+pub mod services;
 
 use routing::main_route;
 use services::{
@@ -29,13 +29,13 @@ async fn main() {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use std::fs::OpenOptions;
     use utoipa::OpenApi;
     use utoipauto::utoipauto;
 
     #[test]
-    fn make_openapi_json() {
+    pub fn make_openapi_json() {
         #[utoipauto]
         #[derive(OpenApi)]
         #[openapi(

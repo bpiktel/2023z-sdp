@@ -7,6 +7,6 @@ where
     Router::new().route("/health", get(health))
 }
 
-async fn health() -> &'static str {
+pub async fn health() -> &'static str {
     "healthy"
 }
