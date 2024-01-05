@@ -12,4 +12,5 @@ FROM debian:bullseye-slim AS runtime
 WORKDIR /app/
 COPY --from=backend-build /app/backend /app/
 COPY --from=backend-build /app/config/ /app/config/
+COPY --from=backend-build /app/migrations/ /app/migrations/
 ENTRYPOINT ["/app/backend"]

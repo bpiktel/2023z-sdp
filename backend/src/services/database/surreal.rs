@@ -124,10 +124,21 @@ impl<T> DerefMut for WithId<T> {
 pub mod tests {
     use surrealdb::engine::any::connect;
 
+    use crate::services::database::migrations::{Migrator, MigratorConfig};
+
     use super::SurrealDb;
 
     fn memory() -> &'static str {
         "mem://"
+    }
+
+    async fn migrate_db(db: &SurrealDb) {
+        Migrator::new(&MigratorConfig {
+            migrations_dir: "./migrations".into(),
+        })
+        .migrate(db)
+        .await
+        .unwrap();
     }
 
     pub async fn surreal_in_memory() -> SurrealDb {
@@ -136,6 +147,7 @@ pub mod tests {
             inner: connect(addr).await.unwrap(),
         };
         db.use_ns("test").use_db("test").await.unwrap();
+        migrate_db(&db).await;
         db
     }
 }

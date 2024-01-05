@@ -24,7 +24,7 @@ impl AudioRepository {
     pub async fn create(&self, info: SampleInfo, data: Bytes) -> RepoResult<WithId<SampleInfo>> {
         let mut result = self
             .surreal
-            .query("create only audio_samples content $info")
+            .query("create only sample content $info")
             .bind(("info", &info))
             .await?;
         let sample = result.take::<Option<WithId<SampleInfo>>>(0)?.found()?;
@@ -34,7 +34,7 @@ impl AudioRepository {
 
     /// List sample infos
     pub async fn infos(&self) -> RepoResult<Vec<WithId<SampleInfo>>> {
-        let mut result = self.surreal.query("select * from audio_samples").await?;
+        let mut result = self.surreal.query("select * from sample").await?;
         let samples = result.take::<Vec<WithId<SampleInfo>>>(0)?;
         Ok(samples)
     }
@@ -43,7 +43,7 @@ impl AudioRepository {
     pub async fn delete(&self, id: String) -> RepoResult {
         self.file_storage.delete(&id).await?;
         self.surreal
-            .query("delete only audio_samples where meta::id(id) is $id")
+            .query("delete only sample where meta::id(id) is $id")
             .bind(("id", &id))
             .await?;
         Ok(())
@@ -53,7 +53,7 @@ impl AudioRepository {
     pub async fn info(&self, id: String) -> RepoResult<WithId<SampleInfo>> {
         let mut result = self
             .surreal
-            .query("select * from only audio_samples where meta::id(id) is $id")
+            .query("select * from only sample where meta::id(id) is $id")
             .bind(("id", &id))
             .await?;
         let sample = result.take::<Option<WithId<SampleInfo>>>(0)?.found()?;
@@ -67,7 +67,7 @@ impl AudioRepository {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SampleInfo {
     name: String,
@@ -131,6 +131,20 @@ mod tests {
         let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
 
         sut.create(info, data).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn create_duplicate() {
+        let sut = setup().await;
+        let info = SampleInfo {
+            name: "create.mp4".to_owned(),
+            azimuth: 10.0,
+            elevation: 0.0,
+        };
+        let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
+        sut.create(info.clone(), data.clone()).await.unwrap();
+
+        sut.create(info, data).await.unwrap_err();
     }
 
     #[tokio::test]

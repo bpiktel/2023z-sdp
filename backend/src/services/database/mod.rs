@@ -1,6 +1,7 @@
 pub mod files;
 pub mod repositories;
 pub mod surreal;
+pub mod migrations;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RepoError {
