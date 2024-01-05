@@ -32,9 +32,9 @@ async fn main() {
 mod tests {
     use std::fs::OpenOptions;
 
-    use utoipa::OpenApi;
     use crate::routing;
     use crate::services;
+    use utoipa::OpenApi;
 
     #[test]
     fn make_openapi_json() {
@@ -47,8 +47,7 @@ mod tests {
             ),
             components(
                 schemas(
-                    routing::api::audio::DeleteSamplesRequest,
-                    services::database::repositories::audio::AudioSample,
+                    services::database::repositories::audio::SampleInfo,
                 )
             ),
             tags(
@@ -56,7 +55,12 @@ mod tests {
             )
         )]
         pub struct ApiDoc;
-        let file = OpenOptions::new().write(true).truncate(true).create(true).open("openapi.json").unwrap();
+        let file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .create(true)
+            .open("openapi.json")
+            .unwrap();
         serde_json::to_writer_pretty(file, &ApiDoc::openapi()).unwrap();
     }
 }

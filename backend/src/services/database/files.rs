@@ -9,7 +9,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct FileStorageConfig {
-    folder: PathBuf,
+    pub folder: PathBuf,
 }
 
 #[derive(Debug, Clone)]
@@ -25,15 +25,17 @@ impl FileStorage {
     }
 
     async fn preprocess_path(&self, path: impl AsRef<Path>) -> std::io::Result<PathBuf> {
-        let path = tokio::fs::canonicalize(path).await?;
-        if !path.starts_with(&self.folder) || path == self.folder {
-            return Err(std::io::Error::new(ErrorKind::NotFound, "File not found"));
-        }
+        let path = path.as_ref();
+        let path = path
+            .components()
+            .last()
+            .ok_or(std::io::Error::new(ErrorKind::NotFound, "Not Found"))?;
+        let path = self.folder.join(path);
         Ok(path)
     }
 
-    /// Create a file with specific id
-    pub async fn create(&self, path: String, data: Bytes) -> std::io::Result<()> {
+    /// Create a file
+    pub async fn create(&self, path: impl AsRef<Path>, data: Bytes) -> std::io::Result<()> {
         let path = self.preprocess_path(path).await?;
         let mut file = tokio::fs::OpenOptions::new()
             .create_new(true)
@@ -44,12 +46,19 @@ impl FileStorage {
         Ok(())
     }
 
-    /// Get a file with specific id
-    pub async fn get(&self, path: String) -> std::io::Result<Bytes> {
+    /// Get a file
+    pub async fn get(&self, path: impl AsRef<Path>) -> std::io::Result<Bytes> {
         let path = self.preprocess_path(path).await?;
         let mut file = tokio::fs::OpenOptions::new().read(true).open(path).await?;
         let mut buf = BytesMut::new();
         while file.read_buf(&mut buf).await? != 0 {}
         Ok(buf.freeze())
+    }
+
+    /// Delete a file
+    pub async fn delete(&self, path: impl AsRef<Path>) -> std::io::Result<()> {
+        let path = self.preprocess_path(path).await?;
+        tokio::fs::remove_file(path).await?;
+        Ok(())
     }
 }

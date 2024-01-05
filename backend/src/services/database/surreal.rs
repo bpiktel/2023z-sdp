@@ -8,7 +8,6 @@ use surrealdb::{
     sql::{Id, Thing},
     Surreal,
 };
-use uuid::Uuid;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct SurrealDbConfig {
@@ -81,33 +80,33 @@ impl BetterCheck for surrealdb::Response {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Record<T = ()> {
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct WithId<T = ()> {
     pub id: Thing,
     #[serde(flatten)]
     pub entry: T,
 }
 
-impl<T> Record<T> {
-    pub fn id(&self) -> Uuid {
-        self.id.to_uuid()
+impl<T> WithId<T> {
+    pub fn id(&self) -> String {
+        self.id.unwrap_string()
     }
 }
 
-pub trait ThingToUuid {
-    fn to_uuid(&self) -> Uuid;
+pub trait ThingUnwrap {
+    fn unwrap_string(&self) -> String;
 }
 
-impl ThingToUuid for Thing {
-    fn to_uuid(&self) -> Uuid {
-        let Id::String(ref uuid) = self.id else {
+impl ThingUnwrap for Thing {
+    fn unwrap_string(&self) -> String {
+        let Id::String(string) = &self.id else {
             panic!("Expected string ID")
         };
-        uuid.parse().expect("Failed to parse ID as UUID")
+        string.to_owned()
     }
 }
 
-impl<T> Deref for Record<T> {
+impl<T> Deref for WithId<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -115,8 +114,28 @@ impl<T> Deref for Record<T> {
     }
 }
 
-impl<T> DerefMut for Record<T> {
+impl<T> DerefMut for WithId<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.entry
+    }
+}
+
+#[cfg(test)]
+pub mod tests {
+    use surrealdb::engine::any::connect;
+
+    use super::SurrealDb;
+
+    fn memory() -> &'static str {
+        "mem://"
+    }
+
+    pub async fn surreal_in_memory() -> SurrealDb {
+        let addr = memory();
+        let db = SurrealDb {
+            inner: connect(addr).await.unwrap(),
+        };
+        db.use_ns("test").use_db("test").await.unwrap();
+        db
     }
 }

@@ -1,6 +1,6 @@
 use axum::{
-    extract::FromRef,
-    routing::{get, post},
+    extract::{FromRef, Path},
+    routing::{delete, get, post},
     Json, Router,
 };
 use axum_extra::extract::Multipart;
@@ -8,19 +8,15 @@ use hyper::StatusCode;
 use serde::Deserialize;
 use tracing::error;
 use validator::Validate;
-use utoipa::{IntoParams, ToSchema};
 
 use crate::services::{
-    auth::{
-        claims::Claims,
-        AuthKeys,
-    },
+    auth::{claims::Claims, AuthKeys},
     database::{
         files::FileStorage,
-        repositories::audio::{AudioRepository, AudioSample},
-        surreal::SurrealDb,
+        repositories::audio::{AudioRepository, SampleInfo},
+        surreal::{SurrealDb, WithId},
     },
-    util::{ResponseType, ValidatedJson},
+    util::ResponseType,
 };
 
 pub fn audio_router<T>() -> Router<T>
@@ -32,14 +28,10 @@ where
 {
     Router::new()
         .route("/", post(create_audio))
-        .route("/delete", post(delete_audio))
+        .route("/delete/:id", delete(delete_audio))
         .route("/get", get(get_audio))
-}
-
-#[derive(Debug, Deserialize, Validate)]
-#[serde(rename_all = "camelCase")]
-pub struct CreateSamplesRequest {
-    samples: Vec<CreateSampleRequest>,
+    // List?
+    // Get data?
 }
 
 #[derive(Debug, Deserialize, Validate)]
@@ -48,12 +40,6 @@ pub struct CreateSampleRequest {
     name: String,
     azimuth: f32,
     elevation: f32,
-}
-
-#[derive(Debug, Deserialize, IntoParams, ToSchema, Validate)]
-#[serde(rename_all = "camelCase")]
-pub struct DeleteSamplesRequest {
-    ids: Vec<String>,
 }
 
 /// Create audio samples from a list
@@ -70,12 +56,12 @@ async fn create_audio(
     audio_repo: AudioRepository,
     _: Claims,
     mut multipart: Multipart,
-) -> ResponseType<Json<Vec<AudioSample>>> {
+) -> ResponseType<Json<Vec<SampleInfo>>> {
     /// TODO multipart :)
     todo!();
     /*
     let Ok(sample) = audio_repo
-        .create_samples(data)
+        .create_sample(data)
         .await
         .map_err(|e| error!({error = ?e}, "Encountered an error while adding a sample"))
     else {
@@ -90,19 +76,19 @@ async fn create_audio(
 ///
 /// Delete all samples with given identifiers.
 #[utoipa::path(
-    post,
-    path = "/audio/delete",
+    delete,
+    path = "/audio/delete/{id}",
     responses(
-        (status = 200, description = "Delete listed audio samples successfully", body = DeleteSamplesRequest)
+        (status = 200, description = "Delete listed audio samples successfully")
     )
 )]
 async fn delete_audio(
     audio_repo: AudioRepository,
     _: Claims,
-    ValidatedJson(data): ValidatedJson<DeleteSamplesRequest>,
+    Path(id): Path<String>,
 ) -> ResponseType<()> {
     let Ok(_) = audio_repo
-        .delete_samples(data.ids)
+        .delete(id)
         .await
         .map_err(|e| error!({error = ?e}, "Encountered an error while deleting a sample"))
     else {
@@ -122,9 +108,12 @@ async fn delete_audio(
         (status = 200, description = "List all audio samples successfully", body = [AudioSample])
     )
 )]
-async fn get_audio(audio_repo: AudioRepository, _: Claims) -> ResponseType<Json<Vec<AudioSample>>> {
+async fn get_audio(
+    audio_repo: AudioRepository,
+    _: Claims,
+) -> ResponseType<Json<Vec<WithId<SampleInfo>>>> {
     let Ok(samples) = audio_repo
-        .list_samples()
+        .infos()
         .await
         .map_err(|e| error!({error = ?e}, "Encountered an error while getting sample list"))
     else {
@@ -132,4 +121,6 @@ async fn get_audio(audio_repo: AudioRepository, _: Claims) -> ResponseType<Json<
     };
 
     ResponseType::Data(Json(samples))
+
+    // TODO: Use `mime_guess::from_path` to get MIME type from sample name
 }
