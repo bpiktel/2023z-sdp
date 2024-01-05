@@ -40,13 +40,24 @@ impl AudioRepository {
     }
 
     /// Delete sample
-    pub async fn delete(&self, id: String) -> RepoResult {
+    pub async fn delete(&self, id: String) -> RepoResult<bool> {
+        let mut result = self
+            .surreal
+            .query("select * from experiment_samples where meta::id(out) is $id")
+            .bind(("id", &id))
+            .await?;
+        let relations = result.take::<Vec<()>>(0)?;
+        if !relations.is_empty() {
+            return Ok(false);
+        }
+        // NOTE: Race condition
+        // Someone can add this sample to an experiment between the check and deletion.
         self.file_storage.delete(&id).await?;
         self.surreal
             .query("delete only sample where meta::id(id) is $id")
             .bind(("id", &id))
             .await?;
-        Ok(())
+        Ok(true)
     }
 
     /// Get sample info
