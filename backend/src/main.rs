@@ -47,7 +47,7 @@ mod tests {
             ),
             components(
                 schemas(
-                    services::database::repositories::audio::SampleInfo,
+                    services::database::repositories::sample::SampleInfo,
                 )
             ),
             tags(

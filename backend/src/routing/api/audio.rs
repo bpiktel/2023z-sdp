@@ -13,7 +13,7 @@ use crate::services::{
     auth::{claims::Claims, AuthKeys},
     database::{
         files::FileStorage,
-        repositories::audio::{AudioRepository, SampleInfo},
+        repositories::sample::{SampleInfo, SampleRepository},
         surreal::{SurrealDb, WithId},
     },
     util::ResponseType,
@@ -53,7 +53,7 @@ pub struct CreateSampleRequest {
     )
 )]
 async fn create_audio(
-    audio_repo: AudioRepository,
+    audio_repo: SampleRepository,
     _: Claims,
     mut multipart: Multipart,
 ) -> ResponseType<Json<Vec<SampleInfo>>> {
@@ -83,7 +83,7 @@ async fn create_audio(
     )
 )]
 async fn delete_audio(
-    audio_repo: AudioRepository,
+    audio_repo: SampleRepository,
     _: Claims,
     Path(id): Path<String>,
 ) -> ResponseType<()> {
@@ -109,7 +109,7 @@ async fn delete_audio(
     )
 )]
 async fn get_audio(
-    audio_repo: AudioRepository,
+    audio_repo: SampleRepository,
     _: Claims,
 ) -> ResponseType<Json<Vec<WithId<SampleInfo>>>> {
     let Ok(samples) = audio_repo
