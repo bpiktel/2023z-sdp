@@ -122,7 +122,6 @@ mod tests {
 
     async fn setup() -> (SampleRepository, ExperimentRepository) {
         let surreal = surreal_in_memory().await;
-        tokio::fs::remove_dir_all("./tmp/file_storage").await.ok();
         let file_storage_config = FileStorageConfig {
             folder: PathBuf::from("./tmp/file_storage"),
         };

@@ -31,12 +31,14 @@ impl ExperimentRepository {
             .query("begin")
             .query("let $experiment = create only experiment content { name: $name }")
             .query(
-                r"for $sample_id in $sample_ids {
+                r"
+                for $sample_id in $sample_ids {
                     relate ($experiment)->experiment_sample->(type::thing(sample, $sample_id));
-                }",
+                }
+                ",
             )
             .query("commit")
-            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment where id is $experiment.id;")
+            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $experiment.id")
             .bind(("name", &experiment.name))
             .bind(("sample_ids", &experiment.sample_ids))
             .await?
@@ -51,8 +53,8 @@ impl ExperimentRepository {
             .surreal
             .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment")
             .await?;
-        let experiment = result.take::<Vec<WithId<Experiment>>>(0)?;
-        Ok(experiment)
+        let experiments = result.take::<Vec<WithId<Experiment>>>(0)?;
+        Ok(experiments)
     }
 
     /// Return all results for an experiment
@@ -60,13 +62,43 @@ impl ExperimentRepository {
         &self,
         experiment_id: String,
         result: ExperimentResult,
-    ) -> RepoResult<ExperimentResult> {
-        todo!();
+    ) -> RepoResult<WithId<ExperimentResult>> {
+        let mut result = self
+            .surreal
+            .query("begin")
+            .query("let $result = create only result content { experiment_id: $experiment_id }")
+            .query(
+                r"
+                for $sample_result in $sample_results {
+                    let $experiment_sample = select value id from only experiment_sample where meta::id(in) is $experiment_id and meta::id(out) is $sample_result.sample_id;
+                    relate ($experiment_sample)->sample_result->($result) content { azimuth: $sample_result.azimuth , elevation: $sample_result.elevation };
+                }
+                ",
+            )
+            .query("commit")
+            .query("select *, (select meta::id(in) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id")
+            .bind(("experiment_id", experiment_id))
+            .bind(("sample_results", result.sample_results))
+            .await?
+            .better_check()?;
+        let result = result
+            .take::<Option<WithId<ExperimentResult>>>(2)?
+            .found()?;
+        Ok(result)
     }
 
     /// Return all results for an experiment
-    pub async fn results(&self, experiment_id: String) -> RepoResult<Vec<ExperimentResult>> {
-        todo!();
+    pub async fn results(
+        &self,
+        experiment_id: String,
+    ) -> RepoResult<Vec<WithId<ExperimentResult>>> {
+        let mut result = self
+            .surreal
+            .query("select *, (select meta::id(in) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id")
+            .bind(("experiment_id", experiment_id))
+            .await?;
+        let results = result.take::<Vec<WithId<ExperimentResult>>>(0)?;
+        Ok(results)
     }
 
     /// Delete the entire experiment
@@ -86,7 +118,9 @@ pub struct Experiment {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ExperimentResult(Vec<SampleResult>);
+pub struct ExperimentResult {
+    sample_results: Vec<SampleResult>,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SampleResult {
@@ -120,7 +154,7 @@ mod tests {
     use crate::services::database::{
         files::{FileStorage, FileStorageConfig},
         repositories::{
-            experiment::Experiment,
+            experiment::{Experiment, ExperimentResult, SampleResult},
             sample::{SampleInfo, SampleRepository},
         },
         surreal::tests::surreal_in_memory,
@@ -130,7 +164,6 @@ mod tests {
 
     async fn setup() -> (ExperimentRepository, SampleRepository) {
         let surreal = surreal_in_memory().await;
-        tokio::fs::remove_dir_all("./tmp/file_storage").await.ok();
         let file_storage_config = FileStorageConfig {
             folder: PathBuf::from("./tmp/file_storage"),
         };
@@ -212,5 +245,72 @@ mod tests {
         let experiment = sut.create(experiment).await.unwrap();
 
         sut.delete(experiment.id()).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn create_result() {
+        let (sut, sample_repo) = setup().await;
+        let info = SampleInfo {
+            name: Uuid::new_v4().to_string(),
+            azimuth: 10.0,
+            elevation: 0.0,
+        };
+        let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
+        let sample = sample_repo.create(info, data).await.unwrap();
+        let experiment = Experiment {
+            name: "exp-1".to_owned(),
+            sample_ids: vec![sample.id()],
+        };
+        let experiment = sut.create(experiment).await.unwrap();
+        let result = ExperimentResult {
+            sample_results: vec![SampleResult {
+                sample_id: sample.id(),
+                azimuth: 17.0,
+                elevation: 9.3,
+            }],
+        };
+
+        let result = sut.create_result(experiment.id(), result).await.unwrap();
+
+        assert_eq!(result.sample_results.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn results() {
+        let (sut, sample_repo) = setup().await;
+        let info = SampleInfo {
+            name: Uuid::new_v4().to_string(),
+            azimuth: 10.0,
+            elevation: 0.0,
+        };
+        let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
+        let sample = sample_repo.create(info, data).await.unwrap();
+        let experiment = Experiment {
+            name: "exp-1".to_owned(),
+            sample_ids: vec![sample.id()],
+        };
+        let experiment = sut.create(experiment).await.unwrap();
+        let result = ExperimentResult {
+            sample_results: vec![SampleResult {
+                sample_id: sample.id(),
+                azimuth: 17.0,
+                elevation: 9.3,
+            }],
+        };
+        sut.create_result(experiment.id(), result).await.unwrap();
+        let result = ExperimentResult {
+            sample_results: vec![SampleResult {
+                sample_id: sample.id(),
+                azimuth: 10.3,
+                elevation: 1.5,
+            }],
+        };
+        sut.create_result(experiment.id(), result).await.unwrap();
+
+        let result = sut.results(experiment.id()).await.unwrap();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].sample_results.len(), 1);
+        assert_eq!(result[1].sample_results.len(), 1);
     }
 }

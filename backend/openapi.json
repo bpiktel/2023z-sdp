@@ -37,8 +37,8 @@
         }
       }
     },
-    "/audio/delete": {
-      "post": {
+    "/audio/delete/{id}": {
+      "delete": {
         "tags": [
           "routing::api::audio"
         ],
@@ -47,14 +47,7 @@
         "operationId": "delete_audio",
         "responses": {
           "200": {
-            "description": "Delete listed audio samples successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteSamplesRequest"
-                }
-              }
-            }
+            "description": "Delete listed audio samples successfully"
           }
         }
       }
@@ -87,10 +80,9 @@
   },
   "components": {
     "schemas": {
-      "AudioSample": {
+      "SampleInfo": {
         "type": "object",
         "required": [
-          "id",
           "name",
           "azimuth",
           "elevation"
@@ -104,25 +96,8 @@
             "type": "number",
             "format": "float"
           },
-          "id": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
-          }
-        }
-      },
-      "DeleteSamplesRequest": {
-        "type": "object",
-        "required": [
-          "ids"
-        ],
-        "properties": {
-          "ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       }
