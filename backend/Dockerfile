@@ -1,4 +1,4 @@
-FROM rust:1.75 AS backend-build
+FROM rust:1.71 AS backend-build
 RUN apt-get update && apt-get upgrade -y && apt-get install libclang-dev -y
 WORKDIR /app/
 COPY ./ /app/
