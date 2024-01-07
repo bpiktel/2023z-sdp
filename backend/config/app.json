@@ -1,6 +1,6 @@
 {
     "tracing": {
-        "directives": "webserver=trace,tower_http=debug",
+        "directives": "backend=trace,tower_http=debug",
         "console": true,
         "json": "logs"
     },

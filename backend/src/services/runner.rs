@@ -15,6 +15,7 @@ use crate::services::signals::shutdown_signal;
 pub async fn run(addr: impl ToSocketAddrs, app: Router) {
     let listener = TcpListener::bind(addr).await.unwrap();
     let (close_tx, close_rx) = watch::channel(());
+    info!("Server started! Listening on: {:?}", listener.local_addr().unwrap());
     loop {
         let (socket, remote_addr) = tokio::select! {
             result = listener.accept() => {
