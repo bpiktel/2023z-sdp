@@ -1,4 +1,5 @@
-FROM rust:1.68 AS backend-build
+FROM rust:1.75 AS backend-build
+RUN apt-get update && apt-get upgrade -y && apt-get install libclang-dev -y
 WORKDIR /app/
 COPY ./ /app/
 RUN --mount=type=cache,target=/usr/local/cargo/registry/index \
@@ -12,4 +13,5 @@ FROM debian:bullseye-slim AS runtime
 WORKDIR /app/
 COPY --from=backend-build /app/backend /app/
 COPY --from=backend-build /app/config/ /app/config/
+COPY --from=backend-build /app/migrations/ /app/migrations/
 ENTRYPOINT ["/app/backend"]

@@ -1,2 +1,5 @@
 /target
 /logs
+
+# For tests
+/tmp

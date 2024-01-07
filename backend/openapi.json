@@ -1,0 +1,112 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "backend",
+    "description": "",
+    "contact": {
+      "name": "MiniaczQ"
+    },
+    "license": {
+      "name": ""
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/audio": {
+      "post": {
+        "tags": [
+          "routing::api::audio"
+        ],
+        "summary": "Create audio samples from a list",
+        "description": "Create audio samples from a list\n\nUpload audio samples to file storage and insert metadata into the database. Return sample indentifiers.",
+        "operationId": "create_audio",
+        "responses": {
+          "200": {
+            "description": "Upload all audio samples successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AudioSample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/audio/delete/{id}": {
+      "delete": {
+        "tags": [
+          "routing::api::audio"
+        ],
+        "summary": "Delete a list of audio samples",
+        "description": "Delete a list of audio samples\n\nDelete all samples with given identifiers.",
+        "operationId": "delete_audio",
+        "responses": {
+          "200": {
+            "description": "Delete listed audio samples successfully"
+          }
+        }
+      }
+    },
+    "/audio/get": {
+      "post": {
+        "tags": [
+          "routing::api::audio"
+        ],
+        "summary": "List all audio samples",
+        "description": "List all audio samples\n\nlist all available audio sample identifiers",
+        "operationId": "get_audio",
+        "responses": {
+          "200": {
+            "description": "List all audio samples successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AudioSample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SampleInfo": {
+        "type": "object",
+        "required": [
+          "name",
+          "azimuth",
+          "elevation"
+        ],
+        "properties": {
+          "azimuth": {
+            "type": "number",
+            "format": "float"
+          },
+          "elevation": {
+            "type": "number",
+            "format": "float"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "todo",
+      "description": "chghckgj"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+define index sample_name_index on table sample columns name unique;
