@@ -76,12 +76,12 @@ async fn login(
     let mut cookie = Cookie::new(JWT_TOKEN_COOKIE, token);
     cookie.set_http_only(true);
     cookie.set_expires(None);
+    cookie.set_path("/api/");
     ResponseType::Data(cookies.add(cookie))
 }
 
-async fn logout() -> CookieJar {
-    let cookies = CookieJar::new();
-    cookies.remove(Cookie::from(JWT_TOKEN_COOKIE))
+async fn logout(jar: CookieJar) -> CookieJar {
+    jar.remove(Cookie::from(JWT_TOKEN_COOKIE))
 }
 
 async fn status(claims: Claims) -> Json<Claims> {

@@ -5,9 +5,7 @@ use axum::{
 };
 use axum_extra::extract::Multipart;
 use hyper::StatusCode;
-use serde::Deserialize;
 use tracing::error;
-use validator::Validate;
 
 use crate::services::{
     auth::{claims::Claims, AuthKeys},
@@ -28,58 +26,75 @@ where
 {
     Router::new()
         .route("/", post(create_audio))
-        .route("/delete/:id", delete(delete_audio))
-        .route("/get", get(get_audio))
-    // List?
-    // Get data?
+        .route("/:id", delete(delete_audio))
+        .route("/all", get(get_all))
+        .route("/:id", get(get_audio))
 }
 
-#[derive(Debug, Deserialize, Validate)]
-#[serde(rename_all = "camelCase")]
-pub struct CreateSampleRequest {
-    name: String,
-    azimuth: f32,
-    elevation: f32,
-}
-
-/// Create audio samples from a list
+/// Create audio sample
 ///
-/// Upload audio samples to file storage and insert metadata into the database. Return sample indentifiers.
+/// Upload an audio sample to file storage and insert metadata into the database. Return sample indentifier.
 #[utoipa::path(
     post,
     path = "/audio",
     responses(
-        (status = 200, description = "Upload all audio samples successfully", body = [AudioSample])
+        (status = 200, description = "Upload an audio sample successfully", body = [AudioSample])
     )
 )]
 async fn create_audio(
     audio_repo: SampleRepository,
     _: Claims,
     mut multipart: Multipart,
-) -> ResponseType<Json<Vec<SampleInfo>>> {
-    /// TODO multipart :)
-    todo!();
-    /*
-    let Ok(sample) = audio_repo
-        .create_sample(data)
+) -> ResponseType<Json<WithId<SampleInfo>>> {
+    let Ok(Some(info)) = multipart
+        .next_field()
+        .await
+        .map_err(|e| error!({error = ?e}, "Encountered an error while reading a sample"))
+    else {
+        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    let Ok(info) = info
+        .text()
+        .await
+        .map_err(|e| error!({error = ?e}, "Encountered an error while reading a sample"))
+    else {
+        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    let Ok(Some(data)) = multipart
+        .next_field()
+        .await
+        .map_err(|e| error!({error = ?e}, "Encountered an error while reading a sample"))
+    else {
+        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    let Ok(data) = data
+        .bytes()
+        .await
+        .map_err(|e| error!({error = ?e}, "Encountered an error while reading a sample"))
+    else {
+        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    let Ok(info) = serde_json::de::from_str::<SampleInfo>(&info) else {
+        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    let Ok(result) = audio_repo
+        .create(info, data)
         .await
         .map_err(|e| error!({error = ?e}, "Encountered an error while adding a sample"))
     else {
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
     };
-
-    ResponseType::Data(Json(sample))
-    */
+    ResponseType::Data(Json(result))
 }
 
-/// Delete a list of audio samples
+/// Delete an audio sample
 ///
-/// Delete all samples with given identifiers.
+/// Delete an audio sample with given identifier.
 #[utoipa::path(
     delete,
-    path = "/audio/delete/{id}",
+    path = "/audio/{id}",
     responses(
-        (status = 200, description = "Delete listed audio samples successfully")
+        (status = 200, description = "Delete set audio sample successfully")
     )
 )]
 async fn delete_audio(
@@ -100,15 +115,15 @@ async fn delete_audio(
 
 /// List all audio samples
 ///
-/// list all available audio sample identifiers
+/// List all available audio sample identifiers
 #[utoipa::path(
-    post,
-    path = "/audio/get",
+    get,
+    path = "/audio/all",
     responses(
         (status = 200, description = "List all audio samples successfully", body = [AudioSample])
     )
 )]
-async fn get_audio(
+async fn get_all(
     audio_repo: SampleRepository,
     _: Claims,
 ) -> ResponseType<Json<Vec<WithId<SampleInfo>>>> {
@@ -121,6 +136,30 @@ async fn get_audio(
     };
 
     ResponseType::Data(Json(samples))
+}
 
-    // TODO: Use `mime_guess::from_path` to get MIME type from sample name
+/// Get audio sample data
+///
+/// Get raw data of an audio sample with given identifier.
+#[utoipa::path(
+    get,
+    path = "/audio/{id}",
+    responses(
+        (status = 200, description = "Get set audio sample data successfully")
+    )
+)]
+async fn get_audio(
+    audio_repo: SampleRepository,
+    _: Claims,
+    Path(id): Path<String>,
+) -> ResponseType<bytes::Bytes> {
+    let Ok(sample) = audio_repo
+        .data(id)
+        .await
+        .map_err(|e| error!({error = ?e}, "Encountered an error while deleting a sample"))
+    else {
+        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+
+    ResponseType::Data(sample)
 }

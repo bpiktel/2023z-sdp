@@ -1,9 +1,10 @@
 mod routing;
 mod services;
 
+use axum::extract::FromRef;
 use routing::main_route;
 use services::{
-    database::{files::FileStorage, surreal::SurrealDb},
+    database::{files::FileStorage, repositories::user::UserRepository, surreal::SurrealDb},
     runner::run,
 };
 
@@ -25,6 +26,10 @@ async fn main() {
         surreal_db,
         file_storage,
     };
+
+    let repo = UserRepository::new(state.surreal_db.clone());
+    repo.try_create("root", "root").await.ok();
+
     run(config.app.url, main_route(&config).with_state(state)).await;
 }
 
