@@ -27,10 +27,8 @@ async fn main() {
         file_storage,
     };
 
-    let repo = UserRepository {
-        surreal: SurrealDb::from_ref(&state.surreal_db),
-    }; // sucks
-    let _ = repo.try_create("root", "root").await;
+    let repo = UserRepository::new(state.surreal_db.clone());
+    repo.try_create("root", "root").await.ok();
 
     run(config.app.url, main_route(&config).with_state(state)).await;
 }

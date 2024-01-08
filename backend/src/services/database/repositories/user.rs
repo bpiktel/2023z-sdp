@@ -13,7 +13,7 @@ use crate::services::database::{
 };
 
 pub struct UserRepository {
-    pub surreal: SurrealDb, // DEBUG
+    surreal: SurrealDb,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,6 +26,10 @@ struct CreateUser {
 const ADMIN_ID: &str = "admin";
 
 impl UserRepository {
+    pub fn new(surreal: SurrealDb) -> Self {
+        Self { surreal }
+    }
+
     fn hash_password(password: &str) -> Vec<u8> {
         let mut hasher = Keccak256::default();
         hasher.update(password);

@@ -115,7 +115,7 @@ async fn delete_audio(
 
 /// List all audio samples
 ///
-/// list all available audio sample identifiers
+/// List all available audio sample identifiers
 #[utoipa::path(
     get,
     path = "/audio/all",
