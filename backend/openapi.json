@@ -17,12 +17,12 @@
         "tags": [
           "routing::api::audio"
         ],
-        "summary": "Create audio samples from a list",
-        "description": "Create audio samples from a list\n\nUpload audio samples to file storage and insert metadata into the database. Return sample indentifiers.",
+        "summary": "Create audio sample",
+        "description": "Create audio sample\n\nUpload an audio sample to file storage and insert metadata into the database. Return sample indentifier.",
         "operationId": "create_audio",
         "responses": {
           "200": {
-            "description": "Upload all audio samples successfully",
+            "description": "Upload an audio sample successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -42,37 +42,27 @@
         "tags": [
           "routing::api::audio"
         ],
-        "summary": "Delete a list of audio samples",
-        "description": "Delete a list of audio samples\n\nDelete all samples with given identifiers.",
+        "summary": "Delete an audio sample",
+        "description": "Delete an audio sample\n\nDelete an audio sample with given identifier.",
         "operationId": "delete_audio",
         "responses": {
           "200": {
-            "description": "Delete listed audio samples successfully"
+            "description": "Delete set audio sample successfully"
           }
         }
       }
     },
-    "/audio/get": {
-      "post": {
+    "/audio/get/{id}": {
+      "get": {
         "tags": [
           "routing::api::audio"
         ],
-        "summary": "List all audio samples",
-        "description": "List all audio samples\n\nlist all available audio sample identifiers",
+        "summary": "Get audio sample data",
+        "description": "Get audio sample data\n\nGet raw data of an audio sample with given identifier.",
         "operationId": "get_audio",
         "responses": {
           "200": {
-            "description": "List all audio samples successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AudioSample"
-                  }
-                }
-              }
-            }
+            "description": "Get set audio sample data successfully"
           }
         }
       }

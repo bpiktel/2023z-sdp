@@ -13,7 +13,7 @@ use crate::services::database::{
 };
 
 pub struct UserRepository {
-    surreal: SurrealDb,
+    pub surreal: SurrealDb, // DEBUG
 }
 
 #[derive(Debug, Serialize, Deserialize)]

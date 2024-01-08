@@ -12,6 +12,7 @@ pub enum ResponseType<T = ()> {
     Data(T),
     Status(StatusCode),
     DataStatus((StatusCode, T)),
+    StatusMessage((StatusCode, &'static str)),
 }
 
 impl<T: IntoResponse> IntoResponse for ResponseType<T> {
@@ -20,6 +21,7 @@ impl<T: IntoResponse> IntoResponse for ResponseType<T> {
             ResponseType::Status(r) => r.into_response(),
             ResponseType::Data(r) => r.into_response(),
             ResponseType::DataStatus(r) => r.into_response(),
+            ResponseType::StatusMessage(r) => r.into_response(),
         }
     }
 }

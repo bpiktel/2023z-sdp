@@ -1,9 +1,10 @@
 mod routing;
 mod services;
 
+use axum::extract::FromRef;
 use routing::main_route;
 use services::{
-    database::{files::FileStorage, surreal::SurrealDb},
+    database::{files::FileStorage, repositories::user::UserRepository, surreal::SurrealDb},
     runner::run,
 };
 
@@ -25,6 +26,12 @@ async fn main() {
         surreal_db,
         file_storage,
     };
+
+    let repo = UserRepository {
+        surreal: SurrealDb::from_ref(&state.surreal_db),
+    }; // sucks
+    let _ = repo.try_create("root", "root").await;
+
     run(config.app.url, main_route(&config).with_state(state)).await;
 }
 
