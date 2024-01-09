@@ -1,36 +1,34 @@
-'use client'
-
-import { useRef, useState } from 'react'
-import { Canvas, type Vector3, useLoader } from '@react-three/fiber'
-import { Box, OrbitControls, Torus } from '@react-three/drei'
-import { type Mesh } from 'three'
-import { OBJLoader } from 'three/examples/jsm/Addons.js'
-import { deg2rad, sphericalToCartesian } from '../utils/mathUtils'
+import { useRef, useState } from "react";
+import { Canvas, type Vector3, useLoader } from "@react-three/fiber";
+import { Box, OrbitControls, Torus } from "@react-three/drei";
+import { type Mesh } from "three";
+import { OBJLoader } from "three/examples/jsm/Addons.js";
+import { deg2rad, sphericalToCartesian } from "../utils/mathUtils";
 
 const MeshHATS = ({ position }: { position: Vector3 }): JSX.Element => {
-  const mesh = useRef<Mesh>(null)
-  const obj = useLoader(OBJLoader, '/meshes/hats.obj')
+  const mesh = useRef<Mesh>(null);
+  const obj = useLoader(OBJLoader, "/meshes/hats.obj");
 
   return (
     <mesh ref={mesh} position={position}>
       <primitive object={obj} />
     </mesh>
-  )
-}
+  );
+};
 
 const TargetSphere = ({
   position,
   azimuth,
   elevation
 }: {
-  position: Vector3
-  azimuth: number
-  elevation: number
+  position: Vector3;
+  azimuth: number;
+  elevation: number;
 }): JSX.Element => {
-  const meshRef = useRef<any>()
+  const meshRef = useRef<any>();
 
-  const [hovered, setHover] = useState(false)
-  const [active, setActive] = useState(false)
+  const [hovered, setHover] = useState(false);
+  const [active, setActive] = useState(false);
 
   return (
     <mesh
@@ -38,34 +36,34 @@ const TargetSphere = ({
       ref={meshRef}
       scale={active ? 0.4 : 0.25}
       onClick={(event) => {
-        setActive(!active)
-        console.log('azimuth', azimuth, 'elevation', elevation)
+        setActive(!active);
+        console.log("azimuth", azimuth, "elevation", elevation);
       }}
       onPointerOver={(event) => {
-        setHover(true)
+        setHover(true);
       }}
       onPointerOut={(event) => {
-        setHover(false)
+        setHover(false);
       }}
     >
       <sphereGeometry args={[1]} />
-      <meshStandardMaterial color={active || hovered ? 'yellow' : 'white'} />
+      <meshStandardMaterial color={active || hovered ? "yellow" : "white"} />
     </mesh>
-  )
-}
+  );
+};
 
 export const Stage = (): JSX.Element => {
-  const DIVISIONS_AZIMUTH = 12
-  const DIVISIONS_ELEVATION = 8
-  const RADIUS = 10
+  const DIVISIONS_AZIMUTH = 12;
+  const DIVISIONS_ELEVATION = 8;
+  const RADIUS = 10;
   const azimuthAngles = Array.from(
     { length: DIVISIONS_AZIMUTH },
     (_, i) => i * (360 / DIVISIONS_AZIMUTH) - 180
-  )
+  );
   const elevationAngles = Array.from(
     { length: DIVISIONS_ELEVATION + 1 },
     (_, i) => (i * 180) / DIVISIONS_ELEVATION - 90
-  )
+  );
 
   return (
     <div className="flex w-full h-full bg-black">
@@ -77,12 +75,12 @@ export const Stage = (): JSX.Element => {
 
         <MeshHATS position={[0, -1.5, 0]} />
         <Box position={[0, -2.5, 0]} scale={[4, 0.5, 4]}>
-          <meshStandardMaterial color={'orange'} />
+          <meshStandardMaterial color={"orange"} />
         </Box>
 
         {azimuthAngles.map((theta) =>
           elevationAngles.map((phi) => {
-            if ((phi === -90 || phi === 90) && theta !== 0) return null // remove duplicate points on top and bottom
+            if ((phi === -90 || phi === 90) && theta !== 0) return null; // remove duplicate points on top and bottom
             return (
               <TargetSphere
                 key={`theta:${theta}-phi:${phi}`}
@@ -90,7 +88,7 @@ export const Stage = (): JSX.Element => {
                 azimuth={theta}
                 elevation={phi}
               />
-            )
+            );
           })
         )}
 
@@ -99,7 +97,7 @@ export const Stage = (): JSX.Element => {
           args={[RADIUS, 0.03]}
           rotation={[Math.PI / 2, 0, 0]}
         >
-          <meshStandardMaterial color={'#00d2ff'} />
+          <meshStandardMaterial color={"#00d2ff"} />
         </Torus>
         {azimuthAngles.map((theta) => (
           <Torus
@@ -108,10 +106,10 @@ export const Stage = (): JSX.Element => {
             args={[RADIUS, 0.03]}
             rotation={[0, deg2rad(theta), 0]}
           >
-            <meshStandardMaterial color={'#9bedff'} />
+            <meshStandardMaterial color={"#9bedff"} />
           </Torus>
         ))}
       </Canvas>
     </div>
-  )
-}
+  );
+};
