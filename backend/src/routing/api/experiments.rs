@@ -87,7 +87,7 @@ async fn list_experiments(
 
 /// Get a specific experiments
 ///
-/// Get a specific existing experiments.
+/// Get a specific existing experiment.
 async fn get_experiment(
     repo: ExperimentRepository,
     Path(id): Path<String>,
