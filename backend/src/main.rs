@@ -1,10 +1,12 @@
 mod routing;
 mod services;
 
-use axum::extract::FromRef;
 use routing::main_route;
 use services::{
-    database::{files::FileStorage, repositories::user::UserRepository, surreal::SurrealDb},
+    database::{
+        files::FileStorage, migrations::Migrator, repositories::user::UserRepository,
+        surreal::SurrealDb,
+    },
     runner::run,
 };
 
@@ -17,7 +19,11 @@ async fn main() {
     let auth_keys = (&config.auth_keys).try_into().expect("Missing PEMs");
     let surreal_db = SurrealDb::setup(&config.surreal_db)
         .await
-        .expect("Failed to setup SurrealDb");
+        .expect("Failed to setup SurrealDB");
+    Migrator::new(&config.surreal_db.migrations)
+        .migrate(&surreal_db)
+        .await
+        .expect("Failed to migrate SurrealDB");
     let file_storage = FileStorage::setup(&config.file_storage)
         .await
         .expect("Failed to setup FileStorage");
@@ -31,41 +37,4 @@ async fn main() {
     repo.try_create("root", "root").await.ok();
 
     run(config.app.url, main_route(&config).with_state(state)).await;
-}
-
-#[cfg(test)]
-mod tests {
-    use std::fs::OpenOptions;
-
-    use crate::routing;
-    use crate::services;
-    use utoipa::OpenApi;
-
-    #[test]
-    fn make_openapi_json() {
-        #[derive(OpenApi)]
-        #[openapi(
-            paths(
-                routing::api::audio::create_audio,
-                routing::api::audio::delete_audio,
-                routing::api::audio::get_audio,
-            ),
-            components(
-                schemas(
-                    services::database::repositories::sample::SampleInfo,
-                )
-            ),
-            tags(
-                (name = "todo", description = "chghckgj")
-            )
-        )]
-        pub struct ApiDoc;
-        let file = OpenOptions::new()
-            .write(true)
-            .truncate(true)
-            .create(true)
-            .open("openapi.json")
-            .unwrap();
-        serde_json::to_writer_pretty(file, &ApiDoc::openapi()).unwrap();
-    }
 }

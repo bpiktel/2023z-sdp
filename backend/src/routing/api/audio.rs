@@ -34,13 +34,6 @@ where
 /// Create audio sample
 ///
 /// Upload an audio sample to file storage and insert metadata into the database. Return sample indentifier.
-#[utoipa::path(
-    post,
-    path = "/audio",
-    responses(
-        (status = 200, description = "Upload an audio sample successfully", body = [AudioSample])
-    )
-)]
 async fn create_audio(
     audio_repo: SampleRepository,
     _: Claims,
@@ -90,13 +83,6 @@ async fn create_audio(
 /// Delete an audio sample
 ///
 /// Delete an audio sample with given identifier.
-#[utoipa::path(
-    delete,
-    path = "/audio/{id}",
-    responses(
-        (status = 200, description = "Delete set audio sample successfully")
-    )
-)]
 async fn delete_audio(
     audio_repo: SampleRepository,
     _: Claims,
@@ -116,13 +102,6 @@ async fn delete_audio(
 /// List all audio samples
 ///
 /// List all available audio sample identifiers
-#[utoipa::path(
-    get,
-    path = "/audio/all",
-    responses(
-        (status = 200, description = "List all audio samples successfully", body = [AudioSample])
-    )
-)]
 async fn get_all(
     audio_repo: SampleRepository,
     _: Claims,
@@ -141,13 +120,6 @@ async fn get_all(
 /// Get audio sample data
 ///
 /// Get raw data of an audio sample with given identifier.
-#[utoipa::path(
-    get,
-    path = "/audio/{id}",
-    responses(
-        (status = 200, description = "Get set audio sample data successfully")
-    )
-)]
 async fn get_audio(
     audio_repo: SampleRepository,
     _: Claims,

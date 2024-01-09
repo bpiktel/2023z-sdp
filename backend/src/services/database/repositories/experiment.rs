@@ -15,14 +15,6 @@ pub struct ExperimentRepository {
     pub surreal: SurrealDb,
 }
 
-// begin transaction;
-// let $experiment = create only experiment content { name = $name };
-// for $sample_id in $sample_ids {
-//     relate ($experiment)->experiment_sample->(type::thing(sample, $sample_id));
-// };
-// commit transaction;
-// select id, name, ->experiment_sample->id as sample_ids from experiment where id is $experiment.id;
-
 impl ExperimentRepository {
     /// Create a new experiment and return it with an identifier
     pub async fn create(&self, experiment: Experiment) -> RepoResult<WithId<Experiment>> {
@@ -44,6 +36,17 @@ impl ExperimentRepository {
             .await?
             .better_check()?;
         let experiment = result.take::<Option<WithId<Experiment>>>(2)?.found()?;
+        Ok(experiment)
+    }
+
+    /// Return a specific experiment
+    pub async fn info(&self, experiment_id: String) -> RepoResult<WithId<Experiment>> {
+        let mut result = self
+            .surreal
+            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment where meta::id(id) is $experiment_id")
+            .bind(("experiment_id", experiment_id))
+            .await?;
+        let experiment = result.take::<Option<WithId<Experiment>>>(0)?.found()?;
         Ok(experiment)
     }
 
@@ -198,6 +201,25 @@ mod tests {
         let experiment = sut.create(experiment).await.unwrap();
 
         assert_eq!(experiment.sample_ids.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn info() {
+        let (sut, sample_repo) = setup().await;
+        let info = SampleInfo {
+            name: Uuid::new_v4().to_string(),
+            azimuth: 10.0,
+            elevation: 0.0,
+        };
+        let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
+        let sample = sample_repo.create(info, data).await.unwrap();
+        let experiment = Experiment {
+            name: "exp-1".to_owned(),
+            sample_ids: vec![sample.id()],
+        };
+        let experiment = sut.create(experiment).await.unwrap();
+
+        sut.info(experiment.id()).await.unwrap();
     }
 
     #[tokio::test]

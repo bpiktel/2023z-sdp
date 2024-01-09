@@ -4,6 +4,8 @@ services:
   sound-localization-tester-backend:
     container_name: sound-localization-tester-backend
     build: .
+    environment:
+      app_cors: true
     ports:
       - 3000:3000
     volumes:

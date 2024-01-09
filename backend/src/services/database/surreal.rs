@@ -9,11 +9,14 @@ use surrealdb::{
     Surreal,
 };
 
+use super::migrations::MigratorConfig;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct SurrealDbConfig {
     pub address: String,
     pub namespace: String,
     pub database: String,
+    pub migrations: MigratorConfig,
 }
 
 #[derive(Debug, Clone)]
@@ -134,7 +137,7 @@ pub mod tests {
 
     async fn migrate_db(db: &SurrealDb) {
         Migrator::new(&MigratorConfig {
-            migrations_dir: "./migrations".into(),
+            directory: "./migrations".into(),
         })
         .migrate(db)
         .await
