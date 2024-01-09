@@ -1,0 +1,953 @@
+{
+	"info": {
+		"_postman_id": "40d57178-0849-41b7-93e9-e65dc9f491b5",
+		"name": "SDP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19281773",
+		"_collection_link": "https://www.postman.com/mortonpl/workspace/sdp/collection/19281773-40d57178-0849-41b7-93e9-e65dc9f491b5?action=share&source=collection_link&creator=19281773"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"root\",\r\n    \"password\": \"root\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"root\",\r\n    \"password\": \"root\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/auth/login",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "set-cookie",
+									"value": "jwt_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3MDQ4OTE5NzQsIm5iZiI6MTcwNDgwNTU3NCwiaWF0IjoxNzA0ODA1NTc0LCJ1c2VySWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiLCJ1c2VybmFtZSI6InJvb3QifQ.JtUMU19c0rVoeIZLsawHExWBolWsvi-9fK4Ggf54YfbCSlyM4AYK4ytV2T4HuXt3vLXQhspfi3wToItDIWc51M0ksa1o_icc6-lza_1imFuWOtLqWoth4eel1LKlWRxbAeNv71IPsouYB_rpYpewtVV9VaS9NCAKWEhMFS22YKW52yCddOdNSAF77S478U3Nodaxb17En7EBHDWpS6kQ3E4MQe_7VxVlK1oEio67eajoqHE_mjIHwCqP8k8b7YWRq5LX8bWfOhgZLuhCA5WD-tFnmhYg5fXckTl8obsNrk4B0LpWFM7joioXRyHHtRoa_7LoT1Kh-w8l81VgOz4txw; HttpOnly; Path=/api/"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "content-length",
+									"value": "0"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:06:14 GMT"
+								}
+							],
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/auth/status",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"status"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/auth/status",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"status"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "118"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:06:26 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exp\": 1704891974,\n    \"nbf\": 1704805574,\n    \"iat\": 1704805574,\n    \"userId\": \"00000000-0000-0000-0000-000000000000\",\n    \"username\": \"root\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/auth/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Audio",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "",
+									"value": "{\"name\": \"...\",\n\"azimuth\": 0.0,\n\"elevation\": 0.0}",
+									"type": "text"
+								},
+								{
+									"key": "",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/api/audio",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"audio"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "",
+											"value": "{\"name\": \"test\",\n\"azimuth\": 0.5,\n\"elevation\": 0.5}",
+											"type": "text"
+										},
+										{
+											"key": "",
+											"value": "Los pinguinos me la van a mascar",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{url}}/api/audio",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"audio"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "105"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:02:09 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": {\n        \"tb\": \"sample\",\n        \"id\": {\n            \"String\": \"3noj7gde5n5pq3ogp8d9\"\n        }\n    },\n    \"name\": \"test\",\n    \"azimuth\": 0.5,\n    \"elevation\": 0.5\n}"
+						}
+					]
+				},
+				{
+					"name": "List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/audio/all",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"audio",
+								"all"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/audio/all",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"audio",
+										"all"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "325"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:06:51 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": {\n            \"tb\": \"sample\",\n            \"id\": {\n                \"String\": \"3noj7gde5n5pq3ogp8d9\"\n            }\n        },\n        \"name\": \"test\",\n        \"azimuth\": 0.5,\n        \"elevation\": 0.5\n    },\n    {\n        \"id\": {\n            \"tb\": \"sample\",\n            \"id\": {\n                \"String\": \"jg3wn8x9tzzn1lcjwx0l\"\n            }\n        },\n        \"name\": \"jorbino\",\n        \"azimuth\": 0,\n        \"elevation\": 1\n    },\n    {\n        \"id\": {\n            \"tb\": \"sample\",\n            \"id\": {\n                \"String\": \"ks2bblcioblr2qgxvlmn\"\n            }\n        },\n        \"name\": \"globino\",\n        \"azimuth\": 0.5,\n        \"elevation\": 0\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Get Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/audio/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"audio",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/audio/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"audio",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3noj7gde5n5pq3ogp8d9"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "raw",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/octet-stream"
+								},
+								{
+									"key": "content-length",
+									"value": "32"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:07:24 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "Los pinguinos me la van a mascar"
+						}
+					]
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/audio/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"audio",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Experiment",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"\",\r\n    \"sample_ids\": [\"\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/experiments",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"experiments"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"abba\",\r\n    \"sample_ids\": [\"jg3wn8x9tzzn1lcjwx0l\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/experiments",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"experiments"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "117"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:08:08 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": {\n        \"tb\": \"experiment\",\n        \"id\": {\n            \"String\": \"seuujv9pr89obymqqcbm\"\n        }\n    },\n    \"name\": \"abba\",\n    \"sample_ids\": [\n        \"jg3wn8x9tzzn1lcjwx0l\"\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/experiments/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"experiments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/experiments",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"experiments"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/experiments",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"experiments"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "238"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:08:35 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": {\n            \"tb\": \"experiment\",\n            \"id\": {\n                \"String\": \"3tf2kq63tymvqwl45x1r\"\n            }\n        },\n        \"name\": \"testo\",\n        \"sample_ids\": [\n            \"jg3wn8x9tzzn1lcjwx0l\"\n        ]\n    },\n    {\n        \"id\": {\n            \"tb\": \"experiment\",\n            \"id\": {\n                \"String\": \"seuujv9pr89obymqqcbm\"\n            }\n        },\n        \"name\": \"abba\",\n        \"sample_ids\": [\n            \"jg3wn8x9tzzn1lcjwx0l\"\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Create Result",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sample_results\": [\r\n        {\r\n            \"sample_id\": \"\",\r\n            \"azimuth\": 0.0,\r\n            \"elevation\": 0.0\r\n        }\r\n    ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/experiments/results/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"experiments",
+								"results",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"sample_results\": [\r\n        {\r\n            \"sample_id\": \"jg3wn8x9tzzn1lcjwx0l\",\r\n            \"azimuth\": 0.0,\r\n            \"elevation\": 1.0\r\n        }\r\n    ]\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/experiments/results/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"experiments",
+										"results",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3tf2kq63tymvqwl45x1r"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "147"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:04:48 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": {\n        \"tb\": \"result\",\n        \"id\": {\n            \"String\": \"md4by4uzzfr9w5dnqn2n\"\n        }\n    },\n    \"sample_results\": [\n        {\n            \"sample_id\": \"2xyqkd5gy45ewsnji09y\",\n            \"azimuth\": 0,\n            \"elevation\": 1\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Results",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/experiments/results/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"experiments",
+								"results",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/experiments/results/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"experiments",
+										"results",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3tf2kq63tymvqwl45x1r"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "297"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "vary",
+									"value": "origin"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-method"
+								},
+								{
+									"key": "vary",
+									"value": "access-control-request-headers"
+								},
+								{
+									"key": "access-control-expose-headers",
+									"value": "*"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 13:09:07 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": {\n            \"tb\": \"result\",\n            \"id\": {\n                \"String\": \"gdkoj803kv37k3f9jszy\"\n            }\n        },\n        \"sample_results\": [\n            {\n                \"sample_id\": \"2xyqkd5gy45ewsnji09y\",\n                \"azimuth\": 0,\n                \"elevation\": 1\n            }\n        ]\n    },\n    {\n        \"id\": {\n            \"tb\": \"result\",\n            \"id\": {\n                \"String\": \"md4by4uzzfr9w5dnqn2n\"\n            }\n        },\n        \"sample_results\": [\n            {\n                \"sample_id\": \"2xyqkd5gy45ewsnji09y\",\n                \"azimuth\": 0,\n                \"elevation\": 1\n            }\n        ]\n    }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/health",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "localhost:3000",
+			"type": "string"
+		}
+	]
+}
