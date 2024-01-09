@@ -2,6 +2,7 @@
 
 pub mod audio;
 pub mod auth;
+pub mod experiments;
 
 use axum::{extract::FromRef, http::StatusCode, response::IntoResponse, Router};
 
@@ -12,6 +13,7 @@ use crate::services::{
 
 use self::audio::audio_router;
 use self::auth::auth_router;
+use self::experiments::router;
 
 pub fn api_router<T>() -> Router<T>
 where
@@ -23,6 +25,7 @@ where
     Router::new()
         .nest("/auth", auth_router())
         .nest("/audio", audio_router())
+        .nest("/experiments", router())
         .fallback(handler_404)
 }
 
