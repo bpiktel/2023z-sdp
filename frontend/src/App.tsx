@@ -3,7 +3,9 @@ import { Outlet, RootRoute, Route, Router } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import HomePage from "./views/home/HomePage";
 import { QueryClient } from "@tanstack/react-query";
-import ExperimentPage from "./views/experiments/ExperimentPage";
+import ExperimentsListPage from "views/experiments/ExperimentsListPage";
+import LoginPage from "views/auth/LoginPage";
+import ExperimentPage from "views/experiments/ExperimentPage";
 
 const rootRoute = new RootRoute({
   component: () => (
@@ -20,15 +22,36 @@ const homeRoute = new Route({
   component: HomePage
 });
 
-const adminRoute = new Route({
+const experimentsRoute = new Route({
   getParentRoute: () => rootRoute,
-  path: "/experiment",
+  path: "/experiments"
+});
+
+const experimentsListRoute = new Route({
+  getParentRoute: () => experimentsRoute,
+  path: "/",
+  component: ExperimentsListPage
+});
+
+const experimentRoute = new Route({
+  getParentRoute: () => experimentsRoute,
+  path: "/$id",
   component: ExperimentPage
 });
 
-const routeTree = rootRoute.addChildren([homeRoute, adminRoute]);
+const loginRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/login",
+  component: LoginPage
+});
 
-const queryClient = new QueryClient();
+const routeTree = rootRoute.addChildren([
+  homeRoute,
+  loginRoute,
+  experimentsRoute.addChildren([experimentsListRoute, experimentRoute])
+]);
+
+export const queryClient = new QueryClient();
 
 const router = new Router({
   routeTree,

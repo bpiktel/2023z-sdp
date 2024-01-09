@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Canvas, type Vector3, useLoader } from "@react-three/fiber";
 import { Box, OrbitControls, Torus } from "@react-three/drei";
 import { type Mesh } from "three";
@@ -78,7 +78,7 @@ export const Stage = (): JSX.Element => {
           <meshStandardMaterial color={"orange"} />
         </Box>
 
-        {azimuthAngles.map((theta) =>
+        {/* {azimuthAngles.map((theta) =>
           elevationAngles.map((phi) => {
             if ((phi === -90 || phi === 90) && theta !== 0) return null; // remove duplicate points on top and bottom
             return (
@@ -90,7 +90,7 @@ export const Stage = (): JSX.Element => {
               />
             );
           })
-        )}
+        )} */}
 
         <Torus
           position={[0, 0, 0]}
@@ -99,7 +99,7 @@ export const Stage = (): JSX.Element => {
         >
           <meshStandardMaterial color={"#00d2ff"} />
         </Torus>
-        {azimuthAngles.map((theta) => (
+        {/* {azimuthAngles.map((theta) => (
           <Torus
             key={`ring${theta}`}
             position={[0, 0, 0]}
@@ -108,7 +108,7 @@ export const Stage = (): JSX.Element => {
           >
             <meshStandardMaterial color={"#9bedff"} />
           </Torus>
-        ))}
+        ))} */}
       </Canvas>
     </div>
   );
