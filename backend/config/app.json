@@ -6,7 +6,7 @@
     },
     "app": {
         "url": "0.0.0.0:3000",
-        "cors": true
+        "cors": false
     },
     "auth_keys": {
         "encoding": "devkeys/priv.pem",
@@ -15,7 +15,10 @@
     "surreal_db": {
         "address": "file://surreal.db",
         "namespace": "default",
-        "database": "default"
+        "database": "default",
+        "migrations": {
+            "directory": "migrations"
+        }
     },
     "file_storage": {
         "folder": "storage"

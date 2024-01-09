@@ -902,6 +902,75 @@
 							"body": "[\n    {\n        \"id\": {\n            \"tb\": \"result\",\n            \"id\": {\n                \"String\": \"gdkoj803kv37k3f9jszy\"\n            }\n        },\n        \"sample_results\": [\n            {\n                \"sample_id\": \"2xyqkd5gy45ewsnji09y\",\n                \"azimuth\": 0,\n                \"elevation\": 1\n            }\n        ]\n    },\n    {\n        \"id\": {\n            \"tb\": \"result\",\n            \"id\": {\n                \"String\": \"md4by4uzzfr9w5dnqn2n\"\n            }\n        },\n        \"sample_results\": [\n            {\n                \"sample_id\": \"2xyqkd5gy45ewsnji09y\",\n                \"azimuth\": 0,\n                \"elevation\": 1\n            }\n        ]\n    }\n]"
 						}
 					]
+				},
+				{
+					"name": "Get One",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/experiments/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"experiments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Example",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/experiments/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"experiments",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "content-length",
+									"value": "118"
+								},
+								{
+									"key": "date",
+									"value": "Tue, 09 Jan 2024 18:39:12 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": {\n        \"tb\": \"experiment\",\n        \"id\": {\n            \"String\": \"3tf2kq63tymvqwl45x1r\"\n        }\n    },\n    \"name\": \"testo\",\n    \"sample_ids\": [\n        \"jg3wn8x9tzzn1lcjwx0l\"\n    ]\n}"
+						}
+					]
 				}
 			]
 		},

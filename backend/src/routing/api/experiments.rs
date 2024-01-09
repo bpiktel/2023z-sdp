@@ -26,6 +26,7 @@ where
     Router::new()
         .route("/", post(create_experiment))
         .route("/", get(list_experiments))
+        .route("/:id", get(get_experiment))
         .route("/:id", delete(delete_experiment))
         .route("/results/:id", get(get_results))
         .route("/results/:id", post(post_result))
@@ -78,6 +79,24 @@ async fn list_experiments(
         .infos()
         .await
         .map_err(|e| error!({error = ?e}, "Encountered an error while listing experiments."))
+    else {
+        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    ResponseType::Data(Json(result))
+}
+
+/// Get a specific experiments
+///
+/// Get a specific existing experiment.
+async fn get_experiment(
+    repo: ExperimentRepository,
+    Path(id): Path<String>,
+    _: Claims,
+) -> ResponseType<Json<WithId<Experiment>>> {
+    let Ok(result) = repo
+        .info(id)
+        .await
+        .map_err(|e| error!({error = ?e}, "Encountered an error while getting an experiment."))
     else {
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
     };
