@@ -4,7 +4,8 @@ const HomePage = () => {
   return (
     <div className="flex flex-col items-center">
       <h1 className="">Home</h1>
-      <Link to="/experiments">Go to experiment</Link>
+      <Link to="/login">Go to login</Link>
+      <Link to="/experiments">Go to experiments</Link>
     </div>
   );
 };
