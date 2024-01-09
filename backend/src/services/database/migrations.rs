@@ -13,9 +13,9 @@ use surrealdb::{
 };
 use tracing::{error, info};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct MigratorConfig {
-    pub migrations_dir: PathBuf,
+    pub directory: PathBuf,
 }
 
 pub struct Migrator<'a> {
@@ -83,7 +83,7 @@ impl<'a> Migrator<'a> {
     }
 
     fn get_all_migrations(&self) -> MigrationResult<Vec<Migration>> {
-        let dir_reader = read_dir(&self.config.migrations_dir)?;
+        let dir_reader = read_dir(&self.config.directory)?;
         let migration_files: Vec<DirEntry> = dir_reader.collect::<std::io::Result<_>>()?;
         let mut migration_files: Vec<Migration> = migration_files
             .into_iter()

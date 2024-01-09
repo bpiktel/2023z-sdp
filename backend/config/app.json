@@ -15,7 +15,10 @@
     "surreal_db": {
         "address": "file://surreal.db",
         "namespace": "default",
-        "database": "default"
+        "database": "default",
+        "migrations": {
+            "directory": "migrations"
+        }
     },
     "file_storage": {
         "folder": "storage"

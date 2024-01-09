@@ -6,7 +6,6 @@ use axum::{
 use bytes::Bytes;
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
 use crate::services::database::{
     files::FileStorage,
@@ -60,17 +59,6 @@ impl SampleRepository {
         Ok(true)
     }
 
-    /// Get sample info
-    pub async fn info(&self, id: String) -> RepoResult<WithId<SampleInfo>> {
-        let mut result = self
-            .surreal
-            .query("select * from only sample where meta::id(id) is $id")
-            .bind(("id", &id))
-            .await?;
-        let sample = result.take::<Option<WithId<SampleInfo>>>(0)?.found()?;
-        Ok(sample)
-    }
-
     /// Get sample data
     pub async fn data(&self, id: String) -> RepoResult<Bytes> {
         let data = self.file_storage.get(id).await?;
@@ -78,7 +66,7 @@ impl SampleRepository {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SampleInfo {
     pub name: String,
@@ -184,22 +172,6 @@ mod tests {
         let samples = sut.infos().await.unwrap();
 
         assert_eq!(samples.len(), 2);
-    }
-
-    #[tokio::test]
-    async fn info() {
-        let (sut, _) = setup().await;
-        let info = SampleInfo {
-            name: "info.mp4".to_owned(),
-            azimuth: 10.0,
-            elevation: 0.0,
-        };
-        let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
-        let sample = sut.create(info, data).await.unwrap();
-
-        let result = sut.info(sample.id()).await.unwrap();
-
-        assert_eq!(result, sample);
     }
 
     #[tokio::test]

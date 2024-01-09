@@ -335,8 +335,6 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
- "utoipa",
- "utoipauto",
  "uuid",
  "validator",
 ]
@@ -3996,63 +3994,6 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
-
-[[package]]
-name = "utoipa"
-version = "4.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ff05e3bac2c9428f57ade702667753ca3f5cf085e2011fe697de5bfd49aa72d"
-dependencies = [
- "indexmap 2.1.0",
- "serde",
- "serde_json",
- "utoipa-gen",
-]
-
-[[package]]
-name = "utoipa-gen"
-version = "4.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f0b6f4667edd64be0e820d6631a60433a269710b6ee89ac39525b872b76d61d"
-dependencies = [
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.39",
- "uuid",
-]
-
-[[package]]
-name = "utoipauto"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d543e9e047da729cdf180693c78f11a40b0865df80370ffdc7d9d58e8f81908"
-dependencies = [
- "utoipauto-macro",
-]
-
-[[package]]
-name = "utoipauto-core"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c09625208a48389a48da5ade858fafcd7c9974a467e5b215cc76bec7dfaa166c"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.39",
-]
-
-[[package]]
-name = "utoipauto-macro"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73e6d4a16c94666625c1be21dad0b598cda40e769df4897b25ac5f40a2e8dd19"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.39",
- "utoipauto-core",
-]
 
 [[package]]
 name = "uuid"
