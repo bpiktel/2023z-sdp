@@ -105,7 +105,6 @@ async fn get_results(
 /// Create an experiment result for the experiment.
 async fn post_result(
     repo: ExperimentRepository,
-    _: Claims,
     Path(id): Path<String>,
     Json(expr): Json<ExperimentResult>,
 ) -> ResponseType<Json<WithId<ExperimentResult>>> {
