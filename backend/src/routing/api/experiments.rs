@@ -109,7 +109,7 @@ async fn post_result(
     Json(expr): Json<ExperimentResult>,
 ) -> ResponseType<Json<WithId<ExperimentResult>>> {
     let Ok(result) = repo.create_result(id, expr).await.map_err(
-        |e| error!({error = ?e}, "Encountered an error while deleting experiment results."),
+        |e| error!({error = ?e}, "Encountered an error while creating experiment results."),
     ) else {
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
     };
