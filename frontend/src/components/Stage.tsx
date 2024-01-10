@@ -1,17 +1,17 @@
-import { Box, OrbitControls, Torus } from "@react-three/drei";
+import { Box, OrbitControls, Torus, Text } from "@react-three/drei";
 import { Canvas, useFrame, useLoader, type Vector3 } from "@react-three/fiber";
 import { useRef, useState } from "react";
 import * as THREE from "three";
-import { type Mesh } from "three";
+import { Euler, type Mesh } from "three";
 import { OBJLoader } from "three/examples/jsm/Addons.js";
 import { deg2rad, sphericalToCartesian } from "../utils/mathUtils";
 
-const MeshHATS = ({ position }: { position: Vector3 }): JSX.Element => {
+const MeshHATS = ({ position, rotation }: { position: Vector3, rotation?: [number, number, number] }): JSX.Element => {
   const mesh = useRef<Mesh>(null);
   const obj = useLoader(OBJLoader, "/meshes/hats.obj");
 
   return (
-    <mesh ref={mesh} position={position}>
+    <mesh ref={mesh} position={position} rotation={rotation && new Euler(rotation[0], rotation[1], rotation[2])}>
       <primitive object={obj} />
     </mesh>
   );
@@ -59,7 +59,7 @@ const StageContent = (): JSX.Element => {
   const RADIUS = 10;
   const azimuthAngles = Array.from(
     { length: DIVISIONS_AZIMUTH },
-    (_, i) => i * (360 / DIVISIONS_AZIMUTH) - 180
+    (_, i) => i * (360 / DIVISIONS_AZIMUTH)
   );
   const elevationAngles = Array.from(
     { length: DIVISIONS_ELEVATION + 1 },
@@ -78,7 +78,7 @@ const StageContent = (): JSX.Element => {
   }, 1);
   return (
     <>
-      <OrbitControls />
+      <OrbitControls enablePan={false} />
       <ambientLight intensity={1} />
       <directionalLight position={[0, 15, 0]} />
       <pointLight position={[0, 5, 0]} intensity={1} />
@@ -110,14 +110,24 @@ const StageContent = (): JSX.Element => {
         <meshStandardMaterial color={"#00d2ff"} />
       </Torus>
       {azimuthAngles.map((theta) => (
-        <Torus
-          key={`ring${theta}`}
-          position={[0, 0, 0]}
-          args={[RADIUS, 0.03]}
-          rotation={[0, deg2rad(theta), 0]}
-        >
-          <meshStandardMaterial color={"#9bedff"} />
-        </Torus>
+        <>
+          <Torus
+            key={`ring${theta}`}
+            position={[0, 0, 0]}
+            args={[RADIUS, 0.03]}
+            rotation={[0, deg2rad(theta + 90), 0]}
+          >
+            <meshStandardMaterial color={"#9bedff"}/>
+          </Torus>
+          {theta % 30 === 0 && <Text
+              position={[-Math.sin(deg2rad(theta+1)) * RADIUS, 0.5, Math.cos(deg2rad(theta+1)) * RADIUS]}
+              rotation={[0, - Math.PI/2 - deg2rad(theta + 90), 0]}
+              anchorX="left"
+              fontSize={0.75}
+          >
+            {theta}°
+          </Text>}
+        </>
       ))}
     </>
   );

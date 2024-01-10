@@ -30,14 +30,14 @@ const ExperimentPage = () => {
   }
 
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-screen flex flex-row">
+      <Stage />
       <div>
         {data?.name} - {data?.id.id.String}
         {data?.sample_ids.map((sample) => (
           <div key={sample}>{sample}</div>
         ))}
       </div>
-      {/* <Stage /> */}
     </div>
   );
 };
