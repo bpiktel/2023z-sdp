@@ -7,6 +7,7 @@ import ExperimentsListPage from "views/experiments/ExperimentsListPage";
 import "./index.css";
 import HomePage from "./views/home/HomePage";
 import CreateExperimentPage from "./views/experiments/CreateExperimentPage.tsx";
+import SamplesListPage from "./views/samples/SamplesListPage.tsx";
 
 const rootRoute = new RootRoute({
   component: () => (
@@ -46,6 +47,17 @@ const createExperimentRoute = new Route({
   component: CreateExperimentPage
 });
 
+const samplesRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/samples"
+});
+
+const samplesListRoute = new Route({
+  getParentRoute: () => samplesRoute,
+  path: "/",
+  component: SamplesListPage
+});
+
 const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/login",
@@ -55,7 +67,8 @@ const loginRoute = new Route({
 const routeTree = rootRoute.addChildren([
   homeRoute,
   loginRoute,
-  experimentsRoute.addChildren([experimentsListRoute, experimentRoute, createExperimentRoute])
+  experimentsRoute.addChildren([experimentsListRoute, experimentRoute, createExperimentRoute]),
+  samplesRoute.addChildren([samplesListRoute])
 ]);
 
 export const queryClient = new QueryClient();
