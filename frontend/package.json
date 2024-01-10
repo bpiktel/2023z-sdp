@@ -15,12 +15,15 @@
     "@tanstack/react-query": "^5.17.9",
     "@tanstack/react-router": "^1.2.2",
     "@tanstack/router-devtools": "^1.2.2",
+    "howler": "^2.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.11.0",
     "three": "^0.160.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/howler": "^2.2.10",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@types/three": "^0.160.0",

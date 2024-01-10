@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { Stage } from "components/Stage";
 import { experimentSchema } from "schemas/experimentSchemas";
+import SamplePlayer from "../../components/player/SamplePlayer.tsx";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -37,6 +38,10 @@ const ExperimentPage = () => {
         {data?.sample_ids.map((sample) => (
           <div key={sample}>{sample}</div>
         ))}
+        <SamplePlayer
+          assetPath="https://bigsoundbank.com/UPLOAD/mp3/0477.mp3"
+          name="Wilhelm Scream"
+        />
       </div>
     </div>
   );
