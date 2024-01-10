@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { sampleListSchema } from "schemas/sampleSchemas";
+import { Link } from "@tanstack/react-router";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -39,6 +40,8 @@ const SamplesListPage = () => {
           </li>
         ))}
       </ul>
+      {/*ToDo: Turn into a button. Also make table ^ more readable.*/}
+      <Link to="/samples/create">Create samples</Link>
     </div>
   );
 };

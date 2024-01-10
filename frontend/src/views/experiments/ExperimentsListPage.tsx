@@ -42,6 +42,8 @@ const ExperimentsListPage = () => {
           </li>
         ))}
       </ul>
+      {/*ToDo: Turn into a button. Also make table ^ more readable.*/}
+      <Link to="/experiments/create">Create experiments</Link>
     </div>
   );
 };
