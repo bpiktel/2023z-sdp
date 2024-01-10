@@ -64,9 +64,8 @@ const CreateExperimentPage = () => {
                 <p className="italic mt-sm">No samples added yet</p>
                   :
                 sampleIds.map((sample, index) => {
-                  return <div className="flex flex-row">
+                  return <div key={index} className="flex flex-row">
                     <input
-                      key={index}
                       className="flex-1 mt-sm"
                       placeholder="file name..."
                       value={sample}
