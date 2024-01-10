@@ -1,7 +1,13 @@
 import { z } from "zod";
-import {idSchema} from "./experimentSchemas.ts";
 
+export const idSchema = z.object({
+  tb: z.string(),
+  id: z.object({
+    String: z.string()
+  })
+});
 
+export type Id = z.infer<typeof idSchema>;
 
 export const sampleSchema = z.object({
   id: idSchema,

@@ -22,8 +22,6 @@ export const experimentListSchema = z.array(experimentSchema);
 
 export type ExperimentList = z.infer<typeof experimentListSchema>;
 
-
-
 export const experimentResultSchema = z.object({
   id: idSchema,
   sample_results: z.array(sampleResultListSchema)
@@ -31,6 +29,6 @@ export const experimentResultSchema = z.object({
 
 export type ExperimentResult = z.infer<typeof experimentResultSchema>;
 
-export const experimentResultsSchema = z.array(experimentResultSchema);
+export const experimentResultListSchema = z.array(experimentResultSchema);
 
-export type ExperimentResults = z.infer<typeof experimentResultsSchema>;
+export type ExperimentResultList = z.infer<typeof experimentResultListSchema>;
