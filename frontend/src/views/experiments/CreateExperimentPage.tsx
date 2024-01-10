@@ -76,7 +76,7 @@ const CreateExperimentPage = () => {
                     />
                     <button
                       className="border w-6 h-6 bg-red-600 self-end ml-3"
-                      onClick={() => setSampleIds((prevState) => prevState.toSpliced(index, 1))}
+                      onClick={() => setSampleIds((prevState) => prevState.filter((_, idx) => idx !== index))}
                     >
                       X
                     </button>
