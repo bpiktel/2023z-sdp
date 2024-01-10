@@ -10,12 +10,15 @@ const createSample = async (
   const { VITE_BASE_API_URL } = import.meta.env;
 
   // TODO: Implement correct request, specifically - work out how and where to include audio file
+  const formData = new FormData();
+  formData.append("", JSON.stringify({ name, azimuth, elevation }));
+  formData.append("", audio_file);
+  
   const response = await fetch(`${VITE_BASE_API_URL}/audio`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name, azimuth, elevation }),
+    // headers: {"Content-Type": "multipart/form-data"}, #Fun fact. By setting "Content-Type" to "multipart/form-data" 
+    // you also have to define "boundary" (which postman does on it own), BUT IF YOU SIMPLY DO NOT DEFINE CONTENT-TYPE THE WEB BROWSER WILL DO IT ALL FOR YOU. 
+    body: formData,
     credentials: "include"
   });
 
@@ -106,7 +109,7 @@ const CreateSamplePage = () => {
 
             <div className="flex flex-col mt-lg">
               <button onClick={handleCreate} className="border">
-                Create <p className="italic">not working yet!</p>
+                Create
               </button>
             </div>
           </>
