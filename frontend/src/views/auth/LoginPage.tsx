@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useAuth } from "auth";
 import { useState } from "react";
 
@@ -39,7 +40,12 @@ const LoginPage = () => {
     <div className="flex h-full items-center justify-center">
       <div className="text-center min-w-[16rem]">
         {authenticated ? (
-          <h1>Authenticated</h1>
+          <div>
+            <h1>Authenticated</h1>
+            <div className="mt-md">
+              <Link to="/">Go back</Link>
+            </div>
+          </div>
         ) : (
           <>
             <h1>Login</h1>

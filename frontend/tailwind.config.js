@@ -11,6 +11,12 @@ export default {
         lg: "32px",
         xl: "48px",
         xxl: "64px"
+      },
+      colors: {
+        primary: "#329af0",
+        "primary-dark": "#257acf",
+        secondary: "#ffffff",
+        "secondary-dark": "#f8f9fa"
       }
     }
   },

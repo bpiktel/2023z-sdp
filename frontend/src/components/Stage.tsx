@@ -6,12 +6,22 @@ import { Euler, type Mesh } from "three";
 import { OBJLoader } from "three/examples/jsm/Addons.js";
 import { deg2rad, sphericalToCartesian } from "../utils/mathUtils";
 
-const MeshHATS = ({ position, rotation }: { position: Vector3, rotation?: [number, number, number] }): JSX.Element => {
+const MeshHATS = ({
+  position,
+  rotation
+}: {
+  position: Vector3;
+  rotation?: [number, number, number];
+}): JSX.Element => {
   const mesh = useRef<Mesh>(null);
   const obj = useLoader(OBJLoader, "/meshes/hats.obj");
 
   return (
-    <mesh ref={mesh} position={position} rotation={rotation && new Euler(rotation[0], rotation[1], rotation[2])}>
+    <mesh
+      ref={mesh}
+      position={position}
+      rotation={rotation && new Euler(rotation[0], rotation[1], rotation[2])}
+    >
       <primitive object={obj} />
     </mesh>
   );
@@ -110,25 +120,33 @@ const StageContent = (): JSX.Element => {
         <meshStandardMaterial color={"#00d2ff"} />
       </Torus>
       {azimuthAngles.map((theta) => (
-        <>
-          <Torus
-            key={`ring${theta}`}
-            position={[0, 0, 0]}
-            args={[RADIUS, 0.03]}
-            rotation={[0, deg2rad(theta + 90), 0]}
-          >
-            <meshStandardMaterial color={"#9bedff"}/>
-          </Torus>
-          {theta % 30 === 0 && <Text
-              position={[-Math.sin(deg2rad(theta+1)) * RADIUS, 0.5, Math.cos(deg2rad(theta+1)) * RADIUS]}
-              rotation={[0, - Math.PI/2 - deg2rad(theta + 90), 0]}
+        <Torus
+          key={`ring${theta}`}
+          position={[0, 0, 0]}
+          args={[RADIUS, 0.03]}
+          rotation={[0, deg2rad(theta + 90), 0]}
+        >
+          <meshStandardMaterial color={"#9bedff"} />
+        </Torus>
+      ))}
+      {azimuthAngles.map(
+        (theta) =>
+          theta % 30 === 0 && (
+            <Text
+              key={`text${theta}`}
+              position={[
+                -Math.sin(deg2rad(theta + 1)) * RADIUS,
+                0.5,
+                Math.cos(deg2rad(theta + 1)) * RADIUS
+              ]}
+              rotation={[0, -Math.PI / 2 - deg2rad(theta + 90), 0]}
               anchorX="left"
               fontSize={0.75}
-          >
-            {theta}°
-          </Text>}
-        </>
-      ))}
+            >
+              {theta}°
+            </Text>
+          )
+      )}
     </>
   );
 };
