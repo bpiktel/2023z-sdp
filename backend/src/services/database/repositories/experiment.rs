@@ -25,7 +25,8 @@ impl ExperimentRepository {
             .query(
                 r"
                 for $sample_id in $sample_ids {
-                    relate ($experiment)->experiment_sample->(type::thing(sample, $sample_id));
+                    let $sample = select value id from only sample where meta::id(id) is $sample_id;
+                    relate ($experiment)->experiment_sample->($sample);
                 }
                 ",
             )
@@ -201,6 +202,17 @@ mod tests {
         let experiment = sut.create(experiment).await.unwrap();
 
         assert_eq!(experiment.sample_ids.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn create_non_existing_audio() {
+        let (sut, _) = setup().await;
+        let experiment = Experiment {
+            name: "exp-1".to_owned(),
+            sample_ids: vec!["aaa".to_owned()],
+        };
+
+        sut.create(experiment).await.unwrap_err();
     }
 
     #[tokio::test]
