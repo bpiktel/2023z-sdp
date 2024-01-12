@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
+import { Howl } from "howler";
 import { Stage } from "components/Stage";
 import { experimentSchema } from "schemas/experimentSchemas";
-import SamplePlayer from "../../components/player/SamplePlayer.tsx";
-import { useState } from "react";
-import { ButtonPrimary } from "components/Buttons.tsx";
+import { useRef, useState } from "react";
+import { ButtonPrimary, ButtonSecondary } from "components/Buttons.tsx";
+import { getAudioPath } from "components/player/utils.ts";
+import { SphericalCoordinates } from "schemas/coordinates";
+import { SampleResult } from "schemas/sampleSchemas";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -20,9 +23,46 @@ const ExperimentPage = () => {
     queryFn: getExperiment
   });
 
+  const audioList =
+    data?.sample_ids.map((sampleId) => getAudioPath(sampleId)) ?? [];
+
+  const playerRef = useRef<Howl>(
+    new Howl({
+      src: audioList,
+      format: ["mp3"],
+      volume: 1,
+      loop: false
+    })
+  );
+
   const [currentStep, setCurrentStep] = useState<"start" | number | "end">(
     "start"
   );
+  const results = useRef<SampleResult[]>([]);
+
+  // Current location selection, selected by the user
+  const [selection, setSelection] = useState<SphericalCoordinates | null>(null);
+
+  // Current location highlight, shows correct answer if applicable
+  const [highlight, setHighlight] = useState<SphericalCoordinates | null>(null);
+
+  const saveResult = () => {
+    results.current = [
+      ...results.current,
+      {
+        sample_id: data!.sample_ids[currentStep as number],
+        azimuth: selection!.azimuth,
+        elevation: selection!.elevation
+      }
+    ];
+  };
+
+  const nextSample = () => {
+    saveResult();
+    setSelection(null);
+    if (currentStep === audioList.length - 1) setCurrentStep("end");
+    else setCurrentStep((currentStep as number) + 1);
+  };
 
   if (isLoading || data == null) {
     return <p>Data is loading...</p>;
@@ -41,16 +81,66 @@ const ExperimentPage = () => {
       <StartInfo experimentName={data.name} onStart={() => setCurrentStep(0)} />
     );
 
+  if (currentStep === "end") return <FinishInfo />;
+
   return (
-    <div className="w-screen h-screen flex flex-col items-center">
+    <div className="w-screen h-screen flex flex-col items-center relative">
       <div className="my-xs mx-md max-w-[48rem] flex items-center">
-        <h1>{data?.name}</h1>
-        <SamplePlayer
-          assetPath="https://bigsoundbank.com/UPLOAD/mp3/0477.mp3"
-          name="Wilhelm Scream"
+        <h1>{data.name}</h1>
+        <ProgressWidget
+          currentStep={currentStep}
+          totalSteps={data.sample_ids.length}
         />
       </div>
-      <Stage />
+      <Stage
+        selection={selection}
+        setSelection={setSelection}
+        highlight={highlight}
+      />
+      {selection !== null && (
+        <div className="absolute w-full h-full flex pointer-events-none">
+          <div className="mt-auto ml-auto bg-black rounded-md p-xs me-md mb-md items-end text-end">
+            {selection?.azimuth !== null && selection?.elevation !== null && (
+              <p>
+                Selected: <br />
+                Azimuth: {selection?.azimuth}
+                <br />
+                Elevation: {selection?.elevation}
+              </p>
+            )}
+            <ButtonSecondary
+              className="pointer-events-auto mt-sm"
+              onClick={() => nextSample()}
+            >
+              Next
+            </ButtonSecondary>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ProgressWidget = ({
+  currentStep,
+  totalSteps
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) => {
+  return (
+    <div className="flex flex-col gap-xs px-md items-center">
+      <div>Progress:</div>
+      <div className="flex flex-row gap-xs">
+        {Array.from(Array(totalSteps).keys()).map((step) => (
+          <div
+            key={step}
+            className={`w-4 h-4 rounded-full border-2 border-white ${
+              currentStep < step ? "bg-transparent" : "bg-white"
+            }`}
+          ></div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -78,6 +168,20 @@ const StartInfo = ({
       <ButtonPrimary onClick={() => onStart()} className="mt-md">
         Start experiment
       </ButtonPrimary>
+    </div>
+  );
+};
+
+const FinishInfo = () => {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center">
+      <h1 className="">You have finished the experiment</h1>
+      <div className="mt-sm mx-xxl max-w-[64rem]">
+        You will hear ... Lorem ipsum dolor sit amet, consectetur adipiscing
+        elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      </div>
+      <div className="mt-md"></div>
+      <ButtonPrimary className="mt-md">Save results</ButtonPrimary>
     </div>
   );
 };

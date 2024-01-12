@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { sampleListSchema } from "schemas/sampleSchemas";
 import { Link } from "@tanstack/react-router";
+import { ButtonSecondary } from "components/Buttons";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -15,7 +16,7 @@ const SamplesListPage = () => {
     queryFn: getSamples
   });
 
-  if (isLoading) {
+  if (isLoading || data == null) {
     return <p>Data is loading...</p>;
   }
 
@@ -28,20 +29,24 @@ const SamplesListPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center p-xl">
       <h1>Samples</h1>
       <ul className="mt-md">
+        {data?.length === 0 && <p>No samples found.</p>}
         {data?.map((sample) => (
           <li key={sample.id.id.String} className="py-sm">
             <p>Name: {sample.name}</p>
             <p>Azimuth: {sample.azimuth}</p>
             <p>Elevation: {sample.elevation}</p>
-            <p>URL: {VITE_BASE_API_URL}/audio/{sample.id.id.String}</p>
+            <p>
+              URL: {VITE_BASE_API_URL}/audio/{sample.id.id.String}
+            </p>
           </li>
         ))}
       </ul>
-      {/*ToDo: Turn into a button. Also make table ^ more readable.*/}
-      <Link to="/samples/create">Create samples</Link>
+      <Link to="/samples/create" className="mt-md">
+        <ButtonSecondary>Create samples</ButtonSecondary>
+      </Link>
     </div>
   );
 };

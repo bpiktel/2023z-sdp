@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { Euler, type Mesh } from "three";
 import { OBJLoader } from "three/examples/jsm/Addons.js";
 import { deg2rad, sphericalToCartesian } from "../utils/mathUtils";
+import { SphericalCoordinates } from "schemas/coordinates";
 
 const MeshHATS = ({
   position,
@@ -29,41 +30,53 @@ const MeshHATS = ({
 
 const TargetSphere = ({
   position,
-  azimuth,
-  elevation
+  onClick,
+  active,
+  highlight
 }: {
   position: Vector3;
-  azimuth: number;
-  elevation: number;
+  onClick: () => void;
+  active?: boolean;
+  highlight?: boolean;
 }): JSX.Element => {
-  const meshRef = useRef<any>();
-
   const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
+
+  const getColor = (): string => {
+    if (hovered) return "yellow";
+    if (highlight) return "red";
+    if (active) return "yellow";
+    return "white";
+  };
 
   return (
     <mesh
       position={position}
-      ref={meshRef}
-      scale={active ? 0.4 : 0.25}
-      onClick={(event) => {
-        setActive(!active);
-        console.log("azimuth", azimuth, "elevation", elevation);
+      scale={hovered ? 0.4 : 0.25}
+      onClick={() => {
+        onClick();
       }}
-      onPointerOver={(event) => {
+      onPointerOver={() => {
         setHover(true);
       }}
-      onPointerOut={(event) => {
+      onPointerOut={() => {
         setHover(false);
       }}
     >
       <sphereGeometry args={[1]} />
-      <meshStandardMaterial color={active || hovered ? "yellow" : "white"} />
+      <meshStandardMaterial color={getColor()} />
     </mesh>
   );
 };
 
-const StageContent = (): JSX.Element => {
+const StageContent = ({
+  selection,
+  setSelection,
+  highlight
+}: {
+  selection: SphericalCoordinates | null;
+  setSelection: (selection: SphericalCoordinates) => void;
+  highlight: SphericalCoordinates | null;
+}): JSX.Element => {
   const DIVISIONS_AZIMUTH = 12;
   const DIVISIONS_ELEVATION = 8;
   const RADIUS = 10;
@@ -105,13 +118,19 @@ const StageContent = (): JSX.Element => {
             <TargetSphere
               key={`theta:${theta}-phi:${phi}`}
               position={sphericalToCartesian(RADIUS, theta + 90, phi)} // rotate theta 90 degrees to match viewing angle
-              azimuth={theta}
-              elevation={phi}
+              onClick={() => {
+                setSelection({ azimuth: theta, elevation: phi });
+              }}
+              active={
+                selection?.azimuth === theta && selection?.elevation === phi
+              }
+              highlight={
+                highlight?.azimuth === theta && highlight?.elevation === phi
+              }
             />
           );
         })
       )}
-
       <Torus
         position={[0, 0, 0]}
         args={[RADIUS, 0.03]}
@@ -151,11 +170,23 @@ const StageContent = (): JSX.Element => {
   );
 };
 
-export const Stage = (): JSX.Element => {
+export const Stage = ({
+  selection,
+  setSelection,
+  highlight
+}: {
+  selection: SphericalCoordinates | null;
+  setSelection: (selection: SphericalCoordinates) => void;
+  highlight: SphericalCoordinates | null;
+}): JSX.Element => {
   return (
     <div className="flex w-full h-full bg-black">
       <Canvas camera={{ position: [-2, 10, -15] }} frameloop="demand">
-        <StageContent />
+        <StageContent
+          selection={selection}
+          setSelection={setSelection}
+          highlight={highlight}
+        />
       </Canvas>
     </div>
   );
