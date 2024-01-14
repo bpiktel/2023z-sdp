@@ -3,11 +3,12 @@ import { useParams } from "@tanstack/react-router";
 import { Howl } from "howler";
 import { Stage } from "components/Stage";
 import { experimentSchema } from "schemas/experimentSchemas";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ButtonPrimary, ButtonSecondary } from "components/Buttons.tsx";
 import { getAudioPath } from "components/player/utils.ts";
 import { SphericalCoordinates } from "schemas/coordinates";
 import { SampleResult } from "schemas/sampleSchemas";
+import LoadingSpinner from "../../components/LoadingSpinner.tsx";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -23,17 +24,9 @@ const ExperimentPage = () => {
     queryFn: getExperiment
   });
 
-  const audioList =
-    data?.sample_ids.map((sampleId) => getAudioPath(sampleId)) ?? [];
+  const audioList: string[] = data?.sample_ids.map((sampleId) => getAudioPath(sampleId)) ?? [];
 
-  const playerRef = useRef<Howl>(
-    new Howl({
-      src: audioList,
-      format: ["mp3"],
-      volume: 1,
-      loop: false
-    })
-  );
+  const playerRef = useRef<Howl | undefined>();
 
   const [currentStep, setCurrentStep] = useState<"start" | number | "end">(
     "start"
@@ -45,6 +38,19 @@ const ExperimentPage = () => {
 
   // Current location highlight, shows correct answer if applicable
   const [highlight, setHighlight] = useState<SphericalCoordinates | null>(null);
+
+  useEffect(() => {
+    if (typeof(currentStep) === 'number') {
+      playerRef.current?.stop()
+      playerRef.current = new Howl({
+        src: [audioList[currentStep]],
+        format: ["mp3"],
+        volume: 0.5,
+        loop: false,
+        autoplay: true,
+      })
+    }
+  }, [currentStep]);
 
   const saveResult = () => {
     results.current = [
@@ -58,6 +64,7 @@ const ExperimentPage = () => {
   };
 
   const nextSample = () => {
+    playerRef.current?.stop()
     saveResult();
     setSelection(null);
     if (currentStep === audioList.length - 1) setCurrentStep("end");
@@ -78,7 +85,7 @@ const ExperimentPage = () => {
 
   if (currentStep === "start")
     return (
-      <StartInfo experimentName={data.name} onStart={() => setCurrentStep(0)} />
+      <StartInfo experimentName={data.name} onStart={() => setCurrentStep(0)} readyToStart={audioList.length > 0} />
     );
 
   if (currentStep === "end") return <FinishInfo />;
@@ -147,10 +154,12 @@ const ProgressWidget = ({
 
 const StartInfo = ({
   experimentName,
-  onStart
+  onStart,
+  readyToStart
 }: {
   experimentName: string;
   onStart: () => void;
+  readyToStart: boolean;
 }) => {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
@@ -165,9 +174,13 @@ const StartInfo = ({
         qui officia deserunt mollit anim id est laborum.
       </div>
       <div className="mt-md"></div>
-      <ButtonPrimary onClick={() => onStart()} className="mt-md">
-        Start experiment
-      </ButtonPrimary>
+      {readyToStart ?
+        <ButtonPrimary onClick={() => onStart()} className="mt-md" disabled={!readyToStart}>
+          Start experiment
+        </ButtonPrimary>
+        :
+        <LoadingSpinner />
+      }
     </div>
   );
 };
