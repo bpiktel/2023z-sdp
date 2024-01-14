@@ -16,7 +16,7 @@ const SamplePlayer = ({
       volume: 1,
       loop: false,
       html5: true,
-      format: ['.mp3', '.wav']
+      format: ['mp3']
     })
   );
 

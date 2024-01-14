@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ButtonSecondary } from "components/Buttons";
 import { FaArrowLeft } from "react-icons/fa";
 import SamplePlayer from "components/player/SamplePlayer";
+import { getAudioPath } from "components/player/utils";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -43,7 +44,7 @@ const SamplesListPage = () => {
         {data?.map((sample) => (
           <li key={sample.id.id.String} className="py-sm">
             <p>
-              {<SamplePlayer assetPath={`${VITE_BASE_API_URL}/audio/${sample.id.id.String}`} name={sample.name}/>}
+              {<SamplePlayer assetPath={getAudioPath(sample.id.id.String)} name={sample.name}/>}
             </p>
             <p>Azimuth: {sample.azimuth}</p>
             <p>Elevation: {sample.elevation}</p>
