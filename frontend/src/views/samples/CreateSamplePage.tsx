@@ -1,6 +1,8 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Link } from "@tanstack/react-router";
 import { fireAlert } from "components/AlertDialogs";
 import { useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
+import { ButtonSecondary } from "components/Buttons";
 
 const createSample = async (
   name: string,
@@ -58,6 +60,11 @@ const CreateSamplePage = () => {
 
   return (
     <div className="flex h-full items-center justify-center">
+      <div className="absolute left-0 top-0 m-xl">
+        <Link to="../" className="flex gap-xs items-center">
+          <FaArrowLeft /> Go Back
+        </Link>
+      </div>
       <div className="text-center min-w-[16rem]">
         <h1 className="mb-xl">Upload sample</h1>
         <table className="my-md">
@@ -111,11 +118,10 @@ const CreateSamplePage = () => {
             setAudioFile(e.target.files?.[0]);
           }}
         />
-
         <div className="flex flex-col mt-lg">
-          <button onClick={handleCreate} className="border">
+          <ButtonSecondary onClick={handleCreate} className="border">
             Create
-          </button>
+          </ButtonSecondary>
         </div>
       </div>
     </div>

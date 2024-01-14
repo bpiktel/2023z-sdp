@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { sampleListSchema } from "schemas/sampleSchemas";
 import { Link } from "@tanstack/react-router";
 import { ButtonSecondary } from "components/Buttons";
+import { FaArrowLeft } from "react-icons/fa";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -30,6 +31,11 @@ const SamplesListPage = () => {
 
   return (
     <div className="flex flex-col items-center p-xl">
+      <div className="absolute left-0 top-0 m-xl">
+        <Link to="../" className="flex gap-xs items-center">
+          <FaArrowLeft /> Return to Home Page
+        </Link>
+      </div>
       <h1>Samples</h1>
       <ul className="mt-md">
         {data?.length === 0 && <p>No samples found.</p>}

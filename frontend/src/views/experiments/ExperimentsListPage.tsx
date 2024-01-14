@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { fireConfirmationModal } from "components/AlertDialogs";
 import { ButtonSecondary } from "components/Buttons";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaArrowLeft } from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
 
 const deleteExperiment = async (id: string, callback: () => void) => {
@@ -63,6 +63,11 @@ const ExperimentsListPage = () => {
 
   return (
     <div className="flex flex-col items-center p-xl">
+      <div className="absolute left-0 top-0 m-xl">
+        <Link to="../" className="flex gap-xs items-center">
+          <FaArrowLeft /> Return to Home Page
+        </Link>
+      </div>
       <h1>Experiments</h1>
       <div className="mt-md flex flex-col gap-sm items-center">
         {data?.map((experiment) => (
