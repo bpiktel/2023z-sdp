@@ -14,7 +14,9 @@ const SamplePlayer = ({
     new Howl({
       src: [assetPath],
       volume: 1,
-      loop: false
+      loop: false,
+      html5: true,
+      format: ['.mp3', '.wav']
     })
   );
 

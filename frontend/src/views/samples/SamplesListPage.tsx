@@ -3,6 +3,7 @@ import { sampleListSchema } from "schemas/sampleSchemas";
 import { Link } from "@tanstack/react-router";
 import { ButtonSecondary } from "components/Buttons";
 import { FaArrowLeft } from "react-icons/fa";
+import SamplePlayer from "components/player/SamplePlayer";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -41,12 +42,15 @@ const SamplesListPage = () => {
         {data?.length === 0 && <p>No samples found.</p>}
         {data?.map((sample) => (
           <li key={sample.id.id.String} className="py-sm">
-            <p>Name: {sample.name}</p>
+            <p>
+              {<SamplePlayer assetPath={`${VITE_BASE_API_URL}/audio/${sample.id.id.String}`} name={sample.name}/>}
+            </p>
             <p>Azimuth: {sample.azimuth}</p>
             <p>Elevation: {sample.elevation}</p>
             <p>
               URL: {VITE_BASE_API_URL}/audio/{sample.id.id.String}
             </p>
+
           </li>
         ))}
       </ul>
