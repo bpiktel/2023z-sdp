@@ -5,10 +5,14 @@ import {FaArrowLeft, FaPlus} from "react-icons/fa";
 import SamplePlayer from "components/player/SamplePlayer";
 import { getAudioPath } from "components/player/utils";
 import {FrostedGlass} from "../../components/FrostedGlass.tsx";
+import {useRef, useState} from "react";
+import {Howl} from "howler";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
+  const playerRef = useRef<Howl>();
+  const [playerStatus, setPlayerStatus] = useState<string | null>(null);
   const getSamples = () =>
     fetch(`${VITE_BASE_API_URL}/audio/all`)
       .then((res) => res.json())
@@ -47,9 +51,13 @@ const SamplesListPage = () => {
           {data?.length === 0 && <p>No samples found.</p>}
           {data?.map((sample) => (
             <li key={sample.id.id.String} className="py-sm">
-              <p>
-                {<SamplePlayer assetPath={getAudioPath(sample.id.id.String)} name={sample.name}/>}
-              </p>
+              <SamplePlayer
+                assetPath={getAudioPath(sample.id.id.String)}
+                name={sample.name}
+                playerRef={playerRef}
+                status={playerStatus}
+                setStatus={setPlayerStatus}
+              />
               <p>Azimuth: {sample.azimuth}</p>
               <p>Elevation: {sample.elevation}</p>
               <p>

@@ -1,66 +1,61 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { MutableRefObject } from "react";
 import { Howl } from "howler";
-import { PauseButton, PlayButton, StopButton } from "./ControlButtons";
+import { PlayButton, StopButton } from "./ControlButtons";
 
 const SamplePlayer = ({
   assetPath,
-  name
+  name,
+  playerRef,
+  className,
+  status,
+  setStatus
 }: {
   assetPath: string;
   name: string;
+  playerRef: MutableRefObject<Howl | undefined>;
+  className?: string;
+  status: string | null;
+  setStatus: React.Dispatch<React.SetStateAction<string | null>>;
 }): JSX.Element => {
-  const playerRef = useRef<Howl>(
-    new Howl({
-      src: [assetPath],
-      volume: 1,
-      loop: false,
-      html5: true,
-      format: ['mp3']
-    })
-  );
+  const setNewStatus = (newStatus: string | null) => {
+    if (newStatus === status)
+      return
 
-  const [status, setStatus] = useState<"stopped" | "playing" | "paused">(
-    "stopped"
-  );
-
-  useEffect(() => {
-    const player = playerRef.current;
-
-    switch (status) {
-      case "playing":
-        player.play();
-        break;
-      case "paused":
-        player.pause();
-        break;
-      case "stopped":
-        player.stop();
-        break;
+    if (status === name && newStatus === null) {
+      playerRef.current?.stop();
+      setStatus(newStatus);
     }
 
-    return () => {
-      player.stop();
-    };
-  }, [playerRef, status]);
+    if (newStatus !== null) {
+      playerRef.current?.stop();
+      playerRef.current = new Howl({
+          src: [assetPath],
+          volume: 1,
+          loop: false,
+          html5: true,
+          autoplay: true,
+          format: ['mp3']
+        }
+      );
+      setStatus(newStatus);
+    }
+  }
+
 
   return (
-    <div className="flex flex-col items-center min-w-[16rem]">
+    <div className={`flex flex-col items-center min-w-[16rem] ${className}`}>
       <div className="text-md font-semibold">{name}</div>
-      <div className="flex gap-sm justify-center">
+      <div className="flex gap-sm mt-xs justify-center">
         <PlayButton
           onClick={() => {
-            setStatus("playing");
-          }}
-        />
-        <PauseButton
-          onClick={() => {
-            setStatus("paused");
+            setNewStatus(name);
           }}
         />
         <StopButton
+          disabled={name !== status}
           onClick={() => {
-            setStatus("stopped");
+            setNewStatus(null);
           }}
         />
       </div>
