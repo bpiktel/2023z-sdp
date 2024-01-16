@@ -6,6 +6,7 @@ import { useState } from "react";
 import { FaArrowLeft, FaMinus, FaPlus } from "react-icons/fa";
 import { Sample, sampleListSchema } from "schemas/sampleSchemas";
 import SamplePreviewWidget from "views/samples/SamplePreviewWidget";
+import {FrostedGlass} from "../../components/FrostedGlass.tsx";
 
 const createExperiment = async (
   name: string,
@@ -67,29 +68,31 @@ const CreateExperimentPage = () => {
           <FaArrowLeft /> Go back
         </Link>
       </div>
-      <h1>Create experiment</h1>
-      <div className="flex flex-row">
-        <p className="pr-md">Experiment name</p>
-        <input
-          className="flex-1 px-2"
-          type="text"
-          placeholder="experiment name..."
-          onChange={(e) => setName(e.target.value)}
+      <FrostedGlass className="flex flex-col items-center gap-xl">
+        <h1>Create experiment</h1>
+        <div className="flex flex-row items-center w-full">
+          <p className="pr-md">Experiment name</p>
+          <input
+            className="flex-1 px-2 py-1"
+            type="text"
+            placeholder="experiment name..."
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <AudioSelector
+          selectedSampleIds={sampleIds}
+          addSample={addSample}
+          removeSample={removeSample}
         />
-      </div>
-      <div className="">
-        <ButtonSecondary
-          onClick={handleCreate}
-          disabled={sampleIds.length === 0 || name.length === 0}
-        >
-          Create
-        </ButtonSecondary>
-      </div>
-      <AudioSelector
-        selectedSampleIds={sampleIds}
-        addSample={addSample}
-        removeSample={removeSample}
-      />
+        <div>
+          <ButtonSecondary
+            onClick={handleCreate}
+            disabled={sampleIds.length === 0 || name.length === 0}
+          >
+            Create
+          </ButtonSecondary>
+        </div>
+      </FrostedGlass>
     </div>
   );
 };

@@ -2,8 +2,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { fireConfirmationModal } from "components/AlertDialogs";
 import { ButtonSecondary } from "components/Buttons";
-import { FaTrash, FaArrowLeft } from "react-icons/fa";
+import {FaTrash, FaArrowLeft, FaPlus} from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
+import {FrostedGlass} from "../../components/FrostedGlass.tsx";
 
 const deleteExperiment = async (id: string, callback: () => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -63,34 +64,49 @@ const ExperimentsListPage = () => {
 
   return (
     <div className="flex flex-col items-center p-xl">
-      <div className="absolute left-0 top-0 m-xl">
+      <div className="w-full flex justify-between mb-md">
         <Link to="../" className="flex gap-xs items-center">
-          <FaArrowLeft /> Return to Home Page
+          <FaArrowLeft/> Return to Home Page
+        </Link>
+        <Link to="/experiments/create" className="flex gap-xs items-center">
+          <FaPlus/> Create new experiment
         </Link>
       </div>
-      <h1>Experiments</h1>
-      <div className="mt-md flex flex-col gap-sm items-center">
-        {data?.map((experiment) => (
-          <div
-            key={experiment.id.id.String}
-            className="flex gap-xs items-center"
-          >
-            <Link
-              to={`/experiments/$id`}
-              params={{ id: experiment.id.id.String }}
+      <FrostedGlass className="flex flex-col items-center">
+        <h1>Experiments</h1>
+        <div className="mt-md flex flex-col gap-sm items-center w-full">
+          {data?.map((experiment) => (
+            <div
+              key={experiment.id.id.String}
+              className="flex w-full justify-between items-center"
             >
-              {experiment.name}
-            </Link>
-            <FaTrash
-              className="text-red-500 cursor-pointer"
-              onClick={() => onDelete(experiment.id.id.String)}
-            />
-          </div>
-        ))}
-      </div>
-      <Link to="/experiments/create" className="mt-md">
-        <ButtonSecondary>Create experiments</ButtonSecondary>
-      </Link>
+              <Link
+                className="text-lg min-w-48"
+                to={`/experiments/$id`}
+                params={{id: experiment.id.id.String}}
+              >
+                {experiment.name}
+              </Link>
+
+              <div className="flex gap-xs">
+                {/*<Link*/}
+                {/*  to={`/experiments/$id`}*/}
+                {/*  params={{id: experiment.id.id.String}}*/}
+                {/*>*/}
+                {/*  <FaEdit className="size-md"/>*/}
+                {/*</Link>*/}
+                <FaTrash
+                  className="size-md text-red-500 cursor-pointer"
+                  onClick={() => onDelete(experiment.id.id.String)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <Link to="/experiments/create" className="mt-lg">
+          <ButtonSecondary>Create new experiment</ButtonSecondary>
+        </Link>
+      </FrostedGlass>
     </div>
   );
 };

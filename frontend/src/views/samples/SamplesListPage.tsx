@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { sampleListSchema } from "schemas/sampleSchemas";
 import { Link } from "@tanstack/react-router";
-import { ButtonSecondary } from "components/Buttons";
-import { FaArrowLeft } from "react-icons/fa";
+import {FaArrowLeft, FaPlus} from "react-icons/fa";
 import SamplePlayer from "components/player/SamplePlayer";
 import { getAudioPath } from "components/player/utils";
+import {FrostedGlass} from "../../components/FrostedGlass.tsx";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -32,32 +32,34 @@ const SamplesListPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center p-xl">
-      <div className="absolute left-0 top-0 m-xl">
+    <div className="flex flex-col items-center p-xl h-screen overflow-x-hidden">
+      <div className="w-full flex justify-between mb-md">
         <Link to="../" className="flex gap-xs items-center">
-          <FaArrowLeft /> Return to Home Page
+          <FaArrowLeft/> Return to Home Page
+        </Link>
+        <Link to="/samples/create" className="flex gap-xs items-center">
+          <FaPlus /> Add new sample
         </Link>
       </div>
-      <h1>Samples</h1>
-      <ul className="mt-md">
-        {data?.length === 0 && <p>No samples found.</p>}
-        {data?.map((sample) => (
-          <li key={sample.id.id.String} className="py-sm">
-            <p>
-              {<SamplePlayer assetPath={getAudioPath(sample.id.id.String)} name={sample.name}/>}
-            </p>
-            <p>Azimuth: {sample.azimuth}</p>
-            <p>Elevation: {sample.elevation}</p>
-            <p>
-              URL: {VITE_BASE_API_URL}/audio/{sample.id.id.String}
-            </p>
+      <FrostedGlass className="flex flex-col items-center">
+        <h1>Samples</h1>
+        <ul className="mt-md">
+          {data?.length === 0 && <p>No samples found.</p>}
+          {data?.map((sample) => (
+            <li key={sample.id.id.String} className="py-sm">
+              <p>
+                {<SamplePlayer assetPath={getAudioPath(sample.id.id.String)} name={sample.name}/>}
+              </p>
+              <p>Azimuth: {sample.azimuth}</p>
+              <p>Elevation: {sample.elevation}</p>
+              <p>
+                URL: {VITE_BASE_API_URL}/audio/{sample.id.id.String}
+              </p>
 
-          </li>
-        ))}
-      </ul>
-      <Link to="/samples/create" className="mt-md">
-        <ButtonSecondary>Create samples</ButtonSecondary>
-      </Link>
+            </li>
+          ))}
+        </ul>
+      </FrostedGlass>
     </div>
   );
 };

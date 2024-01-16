@@ -3,6 +3,7 @@ import { fireAlert } from "components/AlertDialogs";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ButtonSecondary } from "components/Buttons";
+import {FrostedGlass} from "../../components/FrostedGlass.tsx";
 
 const createSample = async (
   name: string,
@@ -65,7 +66,7 @@ const CreateSamplePage = () => {
           <FaArrowLeft /> Go Back
         </Link>
       </div>
-      <div className="text-center min-w-[16rem]">
+      <FrostedGlass className="text-center min-w-[16rem]">
         <h1 className="mb-xl">Upload sample</h1>
         <table className="my-md">
           <tbody>
@@ -75,7 +76,7 @@ const CreateSamplePage = () => {
               </td>
               <td>
                 <input
-                  className="flex-1 px-2"
+                  className="flex-1 px-2 py-1"
                   type="string"
                   placeholder="name..."
                   onChange={(e) => setName(e.target.value)}
@@ -88,7 +89,7 @@ const CreateSamplePage = () => {
               </td>
               <td>
                 <input
-                  className="flex-1 px-2"
+                  className="flex-1 px-2 py-1"
                   type="number"
                   placeholder="azimuth..."
                   onChange={(e) => setAzimuth(+e.target.value)}
@@ -101,7 +102,7 @@ const CreateSamplePage = () => {
               </td>
               <td>
                 <input
-                  className="flex-1 px-2"
+                  className="flex-1 px-2 py-1"
                   type="number"
                   placeholder="elevation..."
                   onChange={(e) => setElevation(+e.target.value)}
@@ -123,7 +124,7 @@ const CreateSamplePage = () => {
             Create
           </ButtonSecondary>
         </div>
-      </div>
+      </FrostedGlass>
     </div>
   );
 };
