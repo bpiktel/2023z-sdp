@@ -31,6 +31,8 @@ body {
   flex-direction: column;
   width: 100%;
   background-image: url("assets/images/background_1920.jpg");
+  background-position:  center;
+  background-size: cover;
 }
 
 /* Typography */
