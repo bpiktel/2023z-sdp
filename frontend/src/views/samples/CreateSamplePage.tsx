@@ -91,6 +91,10 @@ const CreateSamplePage = () => {
                 <input
                   className="flex-1 px-2 py-1"
                   type="number"
+                  defaultValue={0}
+                  min ="0"
+                  max = "345"
+                  step = "15"
                   placeholder="azimuth..."
                   onChange={(e) => setAzimuth(+e.target.value)}
                 />
@@ -104,6 +108,10 @@ const CreateSamplePage = () => {
                 <input
                   className="flex-1 px-2 py-1"
                   type="number"
+                  defaultValue={0}
+                  min = "-90"
+                  max = "90"
+                  step = "15"
                   placeholder="elevation..."
                   onChange={(e) => setElevation(+e.target.value)}
                 />
