@@ -2,9 +2,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { fireConfirmationModal } from "components/AlertDialogs";
 import { ButtonSecondary } from "components/Buttons";
-import {FaTrash, FaArrowLeft, FaPlus} from "react-icons/fa";
+import { FaTrash, FaArrowLeft, FaPlus, FaFile } from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
-import {FrostedGlass} from "../../components/FrostedGlass.tsx";
+import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 
 const deleteExperiment = async (id: string, callback: () => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -66,10 +66,10 @@ const ExperimentsListPage = () => {
     <div className="flex flex-col items-center p-xl">
       <div className="w-full flex justify-between mb-md">
         <Link to="../" className="flex gap-xs items-center">
-          <FaArrowLeft/> Return to Home Page
+          <FaArrowLeft /> Return to Home Page
         </Link>
         <Link to="/experiments/create" className="flex gap-xs items-center">
-          <FaPlus/> Create new experiment
+          <FaPlus /> Create new experiment
         </Link>
       </div>
       <FrostedGlass className="flex flex-col items-center">
@@ -83,7 +83,7 @@ const ExperimentsListPage = () => {
               <Link
                 className="text-lg min-w-48"
                 to={`/experiments/$id`}
-                params={{id: experiment.id.id.String}}
+                params={{ id: experiment.id.id.String }}
               >
                 {experiment.name}
               </Link>
@@ -99,6 +99,15 @@ const ExperimentsListPage = () => {
                   className="size-md text-red-500 cursor-pointer"
                   onClick={() => onDelete(experiment.id.id.String)}
                 />
+                <Link
+                  to={`/experiments/$id/results`}
+                  params={{ id: experiment.id.id.String }}
+                >
+                  <FaFile
+                    className="size-md text-white cursor-pointer"
+                    onClick={() => {}}
+                  />
+                </Link>
               </div>
             </div>
           ))}

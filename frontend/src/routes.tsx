@@ -9,6 +9,7 @@ import HomePage from "./views/home/HomePage";
 import CreateExperimentPage from "./views/experiments/CreateExperimentPage.tsx";
 import SamplesListPage from "./views/samples/SamplesListPage.tsx";
 import CreateSamplePage from "./views/samples/CreateSamplePage.tsx";
+import ExperimentResultsPage from "views/experiments/ExperimentResultsPage.tsx";
 
 const rootRoute = new RootRoute({
   component: () => (
@@ -25,29 +26,43 @@ const homeRoute = new Route({
   component: HomePage
 });
 
-const experimentsRoute = new Route({
+// All experiments routes
+const baseAllExperimentsRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/experiments"
 });
 
 const experimentsListRoute = new Route({
-  getParentRoute: () => experimentsRoute,
+  getParentRoute: () => baseAllExperimentsRoute,
   path: "/",
   component: ExperimentsListPage
 });
 
-const experimentRoute = new Route({
-  getParentRoute: () => experimentsRoute,
-  path: "/$id",
-  component: ExperimentPage
-});
-
 const createExperimentRoute = new Route({
-  getParentRoute: () => experimentsRoute,
+  getParentRoute: () => baseAllExperimentsRoute,
   path: "/create",
   component: CreateExperimentPage
 });
 
+// Single experiment routes
+const baseExperimentRoute = new Route({
+  getParentRoute: () => baseAllExperimentsRoute,
+  path: "/$id"
+});
+
+const experimentRoute = new Route({
+  getParentRoute: () => baseExperimentRoute,
+  path: "/",
+  component: ExperimentPage
+});
+
+const experimentResultsRoute = new Route({
+  getParentRoute: () => baseExperimentRoute,
+  path: "/results",
+  component: ExperimentResultsPage
+});
+
+// All samples routes
 const samplesRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/samples"
@@ -65,6 +80,7 @@ const createSampleRoute = new Route({
   component: CreateSamplePage
 });
 
+// Auth routes
 const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/login",
@@ -74,7 +90,12 @@ const loginRoute = new Route({
 const routeTree = rootRoute.addChildren([
   homeRoute,
   loginRoute,
-  experimentsRoute.addChildren([experimentsListRoute, experimentRoute, createExperimentRoute]),
+  baseAllExperimentsRoute.addChildren([
+    experimentResultsRoute,
+    experimentsListRoute,
+    baseExperimentRoute.addChildren([experimentRoute, experimentResultsRoute]),
+    createExperimentRoute
+  ]),
   samplesRoute.addChildren([samplesListRoute, createSampleRoute])
 ]);
 
