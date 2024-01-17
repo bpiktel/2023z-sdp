@@ -6,7 +6,20 @@ services:
     build: .
     environment:
       app__cors: true
+      surreal_db__address: ws://surrealdb:8000
     ports:
       - 3000:3000
     volumes:
       - ./devkeys:/app/devkeys
+
+  sound-localization-tester-database:
+    container_name: sound-localization-tester-database
+    hostname: surrealdb
+    build: src/services/database
+    ports:
+      - 8000:8000
+    volumes:
+      - surrealdb_volume:/data
+
+volumes:
+  surrealdb_volume:

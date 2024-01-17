@@ -122,7 +122,6 @@ async fn get_all(
 /// Get raw data of an audio sample with given identifier.
 async fn get_audio(
     audio_repo: SampleRepository,
-    _: Claims,
     Path(id): Path<String>,
 ) -> ResponseType<bytes::Bytes> {
     let Ok(sample) = audio_repo

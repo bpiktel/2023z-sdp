@@ -13,7 +13,7 @@
         "decoding": "devkeys/pub.pem"
     },
     "surreal_db": {
-        "address": "file://surreal.db",
+        "address": "ws://127.0.0.1:8000",
         "namespace": "default",
         "database": "default",
         "migrations": {
