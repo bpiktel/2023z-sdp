@@ -3,6 +3,7 @@ import { useAuth } from "auth";
 import { useState } from "react";
 import {FrostedGlass} from "../../components/FrostedGlass.tsx";
 import {FaArrowLeft} from "react-icons/fa";
+import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const signIn = async (
   username: string,
@@ -12,12 +13,9 @@ const signIn = async (
   const { VITE_BASE_API_URL } = import.meta.env;
 
   const response = await fetch(`${VITE_BASE_API_URL}/auth/login`, {
+    ...defaultRequestInit,
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
     body: JSON.stringify({ username, password }),
-    credentials: "include"
   });
   setAuth(response.ok);
 

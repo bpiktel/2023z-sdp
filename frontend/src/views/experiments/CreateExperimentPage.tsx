@@ -7,6 +7,7 @@ import { FaArrowLeft, FaMinus, FaPlus } from "react-icons/fa";
 import { Sample, sampleListSchema } from "schemas/sampleSchemas";
 import SamplePreviewWidget from "views/samples/SamplePreviewWidget";
 import {FrostedGlass} from "../../components/FrostedGlass.tsx";
+import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const createExperiment = async (
   name: string,
@@ -16,12 +17,9 @@ const createExperiment = async (
   const { VITE_BASE_API_URL } = import.meta.env;
 
   const response = await fetch(`${VITE_BASE_API_URL}/experiments`, {
+    ...defaultRequestInit,
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
     body: JSON.stringify({ name, sample_ids }),
-    credentials: "include"
   });
 
   if (response.ok) {
@@ -109,7 +107,7 @@ const AudioSelector = ({
   const { VITE_BASE_API_URL } = import.meta.env;
 
   const getSamples = () =>
-    fetch(`${VITE_BASE_API_URL}/audio/all`)
+    fetch(`${VITE_BASE_API_URL}/audio/all`, defaultRequestInit)
       .then((res) => res.json())
       .then((data) => sampleListSchema.parse(data));
 

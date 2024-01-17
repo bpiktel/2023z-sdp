@@ -5,13 +5,15 @@ import { ButtonSecondary } from "components/Buttons";
 import { FaTrash, FaArrowLeft, FaPlus, FaFile } from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
+import { defaultRequestInit } from 'utils/fetchUtils.ts';
 
 const deleteExperiment = async (id: string, callback: () => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
   try {
     const response = await fetch(`${VITE_BASE_API_URL}/experiments/${id}`, {
-      method: "DELETE"
+      ...defaultRequestInit,
+      method: "DELETE",
     });
 
     if (response.ok) {
@@ -28,7 +30,7 @@ const ExperimentsListPage = () => {
   const queryClient = useQueryClient();
 
   const getExperiments = () =>
-    fetch(`${VITE_BASE_API_URL}/experiments`)
+    fetch(`${VITE_BASE_API_URL}/experiments`, defaultRequestInit)
       .then((res) => res.json())
       .then((data) => experimentListSchema.parse(data));
 

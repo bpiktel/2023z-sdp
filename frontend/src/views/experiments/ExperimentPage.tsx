@@ -11,13 +11,14 @@ import {Sample, SampleList, sampleListSchema, SampleResult} from "schemas/sample
 import LoadingSpinner from "../../components/LoadingSpinner.tsx";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { fireAlert } from "components/AlertDialogs.tsx";
+import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
   const { id } = useParams({ strict: false });
 
   const getExperiment = () =>
-    fetch(`${VITE_BASE_API_URL}/experiments/${id}`)
+    fetch(`${VITE_BASE_API_URL}/experiments/${id}`, defaultRequestInit)
       .then((res) => res.json())
       .then((data) => experimentSchema.parse(data));
 
@@ -246,12 +247,9 @@ const createResult = async (
   const response = await fetch(
     `${VITE_BASE_API_URL}/experiments/results/${experimentId}`,
     {
+      ...defaultRequestInit,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
       body: JSON.stringify({ sample_results: results }),
-      credentials: "include"
     }
   );
 

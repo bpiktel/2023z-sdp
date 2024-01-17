@@ -7,6 +7,7 @@ import { getAudioPath } from "components/player/utils";
 import {FrostedGlass} from "../../components/FrostedGlass.tsx";
 import {useRef, useState} from "react";
 import {Howl} from "howler";
+import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const SamplesListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -14,7 +15,7 @@ const SamplesListPage = () => {
   const playerRef = useRef<Howl>();
   const [playerStatus, setPlayerStatus] = useState<string | null>(null);
   const getSamples = () =>
-    fetch(`${VITE_BASE_API_URL}/audio/all`)
+    fetch(`${VITE_BASE_API_URL}/audio/all`, defaultRequestInit)
       .then((res) => res.json())
       .then((data) => sampleListSchema.parse(data));
 
