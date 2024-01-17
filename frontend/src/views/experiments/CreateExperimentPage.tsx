@@ -139,23 +139,6 @@ const AudioSelector = ({
   return (
     <div className="flex flex-row gap-xl">
       <div className="">
-        <h3 className="mb-sm">Selected samples</h3>
-        {selectedSamples.map((sample) => (
-          <div
-            key={sample.id.id.String}
-            className="flex items-center justify-between gap-sm py-sm border-b last:border-0 border-white/60"
-          >
-            <SamplePreviewWidget sample={sample} />
-            <div>
-              <FaMinus
-                className="cursor-pointer"
-                onClick={() => removeSample(sample.id.id.String)}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="">
         <h3 className="mb-sm">Available samples</h3>
         {unselectedSamples.map((sample) => (
           <div
@@ -167,6 +150,23 @@ const AudioSelector = ({
               <FaPlus
                 className="cursor-pointer"
                 onClick={() => addSample(sample.id.id.String)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="">
+        <h3 className="mb-sm">Selected samples</h3>
+        {selectedSamples.map((sample) => (
+          <div
+            key={sample.id.id.String}
+            className="flex items-center justify-between gap-sm py-sm border-b last:border-0 border-white/60"
+          >
+            <SamplePreviewWidget sample={sample} />
+            <div>
+              <FaMinus
+                className="cursor-pointer"
+                onClick={() => removeSample(sample.id.id.String)}
               />
             </div>
           </div>

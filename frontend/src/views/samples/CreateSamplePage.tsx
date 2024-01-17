@@ -1,10 +1,9 @@
 import { useNavigate, Link } from "@tanstack/react-router";
 import { fireAlert } from "components/AlertDialogs";
-import { SetStateAction, useState } from "react";
+import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ButtonSecondary } from "components/Buttons";
 import {FrostedGlass} from "../../components/FrostedGlass.tsx";
-import { degrees, int } from "three/examples/jsm/nodes/Nodes.js";
 
 const createSample = async (
   name: string,
@@ -50,8 +49,8 @@ const CreateSamplePage = () => {
     } else fireAlert({ title: "Failed to create experiment" });
   };
 
-  const handle_degrees = (degrees:number, set:any) => {
-    let rest = degrees%15;
+  const handle_degrees = (degrees:number, set: (n: number) => void) => {
+    const rest = degrees % 15;
     if (rest < 8) 
       set(degrees - rest);
     else
