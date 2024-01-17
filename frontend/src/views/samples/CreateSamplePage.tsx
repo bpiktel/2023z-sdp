@@ -83,7 +83,7 @@ const CreateSamplePage = () => {
               <td>
                 <input
                   className="w-full flex-1 px-2 py-1"
-                  type="string"
+                  type="text"
                   placeholder="name..."
                   onChange={(e) => setName(e.target.value)}
                 />

@@ -16,6 +16,7 @@ const deleteSample = async (id: string, callback: () => void) => {
 
   try {
     const response = await fetch(`${VITE_BASE_API_URL}/audio/${id}`, {
+      ...defaultRequestInit,
       method: "DELETE",
     });
 

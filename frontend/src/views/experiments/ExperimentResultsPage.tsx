@@ -66,6 +66,7 @@ const ExperimentResultsPage = () => {
 
     const headers = [
       "index",
+      "sample_id",
       "sample_name",
       "sample_azimuth",
       "sample_elevation",
