@@ -1,8 +1,10 @@
 version: '3.9'
 
 services:
-  sound-localization-tester:
-    container_name: sound-localization-tester
-    build: .
+  frontend:
+    container_name: sound-localization-tester-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - 3000:3000
+      - 80:8000
