@@ -53,7 +53,7 @@ impl SampleRepository {
         // Someone can add this sample to an experiment between the check and deletion.
         self.file_storage.delete(&id).await?;
         self.surreal
-            .query("delete only sample where meta::id(id) is $id")
+            .query("delete sample where meta::id(id) is $id")
             .bind(("id", &id))
             .await?;
         Ok(true)
