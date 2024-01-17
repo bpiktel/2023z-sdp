@@ -10,6 +10,7 @@ use crate::services::{
     config::Config,
     database::{files::FileStorage, surreal::SurrealDb},
 };
+use tracing::info;
 
 use self::{api::api_router, healthcheck::healthcheck_router, static_files::static_files_service};
 
@@ -27,7 +28,10 @@ where
         .layer(TraceLayer::new_for_http());
 
     if config.app.cors {
-        router = router.layer(CorsLayer::permissive());
+        router = router.layer(CorsLayer::very_permissive());
+        info!("Applying very permissive CORS");
+    } else {
+        info!("Applying restrictive CORS");
     }
 
     router
