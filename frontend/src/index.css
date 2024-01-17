@@ -49,15 +49,13 @@ h3 {
   font-size: 1.5rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+input[type="text"], input[type="number"] {
+  background-color: #242424;
+  border-color: rgba(255, 255, 255, 0.87);
+  border-width: 1px;
+  border-radius: 0.25em;
+}
+
+a:hover {
+  color: mediumvioletred;
 }
