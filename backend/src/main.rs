@@ -9,8 +9,12 @@ use services::{
     },
     runner::run,
 };
+use tower_http::limit::RequestBodyLimitLayer;
 
 use crate::services::{app::AppState, config::setup_config, tracing::setup_tracing};
+
+// 64 MiB
+const REQUEST_SIZE_LIMIT: usize = 64 * 1024 * 1024;
 
 #[tokio::main]
 async fn main() {
@@ -36,5 +40,11 @@ async fn main() {
     let repo = UserRepository::new(state.surreal_db.clone());
     repo.try_create("root", "root").await.ok();
 
-    run(config.app.url, main_route(&config).with_state(state)).await;
+    run(
+        config.app.url,
+        main_route(&config)
+            .layer(RequestBodyLimitLayer::new(REQUEST_SIZE_LIMIT))
+            .with_state(state),
+    )
+    .await;
 }
