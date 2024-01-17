@@ -1,11 +1,9 @@
 import { useNavigate, Link } from "@tanstack/react-router";
 import { fireAlert } from "components/AlertDialogs";
 import { useState } from "react";
-import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ButtonSecondary } from "components/Buttons";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
-import { degrees, int } from "three/examples/jsm/nodes/Nodes.js";
 
 const createSample = async (
   name: string,
