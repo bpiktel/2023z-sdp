@@ -64,7 +64,7 @@ const ExperimentPage = () => {
       return
 
     const fetchAllSamplesOfTheWorld = async () => {
-      const rawResponse = await fetch(`${VITE_BASE_API_URL}/audio/all`)
+      const rawResponse = await fetch(`${VITE_BASE_API_URL}/audio/all`, defaultRequestInit)
       const responseData = await rawResponse.json()
       const allSamplesOfTheWorld: SampleList = sampleListSchema.parse(responseData)
       setSampleCoordinatesList(data.sample_ids.map((sampleId) => {
