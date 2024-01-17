@@ -22,28 +22,40 @@ body {
   display: flex;
   min-width: 100vw;
   min-height: 100vh;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 #root {
   display: flex;
   flex-direction: column;
   width: 100%;
+  background-image: url("assets/images/background_1920.jpg");
+  background-position:  center;
+  background-size: cover;
 }
+
+/* Typography */
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 2rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+h2 {
+  font-size: 1.75rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+input[type="text"], input[type="number"], input[type="password"] {
+  background-color: #242424;
+  border-color: rgba(255, 255, 255, 0.87);
+  border-width: 1px;
+  border-radius: 0.25em;
+}
+
+a:hover {
+  color: mediumvioletred;
 }

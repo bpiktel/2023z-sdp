@@ -1,6 +1,28 @@
 version: '3.9'
 
 services:
+  sound-localization-tester-frontend:
+    container_name: sound-localization-tester-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 80:8000
+    profiles:
+      - development
+
+  sound-localization-tester-backend:
+    container_name: sound-localization-tester-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      surreal_db__address: ws://surrealdb:8000
+    ports:
+      - 3000:3000
+    profiles:
+      - development
+
   sound-localization-tester-backend-frontend:
     container_name: sound-localization-tester
     build: .
@@ -8,6 +30,8 @@ services:
       surreal_db__address: ws://surrealdb:8000
     ports:
       - 3000:3000
+    profiles:
+      - ''
 
   sound-localization-tester-database:
     container_name: sound-localization-tester-database

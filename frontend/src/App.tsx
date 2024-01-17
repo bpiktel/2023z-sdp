@@ -1,50 +1,30 @@
-import "./index.css";
-import { Outlet, RootRoute, Route, Router } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import HomePage from "./views/home/HomePage";
-import { QueryClient } from "@tanstack/react-query";
-import ExperimentPage from "./views/experiments/ExperimentPage";
+import { RouterProvider } from "@tanstack/react-router";
+import router, { queryClient } from "./routes";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { AuthContext } from "auth";
+import { useEffect, useState } from "react";
+import { defaultRequestInit } from 'utils/fetchUtils';
 
-const rootRoute = new RootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  )
-});
+const checkLoginStatus = async (setAuth: (auth: boolean) => void): Promise<void> => {
+  const { VITE_BASE_API_URL } = import.meta.env;
+  const response = await fetch(`${VITE_BASE_API_URL}/auth/status`, defaultRequestInit);
+  setAuth(response.ok);
+};
 
-const homeRoute = new Route({
-  getParentRoute: () => rootRoute,
-  path: "/",
-  component: HomePage
-});
+const App = () => {
+  const [authenticated, setAuthenticated] = useState(false);
 
-const adminRoute = new Route({
-  getParentRoute: () => rootRoute,
-  path: "/experiment",
-  component: ExperimentPage
-});
+  useEffect(() => {
+    checkLoginStatus(setAuthenticated);
+  }, []);
 
-const routeTree = rootRoute.addChildren([homeRoute, adminRoute]);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider value={{ authenticated, setAuthenticated }}>
+        <RouterProvider router={router} />
+      </AuthContext.Provider>
+    </QueryClientProvider>
+  );
+};
 
-const queryClient = new QueryClient();
-
-const router = new Router({
-  routeTree,
-  defaultPreload: "intent",
-  // Since we're using React Query, we don't want loader calls to ever be stale
-  // This will ensure that the loader is always called when the route is preloaded or visited
-  defaultPreloadStaleTime: 0,
-  context: {
-    queryClient
-  }
-});
-
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
-export default router;
+export default App;
