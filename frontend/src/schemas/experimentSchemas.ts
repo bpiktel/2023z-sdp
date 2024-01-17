@@ -1,5 +1,5 @@
 import { z } from "zod";
-import {sampleResultListSchema} from "./sampleSchemas.ts";
+import { sampleResultListSchema } from "./sampleSchemas.ts";
 
 export const idSchema = z.object({
   tb: z.string(),
@@ -24,7 +24,7 @@ export type ExperimentList = z.infer<typeof experimentListSchema>;
 
 export const experimentResultSchema = z.object({
   id: idSchema,
-  sample_results: z.array(sampleResultListSchema)
+  sample_results: sampleResultListSchema
 });
 
 export type ExperimentResult = z.infer<typeof experimentResultSchema>;
