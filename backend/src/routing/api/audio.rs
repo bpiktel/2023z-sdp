@@ -104,7 +104,6 @@ async fn delete_audio(
 /// List all available audio sample identifiers
 async fn get_all(
     audio_repo: SampleRepository,
-    _: Claims,
 ) -> ResponseType<Json<Vec<WithId<SampleInfo>>>> {
     let Ok(samples) = audio_repo
         .infos()
