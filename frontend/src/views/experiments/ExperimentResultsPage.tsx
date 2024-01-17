@@ -8,6 +8,7 @@ import {
   SampleResult,
   sampleListSchema
 } from "schemas/sampleSchemas.ts";
+import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const combineResultsWithSample = (
   results: SampleResult[],
@@ -27,7 +28,7 @@ const ExperimentResultsPage = () => {
   const { id } = useParams({ strict: false });
 
   const getResults = () =>
-    fetch(`${VITE_BASE_API_URL}/experiments/results/${id}`)
+    fetch(`${VITE_BASE_API_URL}/experiments/results/${id}`, defaultRequestInit)
       .then((res) => res.json())
       .then((data) => experimentResultListSchema.parse(data));
 
@@ -37,7 +38,7 @@ const ExperimentResultsPage = () => {
   });
 
   const getSamples = () =>
-    fetch(`${VITE_BASE_API_URL}/audio/all`)
+    fetch(`${VITE_BASE_API_URL}/audio/all`, defaultRequestInit)
       .then((res) => res.json())
       .then((data) => sampleListSchema.parse(data));
 
