@@ -135,6 +135,25 @@ pub mod tests {
         "mem://"
     }
 
+    #[allow(dead_code)]
+    fn docker() -> &'static str {
+        "ws://127.0.0.1:8000"
+    }
+
+    async fn clear_db(db: &SurrealDb) {
+        db.query(
+            r"
+            remove table experiment;
+            remove table experiment_sample;
+            remove table sample;
+            remove table sample_result;
+            remove table result;
+            ",
+        )
+        .await
+        .unwrap();
+    }
+
     async fn migrate_db(db: &SurrealDb) {
         Migrator::new(&MigratorConfig {
             directory: "./migrations".into(),
@@ -150,6 +169,7 @@ pub mod tests {
             inner: connect(addr).await.unwrap(),
         };
         db.use_ns("test").use_db("test").await.unwrap();
+        clear_db(&db).await;
         migrate_db(&db).await;
         db
     }

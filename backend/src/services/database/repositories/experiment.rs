@@ -80,7 +80,7 @@ impl ExperimentRepository {
                 ",
             )
             .query("commit")
-            .query("select *, (select meta::id(in) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id")
+            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id")
             .bind(("experiment_id", experiment_id))
             .bind(("sample_results", result.sample_results))
             .await?
@@ -98,7 +98,7 @@ impl ExperimentRepository {
     ) -> RepoResult<Vec<WithId<ExperimentResult>>> {
         let mut result = self
             .surreal
-            .query("select *, (select meta::id(in) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id")
+            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id",)
             .bind(("experiment_id", experiment_id))
             .await?;
         let results = result.take::<Vec<WithId<ExperimentResult>>>(0)?;
@@ -346,5 +346,6 @@ mod tests {
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].sample_results.len(), 1);
         assert_eq!(result[1].sample_results.len(), 1);
+        assert_eq!(result[0].sample_results[0].sample_id, sample.id());
     }
 }
