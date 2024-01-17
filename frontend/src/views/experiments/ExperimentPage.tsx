@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { ButtonPrimary, ButtonSecondary } from "components/Buttons.tsx";
 import { getAudioPath } from "components/player/utils.ts";
 import { SphericalCoordinates } from "schemas/coordinates";
-import { SampleResult } from "schemas/sampleSchemas";
+import {Sample, SampleList, sampleListSchema, SampleResult} from "schemas/sampleSchemas";
 import LoadingSpinner from "../../components/LoadingSpinner.tsx";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { fireAlert } from "components/AlertDialogs.tsx";
@@ -29,6 +29,8 @@ const ExperimentPage = () => {
   const audioList: string[] =
     data?.sample_ids.map((sampleId) => getAudioPath(sampleId)) ?? [];
 
+  const [sampleCoordinatesList, setSampleCoordinatesList] = useState<SphericalCoordinates[]>([]);
+
   const playerRef = useRef<Howl | undefined>();
 
   const [currentStep, setCurrentStep] = useState<"start" | number | "end">(
@@ -38,9 +40,10 @@ const ExperimentPage = () => {
 
   // Current location selection, selected by the user
   const [selection, setSelection] = useState<SphericalCoordinates | null>(null);
-
   // Current location highlight, shows correct answer if applicable
   const [highlight, setHighlight] = useState<SphericalCoordinates | null>(null);
+
+  const [trainingMode, setTrainingMode] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof currentStep === "number") {
@@ -48,12 +51,32 @@ const ExperimentPage = () => {
       playerRef.current = new Howl({
         src: [audioList[currentStep]],
         format: ["mp3"],
-        volume: 0.5,
+        volume: 1.0,
         loop: false,
         autoplay: true
       });
     }
   }, [currentStep]);
+
+  useEffect(() => {
+    if (!data)
+      return
+
+    const fetchAllSamplesOfTheWorld = async () => {
+      const rawResponse = await fetch(`${VITE_BASE_API_URL}/audio/all`)
+      const responseData = await rawResponse.json()
+      const allSamplesOfTheWorld: SampleList = sampleListSchema.parse(responseData)
+      setSampleCoordinatesList(data.sample_ids.map((sampleId) => {
+        const sample: Sample | undefined = allSamplesOfTheWorld.find((sample) => sample.id.id.String === sampleId)
+        if (!sample)
+          return { azimuth: 0, elevation: 0 };
+        const coords: SphericalCoordinates = { azimuth: sample.azimuth, elevation: sample.elevation }
+        return coords
+      }));
+    }
+
+    fetchAllSamplesOfTheWorld();
+  }, [data]);
 
   const saveResult = () => {
     results.current = [
@@ -70,9 +93,14 @@ const ExperimentPage = () => {
     playerRef.current?.stop();
     saveResult();
     setSelection(null);
+    setHighlight(null);
     if (currentStep === audioList.length - 1) setCurrentStep("end");
     else setCurrentStep((currentStep as number) + 1);
   };
+
+  const showHighlight = () => {
+    setHighlight(sampleCoordinatesList[currentStep as number])
+  }
 
   if (isLoading || data == null) {
     return <p>Data is loading...</p>;
@@ -90,7 +118,10 @@ const ExperimentPage = () => {
     return (
       <StartInfo
         experimentName={data.name}
-        onStart={() => setCurrentStep(0)}
+        onStart={(isTrainingMode: boolean) => {
+          setTrainingMode(isTrainingMode);
+          setCurrentStep(0);
+        }}
         readyToStart={audioList.length > 0}
       />
     );
@@ -124,12 +155,19 @@ const ExperimentPage = () => {
               <br />
               Elevation: {selection.elevation}
             </p>
+            {trainingMode && !highlight ? <ButtonSecondary
+              className="pointer-events-auto mt-sm"
+              onClick={() => showHighlight()}
+            >
+              Verify
+            </ButtonSecondary>
+              :
             <ButtonSecondary
               className="pointer-events-auto mt-sm"
               onClick={() => nextSample()}
             >
               Next
-            </ButtonSecondary>
+            </ButtonSecondary>}
           </FrostedGlass>
         </div>
       )}
@@ -167,7 +205,7 @@ const StartInfo = ({
   readyToStart
 }: {
   experimentName: string;
-  onStart: () => void;
+  onStart: (isTrainingMode: boolean) => void;
   readyToStart: boolean;
 }) => {
   return (
@@ -183,11 +221,14 @@ const StartInfo = ({
           pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
           culpa qui officia deserunt mollit anim id est laborum.
         </div>
-        {readyToStart ? (
-          <ButtonPrimary onClick={() => onStart()} disabled={!readyToStart}>
+        {readyToStart ? <div className="flex gap-xl">
+          <ButtonPrimary onClick={() => onStart(true)} disabled={!readyToStart}>
+            Training mode
+          </ButtonPrimary>
+          <ButtonPrimary onClick={() => {onStart(false)}} disabled={!readyToStart}>
             Start experiment
           </ButtonPrimary>
-        ) : (
+        </div> : (
           <LoadingSpinner />
         )}
       </FrostedGlass>

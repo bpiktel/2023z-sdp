@@ -32,12 +32,14 @@ const TargetSphere = ({
   position,
   onClick,
   active,
-  highlight
+  highlight,
+  isHoverDisabled
 }: {
   position: Vector3;
   onClick: () => void;
   active?: boolean;
   highlight?: boolean;
+  isHoverDisabled?: boolean;
 }): JSX.Element => {
   const [hovered, setHover] = useState(false);
 
@@ -56,7 +58,7 @@ const TargetSphere = ({
         onClick();
       }}
       onPointerOver={() => {
-        setHover(true);
+        !isHoverDisabled && setHover(true);
       }}
       onPointerOut={() => {
         setHover(false);
@@ -77,8 +79,8 @@ const StageContent = ({
   setSelection: (selection: SphericalCoordinates) => void;
   highlight: SphericalCoordinates | null;
 }): JSX.Element => {
-  const DIVISIONS_AZIMUTH = 12;
-  const DIVISIONS_ELEVATION = 8;
+  const DIVISIONS_AZIMUTH = 24;
+  const DIVISIONS_ELEVATION = 12;
   const RADIUS = 10;
   const azimuthAngles = Array.from(
     { length: DIVISIONS_AZIMUTH },
@@ -119,7 +121,7 @@ const StageContent = ({
               key={`theta:${theta}-phi:${phi}`}
               position={sphericalToCartesian(RADIUS, theta + 90, phi)} // rotate theta 90 degrees to match viewing angle
               onClick={() => {
-                setSelection({ azimuth: theta, elevation: phi });
+                !highlight && setSelection({ azimuth: theta, elevation: phi });
               }}
               active={
                 selection?.azimuth === theta && selection?.elevation === phi
@@ -127,6 +129,7 @@ const StageContent = ({
               highlight={
                 highlight?.azimuth === theta && highlight?.elevation === phi
               }
+              isHoverDisabled={!!highlight}
             />
           );
         })
