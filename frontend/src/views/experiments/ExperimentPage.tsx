@@ -9,7 +9,8 @@ import { getAudioPath } from "components/player/utils.ts";
 import { SphericalCoordinates } from "schemas/coordinates";
 import { SampleResult } from "schemas/sampleSchemas";
 import LoadingSpinner from "../../components/LoadingSpinner.tsx";
-import {FrostedGlass} from "../../components/FrostedGlass.tsx";
+import { FrostedGlass } from "../../components/FrostedGlass.tsx";
+import { fireAlert } from "components/AlertDialogs.tsx";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -25,7 +26,8 @@ const ExperimentPage = () => {
     queryFn: getExperiment
   });
 
-  const audioList: string[] = data?.sample_ids.map((sampleId) => getAudioPath(sampleId)) ?? [];
+  const audioList: string[] =
+    data?.sample_ids.map((sampleId) => getAudioPath(sampleId)) ?? [];
 
   const playerRef = useRef<Howl | undefined>();
 
@@ -41,15 +43,15 @@ const ExperimentPage = () => {
   const [highlight, setHighlight] = useState<SphericalCoordinates | null>(null);
 
   useEffect(() => {
-    if (typeof(currentStep) === 'number') {
-      playerRef.current?.stop()
+    if (typeof currentStep === "number") {
+      playerRef.current?.stop();
       playerRef.current = new Howl({
         src: [audioList[currentStep]],
         format: ["mp3"],
         volume: 0.5,
         loop: false,
-        autoplay: true,
-      })
+        autoplay: true
+      });
     }
   }, [currentStep]);
 
@@ -65,7 +67,7 @@ const ExperimentPage = () => {
   };
 
   const nextSample = () => {
-    playerRef.current?.stop()
+    playerRef.current?.stop();
     saveResult();
     setSelection(null);
     if (currentStep === audioList.length - 1) setCurrentStep("end");
@@ -86,10 +88,15 @@ const ExperimentPage = () => {
 
   if (currentStep === "start")
     return (
-      <StartInfo experimentName={data.name} onStart={() => setCurrentStep(0)} readyToStart={audioList.length > 0} />
+      <StartInfo
+        experimentName={data.name}
+        onStart={() => setCurrentStep(0)}
+        readyToStart={audioList.length > 0}
+      />
     );
 
-  if (currentStep === "end") return <FinishInfo />;
+  if (currentStep === "end")
+    return <FinishInfo experimentId={id} results={results.current} />;
 
   return (
     <div className="w-screen h-screen flex flex-col items-center relative">
@@ -107,7 +114,10 @@ const ExperimentPage = () => {
       />
       {selection !== null && (
         <div className="absolute w-full h-full flex pointer-events-none">
-          <FrostedGlass theme="dark" className="flex flex-col mt-auto ml-auto rounded-lg py-sm px-lg me-md mb-md">
+          <FrostedGlass
+            theme="dark"
+            className="flex flex-col mt-auto ml-auto rounded-lg py-sm px-lg me-md mb-md"
+          >
             <p className="text-black font-semibold">
               Selected: <br />
               Azimuth: {selection.azimuth}
@@ -166,35 +176,82 @@ const StartInfo = ({
         <h1>You are about to start {experimentName}</h1>
         <div className="max-w-[64rem]">
           You will hear ... Lorem ipsum dolor sit amet, consectetur adipiscing
-          elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
-          ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-          qui officia deserunt mollit anim id est laborum.
+          elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+          aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+          laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
+          in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+          culpa qui officia deserunt mollit anim id est laborum.
         </div>
-        {readyToStart ?
+        {readyToStart ? (
           <ButtonPrimary onClick={() => onStart()} disabled={!readyToStart}>
             Start experiment
           </ButtonPrimary>
-          :
+        ) : (
           <LoadingSpinner />
-        }
+        )}
       </FrostedGlass>
     </div>
   );
 };
 
-const FinishInfo = () => {
+const createResult = async (
+  experimentId: string,
+  results: SampleResult[],
+  callback: (success: boolean) => void
+): Promise<void> => {
+  const { VITE_BASE_API_URL } = import.meta.env;
+
+  const response = await fetch(
+    `${VITE_BASE_API_URL}/experiments/results/${experimentId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ sample_results: results }),
+      credentials: "include"
+    }
+  );
+
+  if (response.ok) {
+    callback(true);
+    return;
+  }
+
+  callback(false);
+};
+
+const FinishInfo = ({
+  experimentId,
+  results
+}: {
+  experimentId: string;
+  results: SampleResult[];
+}) => {
+  const [resultSent, setResultSent] = useState<boolean>(false);
+
+  const onResultsSave = () => {
+    createResult(experimentId, results, (success) => {
+      if (success) {
+        fireAlert({ title: "Results saved" });
+        setResultSent(true);
+      }
+    });
+  };
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
       <FrostedGlass className="flex flex-col items-center justify-center mx-xxl gap-xl">
         <h1>You have finished the experiment</h1>
         <div className="max-w-[64rem]">
-          You will hear ... Lorem ipsum dolor sit amet, consectetur adipiscing
-          elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          Thank you for participating in this experiment.
         </div>
-        <ButtonPrimary>Save results</ButtonPrimary>
+        {resultSent ? (
+          <></>
+        ) : (
+          <ButtonPrimary onClick={onResultsSave}>Save results</ButtonPrimary>
+        )}
       </FrostedGlass>
     </div>
   );
