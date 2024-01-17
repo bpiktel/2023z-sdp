@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { useParams, Link } from "@tanstack/react-router";
 import { Howl } from "howler";
 import { Stage } from "components/Stage";
 import { experimentSchema } from "schemas/experimentSchemas";
@@ -12,6 +12,7 @@ import LoadingSpinner from "../../components/LoadingSpinner.tsx";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { fireAlert } from "components/AlertDialogs.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
+import {FaArrowLeft} from "react-icons/fa";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -287,7 +288,7 @@ const FinishInfo = ({
           Thank you for participating in this experiment.
         </div>
         {resultSent ? (
-          <></>
+          <Link className="flex gap-xs py-xs" to="/experiments"><FaArrowLeft /> Return to Experiments</Link>
         ) : (
           <ButtonPrimary onClick={onResultsSave}>Save results</ButtonPrimary>
         )}
