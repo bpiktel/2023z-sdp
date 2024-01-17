@@ -3,7 +3,7 @@ import { fireAlert } from "components/AlertDialogs";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ButtonSecondary } from "components/Buttons";
-import {FrostedGlass} from "../../components/FrostedGlass.tsx";
+import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 
 const createSample = async (
   name: string,
@@ -46,7 +46,7 @@ const CreateSamplePage = () => {
     if (success) {
       fireAlert({ title: "Sample added" });
       navigate({ to: "/samples" });
-    } else fireAlert({ title: "Failed to create experiment" });
+    } else fireAlert({ title: "Sample name taken" });
   };
 
   const handleCreate = async () => {
@@ -92,9 +92,9 @@ const CreateSamplePage = () => {
                   className="flex-1 px-2 py-1"
                   type="number"
                   defaultValue={0}
-                  min ="0"
-                  max = "345"
-                  step = "15"
+                  min="0"
+                  max="345"
+                  step="15"
                   placeholder="azimuth..."
                   onChange={(e) => setAzimuth(+e.target.value)}
                 />
@@ -109,9 +109,9 @@ const CreateSamplePage = () => {
                   className="flex-1 px-2 py-1"
                   type="number"
                   defaultValue={0}
-                  min = "-90"
-                  max = "90"
-                  step = "15"
+                  min="-90"
+                  max="90"
+                  step="15"
                   placeholder="elevation..."
                   onChange={(e) => setElevation(+e.target.value)}
                 />

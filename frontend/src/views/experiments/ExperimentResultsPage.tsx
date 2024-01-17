@@ -9,16 +9,21 @@ import {
   sampleListSchema
 } from "schemas/sampleSchemas.ts";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
+import { ButtonSecondary } from "components/Buttons.tsx";
 
 const combineResultsWithSample = (
   results: SampleResult[],
   samples: Sample[]
 ) => {
   return results.map((result) => {
+    const matchingSample = samples.find(
+      (sample) => sample.id.id.String === result.sample_id
+    );
     return {
       ...result,
-      name: samples.find((sample) => sample.id.id.String === result.sample_id)
-        ?.name
+      name: matchingSample?.name,
+      sAzimuth: matchingSample?.azimuth,
+      sElevation: matchingSample?.elevation
     };
   });
 };
@@ -52,7 +57,41 @@ const ExperimentResultsPage = () => {
     queryFn: getSamples
   });
 
-  console.log(data);
+  const downloadResults = () => {
+    const combinedData = data?.map((result) =>
+      combineResultsWithSample(result.sample_results, samplesData!)
+    );
+
+    if (!combinedData) return;
+
+    const headers = [
+      "index",
+      "sample_name",
+      "sample_azimuth",
+      "sample_elevation",
+      "answer_azimuth",
+      "answer_elevation"
+    ];
+
+    let resultString = "";
+
+    resultString += headers.join(";") + "\n";
+
+    combinedData.forEach((result, idx) => {
+      result.forEach((sampleResult) => {
+        resultString += `${idx};${sampleResult.sample_id};${sampleResult.name};${sampleResult.sAzimuth};${sampleResult.sElevation};${sampleResult.azimuth};${sampleResult.elevation}\n`;
+      });
+    });
+
+    const blob = new Blob([resultString], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.download = `experiment_results.txt`;
+    link.href = url;
+
+    link.click();
+  };
 
   if (isLoading || isFetching || samplesLoading || samplesFetching) {
     return <p>Data is loading...</p>;
@@ -62,50 +101,46 @@ const ExperimentResultsPage = () => {
     return <p>There was an error when fetching your data.</p>;
   }
 
-  console.log("data");
-  console.log(data);
-  console.log(samplesData);
-  console.log("===========");
-
-  console.log(samplesData);
-  console.log(combineResultsWithSample(data![0].sample_results, samplesData!));
-
   return (
-    <div className="flex flex-col items-center p-xl">
+    <div className="flex flex-col items-center p-xl max-h-screen">
       <div className="w-full flex justify-between mb-md">
         <Link to="../../" className="flex gap-xs items-center">
           <FaArrowLeft /> Return to experiments page
         </Link>
       </div>
-      <FrostedGlass className="flex flex-col items-center">
+      <FrostedGlass className="flex flex-col items-center min-w-[36rem] h-full">
         <h1>Results</h1>
-        <div className="mt-md flex flex-col gap-sm items-center w-full">
+        <div className="mt-md grid grid-cols-2 gap-sm items-center w-full overflow-y-auto">
           {data?.map((result, idx) => (
             <div
               key={`result_${idx}`}
-              className="flex gap-sm items-center w-full border-b border-white/40 pb-sm"
+              className="flex gap-sm items-center justify-center w-full border-b border-white/40 pb-sm"
             >
-              <div>{idx + 1}</div>
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-xs">
                 {combineResultsWithSample(
                   result.sample_results,
                   samplesData!
                 ).map((sampleResult, sIdx) => (
                   <div
                     key={`sample_result_${sIdx}`}
-                    className="flex gap-sm items-center w-full"
+                    className="flex gap-md items-center justify-between text-center w-full"
                   >
                     <div>{sampleResult.name}</div>
                     <div>
-                      Azimuth: {sampleResult.azimuth}
+                      A: {sampleResult.azimuth}
                       <br />
-                      Elevation: {sampleResult.elevation}
+                      E: {sampleResult.elevation}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           ))}
+        </div>
+        <div className="mt-lg">
+          <ButtonSecondary onClick={downloadResults}>
+            Download results
+          </ButtonSecondary>
         </div>
       </FrostedGlass>
     </div>
