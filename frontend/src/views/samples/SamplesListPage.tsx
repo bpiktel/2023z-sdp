@@ -61,10 +61,6 @@ const SamplesListPage = () => {
               />
               <p>Azimuth: {sample.azimuth}</p>
               <p>Elevation: {sample.elevation}</p>
-              <p>
-                URL: {VITE_BASE_API_URL}/audio/{sample.id.id.String}
-              </p>
-
             </li>
           ))}
         </ul>
