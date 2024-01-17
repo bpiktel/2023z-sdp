@@ -1,6 +1,7 @@
 mod routing;
 mod services;
 
+use axum::extract::DefaultBodyLimit;
 use routing::main_route;
 use services::{
     database::{
@@ -9,7 +10,6 @@ use services::{
     },
     runner::run,
 };
-use tower_http::limit::RequestBodyLimitLayer;
 
 use crate::services::{app::AppState, config::setup_config, tracing::setup_tracing};
 
@@ -43,7 +43,7 @@ async fn main() {
     run(
         config.app.url,
         main_route(&config)
-            .layer(RequestBodyLimitLayer::new(REQUEST_SIZE_LIMIT))
+            .layer(DefaultBodyLimit::max(REQUEST_SIZE_LIMIT))
             .with_state(state),
     )
     .await;
