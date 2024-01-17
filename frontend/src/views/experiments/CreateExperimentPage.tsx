@@ -6,7 +6,7 @@ import { useState } from "react";
 import { FaArrowLeft, FaMinus, FaPlus } from "react-icons/fa";
 import { Sample, sampleListSchema } from "schemas/sampleSchemas";
 import SamplePreviewWidget from "views/samples/SamplePreviewWidget";
-import {FrostedGlass} from "../../components/FrostedGlass.tsx";
+import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const createExperiment = async (
@@ -82,7 +82,7 @@ const CreateExperimentPage = () => {
           addSample={addSample}
           removeSample={removeSample}
         />
-        <div>
+        <div className="w-full flex flex-col">
           <ButtonSecondary
             onClick={handleCreate}
             disabled={sampleIds.length === 0 || name.length === 0}
@@ -98,7 +98,7 @@ const CreateExperimentPage = () => {
 const AudioSelector = ({
   selectedSampleIds,
   addSample,
-  removeSample
+  removeSample,
 }: {
   selectedSampleIds: string[];
   addSample: (id: string) => void;
@@ -113,7 +113,7 @@ const AudioSelector = ({
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["samples"],
-    queryFn: getSamples
+    queryFn: getSamples,
   });
 
   if (isLoading || data == null) {

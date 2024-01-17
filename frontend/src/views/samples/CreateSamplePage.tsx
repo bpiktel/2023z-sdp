@@ -23,7 +23,7 @@ const createSample = async (
     // headers: {"Content-Type": "multipart/form-data"}, #Fun fact. By setting "Content-Type" to "multipart/form-data"
     // you also have to define "boundary" (which postman does on it own), BUT IF YOU SIMPLY DO NOT DEFINE CONTENT-TYPE THE WEB BROWSER WILL DO IT ALL FOR YOU.
     body: formData,
-    credentials: "include"
+    credentials: "include",
   });
 
   if (response.ok) {
@@ -82,7 +82,7 @@ const CreateSamplePage = () => {
               </td>
               <td>
                 <input
-                  className="flex-1 px-2 py-1"
+                  className="w-full flex-1 px-2 py-1"
                   type="string"
                   placeholder="name..."
                   onChange={(e) => setName(e.target.value)}
@@ -93,15 +93,15 @@ const CreateSamplePage = () => {
               <td className="pr-md py-xs">
                 <p className="text-right">Azimuth</p>
               </td>
-              <td>
+              <td className="text-left">
                 <input
-                  className="flex-1 px-2 py-1"
+                  className="flex-1 pl-2 p-1 min-w-24"
                   type="number"
                   defaultValue={0}
                   min="0"
                   max="345"
                   step="15"
-                  placeholder="azimuth..."
+                  placeholder="azimuth"
                   onChange={(e) => handleDegrees(+e.target.value, setAzimuth)}
                 />
               </td>
@@ -110,15 +110,15 @@ const CreateSamplePage = () => {
               <td className="pr-md py-xs">
                 <p className="text-right">Elevation</p>
               </td>
-              <td>
+              <td className="text-left">
                 <input
-                  className="flex-1 px-2 py-1"
+                  className="flex-1 pl-2 p-1 min-w-24"
                   type="number"
                   defaultValue={0}
                   min="-90"
                   max="90"
                   step="15"
-                  placeholder="elevation..."
+                  placeholder="elevation"
                   onChange={(e) => handleDegrees(+e.target.value, setElevation)}
                 />
               </td>

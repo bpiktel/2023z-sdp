@@ -9,7 +9,7 @@ const SamplePlayer = ({
   playerRef,
   className,
   status,
-  setStatus
+  setStatus,
 }: {
   assetPath: string;
   name: string;
@@ -19,8 +19,7 @@ const SamplePlayer = ({
   setStatus: React.Dispatch<React.SetStateAction<string | null>>;
 }): JSX.Element => {
   const setNewStatus = (newStatus: string | null) => {
-    if (newStatus === status)
-      return
+    if (newStatus === status) return;
 
     if (status === name && newStatus === null) {
       playerRef.current?.stop();
@@ -30,21 +29,19 @@ const SamplePlayer = ({
     if (newStatus !== null) {
       playerRef.current?.stop();
       playerRef.current = new Howl({
-          src: [assetPath],
-          volume: 1,
-          loop: false,
-          html5: true,
-          autoplay: true,
-          format: ['mp3']
-        }
-      );
+        src: [assetPath],
+        volume: 1,
+        loop: false,
+        html5: true,
+        autoplay: true,
+        format: ["mp3"],
+      });
       setStatus(newStatus);
     }
-  }
-
+  };
 
   return (
-    <div className={`flex flex-col items-center min-w-[16rem] ${className}`}>
+    <div className={`flex flex-col items-center ${className}`}>
       <div className="text-md font-semibold">{name}</div>
       <div className="flex gap-sm mt-xs justify-center">
         <PlayButton

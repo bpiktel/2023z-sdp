@@ -5,7 +5,7 @@ import { ButtonSecondary } from "components/Buttons";
 import { FaTrash, FaArrowLeft, FaPlus, FaFile } from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
-import { defaultRequestInit } from 'utils/fetchUtils.ts';
+import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const deleteExperiment = async (id: string, callback: () => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -36,13 +36,13 @@ const ExperimentsListPage = () => {
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["experiments"],
-    queryFn: getExperiments
+    queryFn: getExperiments,
   });
 
   const onDelete = async (id: string) => {
     await fireConfirmationModal({
       title: "Delete experiment",
-      body: "Are you sure you want to delete this experiment?"
+      body: "Are you sure you want to delete this experiment?",
     }).then((result) => {
       if (result.isConfirmed) {
         deleteExperiment(id, () => {
@@ -114,7 +114,7 @@ const ExperimentsListPage = () => {
             </div>
           ))}
         </div>
-        <Link to="/experiments/create" className="mt-lg">
+        <Link to="/experiments/create" className="mt-lg w-full flex flex-col">
           <ButtonSecondary>Create new experiment</ButtonSecondary>
         </Link>
       </FrostedGlass>
