@@ -1,9 +1,10 @@
 import { useNavigate, Link } from "@tanstack/react-router";
 import { fireAlert } from "components/AlertDialogs";
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ButtonSecondary } from "components/Buttons";
 import {FrostedGlass} from "../../components/FrostedGlass.tsx";
+import { degrees, int } from "three/examples/jsm/nodes/Nodes.js";
 
 const createSample = async (
   name: string,
@@ -47,6 +48,14 @@ const CreateSamplePage = () => {
       fireAlert({ title: "Sample added" });
       navigate({ to: "/samples" });
     } else fireAlert({ title: "Failed to create experiment" });
+  };
+
+  const handle_degrees = (degrees:number, set:any) => {
+    let rest = degrees%15;
+    if (rest < 8) 
+      set(degrees - rest);
+    else
+      set(degrees + 15 - rest);
   };
 
   const handleCreate = async () => {
@@ -96,7 +105,7 @@ const CreateSamplePage = () => {
                   max = "345"
                   step = "15"
                   placeholder="azimuth..."
-                  onChange={(e) => setAzimuth(+e.target.value)}
+                  onChange={(e) => handle_degrees(Number(e.target.value), setAzimuth)}
                 />
               </td>
             </tr>
@@ -113,7 +122,7 @@ const CreateSamplePage = () => {
                   max = "90"
                   step = "15"
                   placeholder="elevation..."
-                  onChange={(e) => setElevation(+e.target.value)}
+                  onChange={(e) => handle_degrees(Number(e.target.value), setElevation)}
                 />
               </td>
             </tr>
