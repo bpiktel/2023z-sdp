@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  sound-localization-tester-database:
+    container_name: sound-localization-tester-database
+    build: .
+    ports:
+      - 8000:8000
+    volumes:
+      - surrealdb_volume:/data
+
+volumes:
+  surrealdb_volume:
