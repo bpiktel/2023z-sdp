@@ -73,7 +73,6 @@ async fn delete_experiment(
 /// List all existing experiments.
 async fn list_experiments(
     repo: ExperimentRepository,
-    _: Claims,
 ) -> ResponseType<Json<Vec<WithId<Experiment>>>> {
     let Ok(result) = repo
         .infos()
@@ -91,7 +90,6 @@ async fn list_experiments(
 async fn get_experiment(
     repo: ExperimentRepository,
     Path(id): Path<String>,
-    _: Claims,
 ) -> ResponseType<Json<WithId<Experiment>>> {
     let Ok(result) = repo
         .info(id)
