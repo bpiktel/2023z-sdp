@@ -1,6 +1,7 @@
 import { useNavigate, Link } from "@tanstack/react-router";
 import { fireAlert } from "components/AlertDialogs";
 import { useState } from "react";
+import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ButtonSecondary } from "components/Buttons";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
@@ -50,7 +51,7 @@ const CreateSamplePage = () => {
     } else fireAlert({ title: "Sample name taken" });
   };
 
-  const handleDegrees = (degrees: number, set: any) => {
+  const handleDegrees = (degrees: number, set: (n: number) => void) => {
     const rest = degrees % 15;
     if (rest < 8) set(degrees - rest);
     else set(degrees + 15 - rest);
