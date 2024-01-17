@@ -1,16 +1,13 @@
 version: '3'
 
 services:
-  surrealdb:
-    image: surrealdb/surrealdb:1.0.0
-    environment:
-      SURREAL_AUTH: false
-      SURREAL_STRICT: false
-      SURREAL_NO_BANNER: true
-      SURREAL_LOG: info
-      SURREAL_PATH: file://data
-    entrypoint: /surreal start
+  sound-localization-tester-database:
+    container_name: sound-localization-tester-database
+    build: .
     ports:
       - 8000:8000
     volumes:
-      - ./surreal:/data
+      - surrealdb_volume:/data
+
+volumes:
+  surrealdb_volume:

@@ -1,8 +1,20 @@
 version: '3.9'
 
 services:
-  sound-localization-tester:
+  sound-localization-tester-backend-frontend:
     container_name: sound-localization-tester
     build: .
+    environment:
+      surreal_db__address: ws://surrealdb:8000
     ports:
       - 3000:3000
+
+  sound-localization-tester-database:
+    container_name: sound-localization-tester-database
+    hostname: surrealdb
+    build: backend/src/services/database
+    volumes:
+      - surrealdb_volume:/data
+
+volumes:
+  surrealdb_volume:

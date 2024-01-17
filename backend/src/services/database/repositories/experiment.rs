@@ -98,7 +98,7 @@ impl ExperimentRepository {
     ) -> RepoResult<Vec<WithId<ExperimentResult>>> {
         let mut result = self
             .surreal
-            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id",)
+            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id")
             .bind(("experiment_id", experiment_id))
             .await?;
         let results = result.take::<Vec<WithId<ExperimentResult>>>(0)?;
