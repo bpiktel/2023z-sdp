@@ -6,6 +6,7 @@ import { FaTrash, FaArrowLeft, FaPlus, FaFile } from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
+import { useAuth } from "../../auth.ts";
 
 const deleteExperiment = async (id: string, callback: () => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -26,7 +27,7 @@ const deleteExperiment = async (id: string, callback: () => void) => {
 
 const ExperimentsListPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
-
+  const { authenticated } = useAuth();
   const queryClient = useQueryClient();
 
   const getExperiments = () =>
@@ -70,9 +71,11 @@ const ExperimentsListPage = () => {
         <Link to="../" className="flex gap-xs items-center">
           <FaArrowLeft /> Return to Home Page
         </Link>
-        <Link to="/experiments/create" className="flex gap-xs items-center">
-          <FaPlus /> Create new experiment
-        </Link>
+        {authenticated && (
+          <Link to="/experiments/create" className="flex gap-xs items-center">
+            <FaPlus /> Create new experiment
+          </Link>
+        )}
       </div>
       <FrostedGlass className="flex flex-col items-center">
         <h1>Experiments</h1>
@@ -97,10 +100,12 @@ const ExperimentsListPage = () => {
                 {/*>*/}
                 {/*  <FaEdit className="size-md"/>*/}
                 {/*</Link>*/}
-                <FaTrash
-                  className="size-md text-red-500 cursor-pointer"
-                  onClick={() => onDelete(experiment.id.id.String)}
-                />
+                {authenticated && (
+                  <FaTrash
+                    className="size-md text-red-500 cursor-pointer"
+                    onClick={() => onDelete(experiment.id.id.String)}
+                  />
+                )}
                 <Link
                   to={`/experiments/$id/results`}
                   params={{ id: experiment.id.id.String }}
@@ -114,9 +119,11 @@ const ExperimentsListPage = () => {
             </div>
           ))}
         </div>
-        <Link to="/experiments/create" className="mt-lg w-full flex flex-col">
-          <ButtonSecondary>Create new experiment</ButtonSecondary>
-        </Link>
+        {authenticated && (
+          <Link to="/experiments/create" className="mt-lg w-full flex flex-col">
+            <ButtonSecondary>Create new experiment</ButtonSecondary>
+          </Link>
+        )}
       </FrostedGlass>
     </div>
   );

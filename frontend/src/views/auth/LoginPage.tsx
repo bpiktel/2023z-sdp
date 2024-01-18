@@ -3,24 +3,7 @@ import { useAuth } from "auth";
 import { useState } from "react";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { FaArrowLeft } from "react-icons/fa";
-import { defaultRequestInit } from "utils/fetchUtils.ts";
-
-const signIn = async (
-  username: string,
-  password: string,
-  setAuth: (auth: boolean) => void
-): Promise<void> => {
-  const { VITE_BASE_API_URL } = import.meta.env;
-
-  const response = await fetch(`${VITE_BASE_API_URL}/auth/login`, {
-    ...defaultRequestInit,
-    method: "POST",
-    body: JSON.stringify({ username, password }),
-  });
-  setAuth(response.ok);
-
-  if (!response.ok) throw new Error("Failed on sign up request");
-};
+import { signIn } from "../../utils/authUtils.ts";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");

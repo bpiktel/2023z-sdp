@@ -1,16 +1,33 @@
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "auth";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaDoorOpen } from "react-icons/fa";
+import { signOut } from "../../utils/authUtils.ts";
+import { ButtonSecondary } from "../../components/Buttons.tsx";
 
 const HomePage = () => {
-  const { authenticated } = useAuth();
+  const { authenticated, setAuthenticated } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(setAuthenticated);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="flex w-full flex-col items-center p-xl">
       <div className="ml-auto mb-md">
         {authenticated ? (
-          <div>You are authenticated</div>
+          <div className="flex flex-row items-center gap-sm">
+            You are authenticated
+            <ButtonSecondary onClick={handleSignOut}>
+              <div className="flex gap-xs">
+                Logout <FaDoorOpen />
+              </div>
+            </ButtonSecondary>
+          </div>
         ) : (
           <div>
             You are not authenticated
@@ -29,9 +46,11 @@ const HomePage = () => {
           <Link className="flex gap-xs py-xs" to="/experiments">
             Go to experiments <FaArrowRight />
           </Link>
-          <Link className="flex gap-xs py-xs" to="/samples">
-            Go to samples <FaArrowRight />
-          </Link>
+          {authenticated && (
+            <Link className="flex gap-xs py-xs" to="/samples">
+              Go to samples <FaArrowRight />
+            </Link>
+          )}
         </div>
       </FrostedGlass>
     </div>
