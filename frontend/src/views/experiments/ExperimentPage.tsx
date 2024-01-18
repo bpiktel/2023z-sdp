@@ -7,12 +7,17 @@ import { useEffect, useRef, useState } from "react";
 import { ButtonPrimary, ButtonSecondary } from "components/Buttons.tsx";
 import { getAudioPath } from "components/player/utils.ts";
 import { SphericalCoordinates } from "schemas/coordinates";
-import {Sample, SampleList, sampleListSchema, SampleResult} from "schemas/sampleSchemas";
+import {
+  Sample,
+  SampleList,
+  sampleListSchema,
+  SampleResult
+} from "schemas/sampleSchemas";
 import LoadingSpinner from "../../components/LoadingSpinner.tsx";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { fireAlert } from "components/AlertDialogs.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
-import {FaArrowLeft} from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -29,9 +34,13 @@ const ExperimentPage = () => {
   });
 
   const audioList: string[] =
-    data?.sample_ids.map((sampleId) => getAudioPath(sampleId)) ?? [];
+    data?.sample_ids
+      .map((sampleId) => getAudioPath(sampleId))
+      .sort(() => Math.random() - 0.5) ?? [];
 
-  const [sampleCoordinatesList, setSampleCoordinatesList] = useState<SphericalCoordinates[]>([]);
+  const [sampleCoordinatesList, setSampleCoordinatesList] = useState<
+    SphericalCoordinates[]
+  >([]);
 
   const playerRef = useRef<Howl | undefined>();
 
@@ -61,21 +70,30 @@ const ExperimentPage = () => {
   }, [currentStep]);
 
   useEffect(() => {
-    if (!data)
-      return
+    if (!data) return;
 
     const fetchAllSamplesOfTheWorld = async () => {
-      const rawResponse = await fetch(`${VITE_BASE_API_URL}/audio/all`, defaultRequestInit)
-      const responseData = await rawResponse.json()
-      const allSamplesOfTheWorld: SampleList = sampleListSchema.parse(responseData)
-      setSampleCoordinatesList(data.sample_ids.map((sampleId) => {
-        const sample: Sample | undefined = allSamplesOfTheWorld.find((sample) => sample.id.id.String === sampleId)
-        if (!sample)
-          return { azimuth: 0, elevation: 0 };
-        const coords: SphericalCoordinates = { azimuth: sample.azimuth, elevation: sample.elevation }
-        return coords
-      }));
-    }
+      const rawResponse = await fetch(
+        `${VITE_BASE_API_URL}/audio/all`,
+        defaultRequestInit
+      );
+      const responseData = await rawResponse.json();
+      const allSamplesOfTheWorld: SampleList =
+        sampleListSchema.parse(responseData);
+      setSampleCoordinatesList(
+        data.sample_ids.map((sampleId) => {
+          const sample: Sample | undefined = allSamplesOfTheWorld.find(
+            (sample) => sample.id.id.String === sampleId
+          );
+          if (!sample) return { azimuth: 0, elevation: 0 };
+          const coords: SphericalCoordinates = {
+            azimuth: sample.azimuth,
+            elevation: sample.elevation
+          };
+          return coords;
+        })
+      );
+    };
 
     fetchAllSamplesOfTheWorld();
   }, [data]);
@@ -101,8 +119,8 @@ const ExperimentPage = () => {
   };
 
   const showHighlight = () => {
-    setHighlight(sampleCoordinatesList[currentStep as number])
-  }
+    setHighlight(sampleCoordinatesList[currentStep as number]);
+  };
 
   if (isLoading || data == null) {
     return <p>Data is loading...</p>;
@@ -151,25 +169,27 @@ const ExperimentPage = () => {
             theme="dark"
             className="flex flex-col mt-auto ml-auto rounded-lg py-sm px-lg me-md mb-md"
           >
-            <p className="text-black font-semibold">
+            <p className="text-white font-semibold">
               Selected: <br />
               Azimuth: {selection.azimuth}
               <br />
               Elevation: {selection.elevation}
             </p>
-            {trainingMode && !highlight ? <ButtonSecondary
-              className="pointer-events-auto mt-sm"
-              onClick={() => showHighlight()}
-            >
-              Verify
-            </ButtonSecondary>
-              :
-            <ButtonSecondary
-              className="pointer-events-auto mt-sm"
-              onClick={() => nextSample()}
-            >
-              Next
-            </ButtonSecondary>}
+            {trainingMode && !highlight ? (
+              <ButtonSecondary
+                className="pointer-events-auto mt-sm"
+                onClick={() => showHighlight()}
+              >
+                Verify
+              </ButtonSecondary>
+            ) : (
+              <ButtonSecondary
+                className="pointer-events-auto mt-sm"
+                onClick={() => nextSample()}
+              >
+                Next
+              </ButtonSecondary>
+            )}
           </FrostedGlass>
         </div>
       )}
@@ -223,14 +243,24 @@ const StartInfo = ({
           pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
           culpa qui officia deserunt mollit anim id est laborum.
         </div>
-        {readyToStart ? <div className="flex gap-xl">
-          <ButtonPrimary onClick={() => onStart(true)} disabled={!readyToStart}>
-            Training mode
-          </ButtonPrimary>
-          <ButtonPrimary onClick={() => {onStart(false)}} disabled={!readyToStart}>
-            Start experiment
-          </ButtonPrimary>
-        </div> : (
+        {readyToStart ? (
+          <div className="flex gap-xl">
+            <ButtonPrimary
+              onClick={() => onStart(true)}
+              disabled={!readyToStart}
+            >
+              Training mode
+            </ButtonPrimary>
+            <ButtonPrimary
+              onClick={() => {
+                onStart(false);
+              }}
+              disabled={!readyToStart}
+            >
+              Start experiment
+            </ButtonPrimary>
+          </div>
+        ) : (
           <LoadingSpinner />
         )}
       </FrostedGlass>
@@ -250,7 +280,7 @@ const createResult = async (
     {
       ...defaultRequestInit,
       method: "POST",
-      body: JSON.stringify({ sample_results: results }),
+      body: JSON.stringify({ sample_results: results })
     }
   );
 
@@ -288,7 +318,9 @@ const FinishInfo = ({
           Thank you for participating in this experiment.
         </div>
         {resultSent ? (
-          <Link className="flex gap-xs py-xs" to="/experiments"><FaArrowLeft /> Return to Experiments</Link>
+          <Link className="flex gap-xs py-xs" to="/experiments">
+            <FaArrowLeft /> Return to Experiments
+          </Link>
         ) : (
           <ButtonPrimary onClick={onResultsSave}>Save results</ButtonPrimary>
         )}
