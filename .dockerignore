@@ -4,3 +4,6 @@
 
 # For tests
 **/tmp
+
+**/node_modules
+**/dist

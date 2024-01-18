@@ -1,5 +1,7 @@
+import { ReactNode } from "react";
+
 type frostedWithTheme = {
-  children: JSX.Element | JSX.Element[] | string;
+  children: ReactNode;
   className?: string;
   theme?: "light" | "dark" | "overlay";
 };

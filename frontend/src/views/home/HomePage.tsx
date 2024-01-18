@@ -1,21 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "auth";
-import {FrostedGlass} from "../../components/FrostedGlass.tsx";
-import {FaArrowRight} from "react-icons/fa";
-import { defaultRequestInit } from "utils/fetchUtils.ts";
-import { ButtonSecondary } from "components/Buttons.tsx";
-
-const signOut = async (
-  setAuth: (auth: boolean) => void
-): Promise<void> => {
-  const { VITE_BASE_API_URL } = import.meta.env;
-  const response = await fetch(`${VITE_BASE_API_URL}/auth/logout`, {
-    ...defaultRequestInit,
-    method: "POST",
-  });
-  setAuth(!response.ok);
-  if (!response.ok) throw new Error("Failed on sign up request");
-};
+import { FrostedGlass } from "../../components/FrostedGlass.tsx";
+import { FaArrowRight, FaDoorOpen } from "react-icons/fa";
+import { signOut } from "../../utils/authUtils.ts";
+import { ButtonSecondary } from "../../components/Buttons.tsx";
 
 const HomePage = () => {
   const { authenticated, setAuthenticated } = useAuth();
@@ -30,13 +18,14 @@ const HomePage = () => {
 
   return (
     <div className="flex w-full flex-col items-center p-xl">
-      <div className="ml-auto">
+      <div className="ml-auto mb-md">
         {authenticated ? (
-          <div style={{ textAlign: "right" }}>
-            <span>You are authenticated</span>
-            {' '}
+          <div className="flex flex-row items-center gap-sm">
+            You are authenticated
             <ButtonSecondary onClick={handleSignOut}>
-              Sign Out
+              <div className="flex gap-xs">
+                Logout <FaDoorOpen />
+              </div>
             </ButtonSecondary>
           </div>
         ) : (
@@ -51,9 +40,19 @@ const HomePage = () => {
       <FrostedGlass className="flex flex-col items-center p-xl">
         <h1 className="mb-s">Home</h1>
         <div className="flex flex-col items-center mt-md gap-xs">
-          <Link className="flex gap-xs py-xs" to="/login">Go to login <FaArrowRight /></Link>
-          <Link className="flex gap-xs py-xs" to="/experiments">Go to experiments <FaArrowRight /></Link>
-          <Link className="flex gap-xs py-xs" to="/samples">Go to samples <FaArrowRight /></Link>
+          {!authenticated && (
+            <Link className="flex gap-xs py-xs" to="/login">
+              Go to login <FaArrowRight />
+            </Link>
+          )}
+          <Link className="flex gap-xs py-xs" to="/experiments">
+            Go to experiments <FaArrowRight />
+          </Link>
+          {authenticated && (
+            <Link className="flex gap-xs py-xs" to="/samples">
+              Go to samples <FaArrowRight />
+            </Link>
+          )}
         </div>
       </FrostedGlass>
     </div>
