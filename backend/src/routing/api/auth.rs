@@ -12,13 +12,16 @@ use tracing::error;
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::services::{
-    auth::{
-        claims::{create_token, Claims, JWT_TOKEN_COOKIE},
-        AuthKeys,
+use crate::{
+    routing::MAIN_ROUTE_PATH,
+    services::{
+        auth::{
+            claims::{create_token, Claims, JWT_TOKEN_COOKIE},
+            AuthKeys,
+        },
+        database::{repositories::user::UserRepository, surreal::SurrealDb},
+        util::{ResponseType, ValidatedJson},
     },
-    database::{repositories::user::UserRepository, surreal::SurrealDb},
-    util::{ResponseType, ValidatedJson},
 };
 
 pub fn auth_router<T>() -> Router<T>
@@ -76,12 +79,12 @@ async fn login(
     let mut cookie = Cookie::new(JWT_TOKEN_COOKIE, token);
     cookie.set_http_only(true);
     cookie.set_expires(None);
-    cookie.set_path("/api/");
+    cookie.set_path(MAIN_ROUTE_PATH);
     ResponseType::Data(cookies.add(cookie))
 }
 
 async fn logout(jar: CookieJar) -> CookieJar {
-    jar.remove(Cookie::from(JWT_TOKEN_COOKIE))
+    jar.remove(Cookie::build(JWT_TOKEN_COOKIE).path(MAIN_ROUTE_PATH))
 }
 
 async fn status(claims: Claims) -> Json<Claims> {
