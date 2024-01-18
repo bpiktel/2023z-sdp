@@ -1,5 +1,12 @@
-FROM node:lts-bullseye-slim AS frontend-build
-# Tutaj trzeba zbudować frontend jako pliki statyczne
+FROM node:18-alpine AS frontend-build
+
+WORKDIR /app
+COPY ./frontend .
+RUN npm install
+
+COPY . .
+
+RUN npm run build
 
 FROM rust:1.71 AS backend-build
 RUN apt-get update && apt-get upgrade -y && apt-get install libclang-dev -y
@@ -15,7 +22,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry/index \
 FROM debian:bullseye-slim AS runtime
 WORKDIR /app/
 COPY --from=backend-build /app/backend /app/
-# Tutaj trzeba podać ścieżkę do tych plików, chodzi o folder z `index.html`
-# COPY --from=frontend-build <???> /app/static/
+COPY --from=frontend-build /app/dist/ /app/static/
 COPY --from=backend-build /app/config/ /app/config/
 ENTRYPOINT ["/app/backend"]
