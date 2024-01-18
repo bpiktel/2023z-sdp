@@ -40,9 +40,11 @@ const HomePage = () => {
       <FrostedGlass className="flex flex-col items-center p-xl">
         <h1 className="mb-s">Home</h1>
         <div className="flex flex-col items-center mt-md gap-xs">
-          <Link className="flex gap-xs py-xs" to="/login">
-            Go to login <FaArrowRight />
-          </Link>
+          {!authenticated && (
+            <Link className="flex gap-xs py-xs" to="/login">
+              Go to login <FaArrowRight />
+            </Link>
+          )}
           <Link className="flex gap-xs py-xs" to="/experiments">
             Go to experiments <FaArrowRight />
           </Link>
