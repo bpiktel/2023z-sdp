@@ -3,7 +3,6 @@ import Swal, { SweetAlertResult } from "sweetalert2";
 const swalCustomStyle = Swal.mixin({
   customClass: {
     popup: "rounded-none",
-    icon: "!border-none scale-[300%]",
     title: "h2 text-center text-black",
     htmlContainer: "h4 text-center text-black mt-sm mb-md",
     confirmButton:

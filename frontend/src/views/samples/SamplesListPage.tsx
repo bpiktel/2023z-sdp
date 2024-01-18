@@ -8,21 +8,22 @@ import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { useRef, useState } from "react";
 import { Howl } from "howler";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
-import { fireConfirmationModal } from "../../components/AlertDialogs.tsx";
+import {
+  fireAlert,
+  fireConfirmationModal
+} from "../../components/AlertDialogs.tsx";
 import { ButtonSecondary } from "../../components/Buttons.tsx";
 
-const deleteSample = async (id: string, callback: () => void) => {
+const deleteSample = async (id: string, callback: (arg0: boolean) => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
   try {
     const response = await fetch(`${VITE_BASE_API_URL}/audio/${id}`, {
       ...defaultRequestInit,
-      method: "DELETE",
+      method: "DELETE"
     });
 
-    if (response.ok) {
-      callback();
-    }
+    callback(response.ok);
   } catch (error) {
     console.error(error);
   }
@@ -41,16 +42,26 @@ const SamplesListPage = () => {
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["samples"],
-    queryFn: getSamples,
+    queryFn: getSamples
   });
 
   const onDelete = async (id: string) => {
     await fireConfirmationModal({
       title: "Delete sample",
-      body: "Are you sure you want to delete this sample?",
+      body: "Are you sure you want to delete this sample?"
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteSample(id, () => {
+        deleteSample(id, (success) => {
+          if (success)
+            fireAlert({
+              title: "Sample deleted successfully"
+            });
+          else
+            fireAlert({
+              title:
+                "Failed to delete sample, check if it's used in experiments"
+            });
+
           queryClient.invalidateQueries({ queryKey: ["samples"] });
         });
       }
