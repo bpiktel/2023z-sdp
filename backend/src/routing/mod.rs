@@ -14,6 +14,8 @@ use tracing::info;
 
 use self::{api::api_router, healthcheck::healthcheck_router, static_files::static_files_service};
 
+pub const MAIN_ROUTE_PATH: &'static str = "/api";
+
 pub fn main_route<T>(config: &Config) -> Router<T>
 where
     AuthKeys: FromRef<T>,
@@ -23,7 +25,7 @@ where
 {
     let mut router = Router::new()
         .merge(healthcheck_router())
-        .nest("/api", api_router())
+        .nest(MAIN_ROUTE_PATH, api_router())
         .fallback_service(static_files_service())
         .layer(TraceLayer::new_for_http());
 
