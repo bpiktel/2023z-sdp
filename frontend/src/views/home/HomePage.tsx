@@ -2,15 +2,43 @@ import { Link } from "@tanstack/react-router";
 import { useAuth } from "auth";
 import {FrostedGlass} from "../../components/FrostedGlass.tsx";
 import {FaArrowRight} from "react-icons/fa";
+import { defaultRequestInit } from "utils/fetchUtils.ts";
+import { ButtonSecondary } from "components/Buttons.tsx";
+
+const signOut = async (
+  setAuth: (auth: boolean) => void
+): Promise<void> => {
+  const { VITE_BASE_API_URL } = import.meta.env;
+  const response = await fetch(`${VITE_BASE_API_URL}/auth/logout`, {
+    ...defaultRequestInit,
+    method: "POST",
+  });
+  setAuth(!response.ok);
+  if (!response.ok) throw new Error("Failed on sign up request");
+};
 
 const HomePage = () => {
-  const { authenticated } = useAuth();
+  const { authenticated, setAuthenticated } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(setAuthenticated);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="flex w-full flex-col items-center p-xl">
       <div className="ml-auto">
         {authenticated ? (
-          <div>You are authenticated</div>
+          <div style={{ textAlign: "right" }}>
+            <span>You are authenticated</span>
+            {' '}
+            <ButtonSecondary onClick={handleSignOut}>
+              Sign Out
+            </ButtonSecondary>
+          </div>
         ) : (
           <div>
             You are not authenticated
