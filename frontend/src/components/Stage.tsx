@@ -1,6 +1,12 @@
 import { Box, OrbitControls, Torus, Text } from "@react-three/drei";
-import { Canvas, useFrame, useLoader, type Vector3 } from "@react-three/fiber";
-import { useRef, useState } from "react";
+import {
+  Canvas,
+  useFrame,
+  useLoader,
+  type Vector3,
+  useThree
+} from "@react-three/fiber";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Euler, type Mesh } from "three";
 import { OBJLoader } from "three/examples/jsm/Addons.js";
@@ -73,11 +79,13 @@ const TargetSphere = ({
 const StageContent = ({
   selection,
   setSelection,
-  highlight
+  highlight,
+  currentSample
 }: {
   selection: SphericalCoordinates | null;
   setSelection: (selection: SphericalCoordinates) => void;
   highlight: SphericalCoordinates | null;
+  currentSample: "start" | "end" | number;
 }): JSX.Element => {
   const DIVISIONS_AZIMUTH = 24;
   const DIVISIONS_ELEVATION = 12;
@@ -91,8 +99,13 @@ const StageContent = ({
     (_, i) => (i * 180) / DIVISIONS_ELEVATION - 90
   );
 
+  const three = useThree();
   const [clock] = useState(new THREE.Clock());
   const FPS_CAP = 30;
+
+  useEffect(() => {
+    three.camera.position.set(-2, 10, -15);
+  }, [currentSample]);
 
   useFrame(({ gl, scene, camera }) => {
     const timeUntilNextFrame = 1000 / FPS_CAP - clock.getDelta();
@@ -176,11 +189,13 @@ const StageContent = ({
 export const Stage = ({
   selection,
   setSelection,
-  highlight
+  highlight,
+  currentSample
 }: {
   selection: SphericalCoordinates | null;
   setSelection: (selection: SphericalCoordinates) => void;
   highlight: SphericalCoordinates | null;
+  currentSample: "start" | "end" | number;
 }): JSX.Element => {
   return (
     <div className="flex w-full h-full bg-black">
@@ -189,6 +204,7 @@ export const Stage = ({
           selection={selection}
           setSelection={setSelection}
           highlight={highlight}
+          currentSample={currentSample}
         />
       </Canvas>
     </div>

@@ -57,7 +57,7 @@ const ExperimentPage = () => {
   const [trainingMode, setTrainingMode] = useState<boolean>(false);
 
   useEffect(() => {
-    if (typeof currentStep === "number") {
+    if (typeof currentStep === "number" && currentStep >= 0) {
       playerRef.current?.stop();
       playerRef.current = new Howl({
         src: [audioList[currentStep]],
@@ -140,7 +140,7 @@ const ExperimentPage = () => {
         experimentName={data.name}
         onStart={(isTrainingMode: boolean) => {
           setTrainingMode(isTrainingMode);
-          setCurrentStep(0);
+          setCurrentStep(-1);
         }}
         readyToStart={audioList.length > 0}
       />
@@ -166,9 +166,20 @@ const ExperimentPage = () => {
       </div>
       <Stage
         selection={selection}
-        setSelection={setSelection}
+        setSelection={currentStep >= 0 ? setSelection : () => {}}
         highlight={highlight}
+        currentSample={currentStep}
       />
+      {currentStep === -1 && (
+        <div className="absolute w-full h-full flex pointer-events-none">
+          <ButtonSecondary
+            className="pointer-events-auto m-lg mt-auto ml-auto"
+            onClick={() => setCurrentStep(0)}
+          >
+            Start
+          </ButtonSecondary>
+        </div>
+      )}
       {selection !== null && (
         <div className="absolute w-full h-full flex pointer-events-none">
           <FrostedGlass
