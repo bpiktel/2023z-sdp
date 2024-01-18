@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "auth";
 import { useState } from "react";
-import {FrostedGlass} from "../../components/FrostedGlass.tsx";
-import {FaArrowLeft} from "react-icons/fa";
+import { FrostedGlass } from "../../components/FrostedGlass.tsx";
+import { FaArrowLeft } from "react-icons/fa";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
 
 const signIn = async (
@@ -40,14 +40,14 @@ const LoginPage = () => {
     <div className="flex h-full items-center justify-center">
       <div className="text-center min-w-[16rem]">
         {authenticated ? (
-          <div>
+          <FrostedGlass>
             <h1>Authenticated</h1>
             <div className="mt-md">
               <Link to="/" className="flex gap-xs items-center justify-center">
-                <FaArrowLeft/> Return to Home Page
+                <FaArrowLeft /> Return to Home Page
               </Link>
             </div>
-          </div>
+          </FrostedGlass>
         ) : (
           <>
             <FrostedGlass>
@@ -74,7 +74,7 @@ const LoginPage = () => {
             </FrostedGlass>
             <div className="absolute left-0 top-0 m-xl">
               <Link to="../" className="flex gap-xs items-center">
-                <FaArrowLeft/> Return to Home Page
+                <FaArrowLeft /> Return to Home Page
               </Link>
             </div>
           </>

@@ -83,7 +83,7 @@ const ExperimentsListPage = () => {
               className="flex w-full justify-between items-center"
             >
               <Link
-                className="text-lg min-w-48"
+                className="text-lg min-w-48 pr-xs"
                 to={`/experiments/$id`}
                 params={{ id: experiment.id.id.String }}
               >
