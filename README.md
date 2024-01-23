@@ -68,6 +68,28 @@ services:
       admin__password: <wypełnić>
 ```
 
+### (opcjonalnie) zmiana portu
+
+Należy zamienić
+
+```
+services:
+  sound-localization-tester-backend-frontend:
+    # [...]
+    ports:
+      - 80:3000
+```
+
+na
+
+```
+services:
+  sound-localization-tester-backend-frontend:
+    # [...]
+    ports:
+      - <nowy port>:3000
+```
+
 ### Uruchomienie
 
 Podstawowy scenariusz użycia sprowadza się do następujących poleceń:
@@ -77,10 +99,11 @@ Podstawowy scenariusz użycia sprowadza się do następujących poleceń:
 docker compose up -d
 # Przebuduj (ważne przy aktualizacji) i uruchom
 docker compose up --build -d
+
 # Zatrzymaj
 docker compose down
 # Zatrzymaj i usuń dane (konto administratora, audio, eksperymenty, wyniki)
 docker compose down -v
 ```
 
-Po uruchomieniu aplikacja będzie dostępna pod adresem `http://localhost:3000`.
+Po uruchomieniu aplikacja będzie dostępna pod adresem `http://localhost:80` (jeżeli został domyślny port).

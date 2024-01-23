@@ -1,5 +1,6 @@
 use config::{Environment, File, FileFormat};
 use serde::Deserialize;
+use validator::Validate;
 
 use super::{
     app::AppConfig,
@@ -8,19 +9,22 @@ use super::{
     tracing::TracingConfig,
 };
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 pub struct AdminConfig {
+    #[validate(length(min = 4))]
     pub username: String,
+    #[validate(length(min = 4))]
     pub password: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 pub struct Config {
     pub app: AppConfig,
     pub tracing: TracingConfig,
     pub auth_keys: AuthKeysConfig,
     pub surreal_db: SurrealDbConfig,
     pub file_storage: FileStorageConfig,
+    #[validate]
     pub admin: AdminConfig,
 }
 
