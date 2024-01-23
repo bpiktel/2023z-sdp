@@ -2,7 +2,7 @@
 
 ## Architektura
 
-Aplikacja jest standardową architekturą 3-wartswową: frontend, backend, baza danych.
+Aplikacja jest standardową architekturą 3-warstwową: frontend, backend, baza danych.
 Aplikacja podzielona jest na 2 kontenery: backend, który serwuje statyczne pliki frontendu oraz bazę danych.
 
 Frontend wykorzystuje framework React w języku TypeScript.
@@ -16,21 +16,21 @@ Podane dane administratora są wykorzystywane tylko **przy pierwszym uruchomieni
 
 ### Docker compose
 
-Plik `docker-compsoe.yml.template` należy skopiować i usunąć człon `.template`.
-Zostanie on wypełniony danymi produkcyjnymi i jest wyłączony z kontroli wersji.
+Plik `docker-compose.yml.template` należy skopiować i usunąć z nazwy pliku człon `.template`.
+Będzie zawierał wrażliwe dane produkcyjne i z tego powodu jest wyłączony z systemu kontroli wersji.
 
-### Generacja kluczy produkcyjnych JWT
+### Generowanie kluczy szyfrujących używanych w środowisku produkcyjnym
 
 1. Wygenerować klucz:
 ```sh
-mkdir keys # Folder `keys` jest wyłączony z kontroli wersji
+mkdir keys # Folder `keys` jest wyłączony z systemu kontroli wersji
 cd keys
 ssh-keygen -t rsa -b 4096 -m PEM -f jwt-auth-rsa.key # Bez passphrase
 openssl rsa -in jwt-auth-rsa.key -pubout -outform PEM -out jwt-auth-rsa.key.pub
 cd ..
 ```
 
-2. Podpiąć ścieżkę do klucza do obrazu:
+2. Podpiąć ścieżkę do klucza do obrazu (w `docker-compose.yml`):
 ```
 services:
   sound-localization-tester-backend-frontend:
@@ -39,7 +39,7 @@ services:
       - ./keys:/app/keys
 ```
 
-3. Podać ścieżki do konkretnych plików
+3. Podać ścieżki do konkretnych plików (w `docker-compose.yml`):
 ```
 services:
   sound-localization-tester-backend-frontend:
@@ -51,7 +51,9 @@ services:
 
 ### Ustawianie danych administratora
 
-Dane administratora są ustawiane tylko przy pierwszym uruchomieniu! (na czystej bazie danych)
+Uwaga: dane administratora są ustawiane tylko przy pierwszym uruchomieniu! (na czystej bazie danych)
+
+W `docker-compsoe.yml`:
 
 ```
 services:
