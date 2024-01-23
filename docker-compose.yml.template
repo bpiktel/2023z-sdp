@@ -13,7 +13,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      # - ./keys:/keys
+      # - ./keys:/app/keys
       - ./backend/migrations:/app/migrations
 
   sound-localization-tester-database:

@@ -36,7 +36,7 @@ services:
   sound-localization-tester-backend-frontend:
     # [...]
     volumes:
-      - ./keys:/keys
+      - ./keys:/app/keys
 ```
 
 3. Podać ścieżki do konkretnych plików
