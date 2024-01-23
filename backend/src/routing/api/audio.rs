@@ -6,6 +6,7 @@ use axum::{
 use axum_extra::extract::Multipart;
 use hyper::StatusCode;
 use tracing::error;
+use validator::Validate;
 
 use crate::services::{
     auth::{claims::Claims, AuthKeys},
@@ -14,7 +15,7 @@ use crate::services::{
         repositories::sample::{SampleInfo, SampleRepository},
         surreal::{SurrealDb, WithId},
     },
-    util::ResponseType,
+    util::{ResponseType, ValidatedJsonRejection},
 };
 
 pub fn audio_router<T>() -> Router<T>
@@ -46,12 +47,16 @@ async fn create_audio(
     else {
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
     };
-    let Ok(info) = info
-        .text()
+    let Ok(info_bytes) = info
+        .bytes()
         .await
         .map_err(|e| error!({error = ?e}, "Encountered an error while reading a sample"))
     else {
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    let Json(info): Json<SampleInfo> = match Json::from_bytes(&info_bytes) {
+        Ok(info) => info,
+        Err(err) => return ResponseType::JsonErr(ValidatedJsonRejection::Json(err)),
     };
     let Ok(Some(data)) = multipart
         .next_field()
@@ -67,9 +72,12 @@ async fn create_audio(
     else {
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
     };
-    let Ok(info) = serde_json::de::from_str::<SampleInfo>(&info) else {
-        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
-    };
+    if let Err(err) = info.validate().map_err(|e| {
+        error!({error = ?e}, "Invalid sample info");
+        e
+    }) {
+        return ResponseType::JsonErr(ValidatedJsonRejection::Validation(err));
+    }
     let Ok(result) = audio_repo
         .create(info, data)
         .await
@@ -102,9 +110,7 @@ async fn delete_audio(
 /// List all audio samples
 ///
 /// List all available audio sample identifiers
-async fn get_all(
-    audio_repo: SampleRepository,
-) -> ResponseType<Json<Vec<WithId<SampleInfo>>>> {
+async fn get_all(audio_repo: SampleRepository) -> ResponseType<Json<Vec<WithId<SampleInfo>>>> {
     let Ok(samples) = audio_repo
         .infos()
         .await

@@ -6,6 +6,7 @@ use axum::{
 use bytes::Bytes;
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 use crate::services::database::{
     files::FileStorage,
@@ -66,9 +67,10 @@ impl SampleRepository {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct SampleInfo {
+    #[validate(length(min = 1, max = 63))]
     pub name: String,
     pub azimuth: f32,
     pub elevation: f32,
