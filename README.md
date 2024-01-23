@@ -2,35 +2,39 @@
 
 ## Architektura
 
-Aplikacja jest standardową architekturą 3-warstwową: frontend, backend, baza danych.
-Aplikacja podzielona jest na 2 kontenery: backend, który serwuje statyczne pliki frontendu oraz bazę danych.
+Aplikacja oparta jest o standardową architekturą 3-warstwową składającą się z frontendu, backendu i bazy danych.
+Przygotowany plik docker-compose.yml uruchamia 2 kontenery: backend (który serwuje statyczne pliki frontendu) oraz bazę danych.
 
-Frontend wykorzystuje framework React w języku TypeScript.
-Backend wykorzystuje framework Axum w języku Rust.
-Baza danych to SurrealDB.
+Frontend napisany został w języku TypeScript z użyciem frameworka React.
+Backend napisany został w języku Rust z użyciem frameworka Axum.
+Zastosowaną technologią bazy danych jest SurrealDB.
 
 ## Przygotowanie do uruchomienia
 
 Przed uruchomieniem produkcyjnym należy przygotować klucze RSA służące do podpisu i walidacji tokenów JWT oraz podać dane logowania administratora.
-Podane dane administratora są wykorzystywane tylko **przy pierwszym uruchomieniu** aplikacji.
+Konto administratora tworzone jest **przy pierwszym uruchomieniu** aplikacji, więc zmiana podanych danych administratora w kolejnych uruchomieniach nie przyniesie skutku.
 
 ### Docker compose
 
-Plik `docker-compose.yml.template` należy skopiować i usunąć z nazwy pliku człon `.template`.
-Będzie zawierał wrażliwe dane produkcyjne i z tego powodu jest wyłączony z systemu kontroli wersji.
+Na podstawie pliku szablonu `docker-compose.yml.template` należy stworzyć plik `docker-compose.yml` - poprzez jego skopiowanie:
+```sh
+cp docker-compose.yml.template docker-compose.yml
+```
+a następnie edycję zgodnie z dalszymi instrukcjami.
+Utworzony plik `docker-compose.yml` będzie zawierał wrażliwe dane produkcyjne i z tego powodu jest wyłączony z systemu kontroli wersji.
 
 ### Generowanie kluczy szyfrujących używanych w środowisku produkcyjnym
 
-1. Wygenerować klucz:
+1. Generowanie pary kluczy:
 ```sh
 mkdir keys # Folder `keys` jest wyłączony z systemu kontroli wersji
 cd keys
-ssh-keygen -t rsa -b 4096 -m PEM -f jwt-auth-rsa.key # Bez passphrase
+ssh-keygen -t rsa -b 4096 -m PEM -f jwt-auth-rsa.key -N "" # Bez passphrase
 openssl rsa -in jwt-auth-rsa.key -pubout -outform PEM -out jwt-auth-rsa.key.pub
 cd ..
 ```
 
-2. Podpiąć ścieżkę do klucza do obrazu (w `docker-compose.yml`):
+2. Podpięcie folderu z kluczami do obrazu (w `docker-compose.yml`):
 ```
 services:
   sound-localization-tester-backend-frontend:
@@ -39,7 +43,7 @@ services:
       - ./keys:/app/keys
 ```
 
-3. Podać ścieżki do konkretnych plików (w `docker-compose.yml`):
+3. Podanie ścieżek do konkretnych plików klucza (w `docker-compose.yml`):
 ```
 services:
   sound-localization-tester-backend-frontend:
@@ -53,7 +57,7 @@ services:
 
 Uwaga: dane administratora są ustawiane tylko przy pierwszym uruchomieniu! (na czystej bazie danych)
 
-W `docker-compsoe.yml`:
+W `docker-compose.yml`:
 
 ```
 services:
@@ -66,7 +70,7 @@ services:
 
 ### Uruchomienie
 
-Najprostsza obsługa sprowadza się do następujących poleceń:
+Podstawowy scenariusz użycia sprowadza się do następujących poleceń:
 
 ```sh
 # Uruchom
@@ -79,4 +83,4 @@ docker compose down
 docker compose down -v
 ```
 
-Po uruchomieniu aplikacja będzie dostępna pod `http://localhost:3000`.
+Po uruchomieniu aplikacja będzie dostępna pod adresem `http://localhost:3000`.
