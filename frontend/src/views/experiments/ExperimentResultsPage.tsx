@@ -6,7 +6,7 @@ import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import {
   Sample,
   SampleResult,
-  sampleListSchema
+  sampleListSchema,
 } from "schemas/sampleSchemas.ts";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
 import { ButtonSecondary } from "components/Buttons.tsx";
@@ -23,7 +23,7 @@ const combineResultsWithSample = (
       ...result,
       name: matchingSample?.name,
       sAzimuth: matchingSample?.azimuth,
-      sElevation: matchingSample?.elevation
+      sElevation: matchingSample?.elevation,
     };
   });
 };
@@ -39,7 +39,7 @@ const ExperimentResultsPage = () => {
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["results", id],
-    queryFn: getResults
+    queryFn: getResults,
   });
 
   const getSamples = () =>
@@ -51,36 +51,40 @@ const ExperimentResultsPage = () => {
     data: samplesData,
     isLoading: samplesLoading,
     isFetching: samplesFetching,
-    error: samplesError
+    error: samplesError,
   } = useQuery({
     queryKey: ["samples"],
-    queryFn: getSamples
+    queryFn: getSamples,
   });
 
   const downloadResults = () => {
-    const combinedData = data?.map((result) =>
-      combineResultsWithSample(result.sample_results, samplesData!)
-    );
+    const combinedData = data?.map((result) => ({
+      username: result.user,
+      mode: result.training ? "training" : "test",
+      results: combineResultsWithSample(result.sample_results, samplesData!),
+    }));
 
     if (!combinedData) return;
 
     const headers = [
       "index",
+      "username",
+      "mode",
       "sample_id",
       "sample_name",
       "sample_azimuth",
       "sample_elevation",
       "answer_azimuth",
-      "answer_elevation"
+      "answer_elevation",
     ];
 
     let resultString = "";
 
     resultString += headers.join(";") + "\n";
 
-    combinedData.forEach((result, idx) => {
-      result.forEach((sampleResult) => {
-        resultString += `${idx};${sampleResult.sample_id};${sampleResult.name};${sampleResult.sAzimuth};${sampleResult.sElevation};${sampleResult.azimuth};${sampleResult.elevation}\n`;
+    combinedData.forEach((testDetails, idx) => {
+      testDetails.results.forEach((sampleResult) => {
+        resultString += `${idx};${testDetails.username};${testDetails.mode};${sampleResult.sample_id};${sampleResult.name};${sampleResult.sAzimuth};${sampleResult.sElevation};${sampleResult.azimuth};${sampleResult.elevation}\n`;
       });
     });
 
@@ -117,7 +121,11 @@ const ExperimentResultsPage = () => {
               key={`result_${idx}`}
               className="flex gap-sm items-center justify-center w-full border-b border-white/40 pb-sm"
             >
-              <div className="flex flex-col gap-xs">
+              <div className="flex flex-col">
+                <div className="flex flex-col items-center pb-sm">
+                  <div>username: {result.user}</div>
+                  <div>mode: {result.training ? "training" : "test"}</div>
+                </div>
                 {combineResultsWithSample(
                   result.sample_results,
                   samplesData!

@@ -4,8 +4,8 @@ import { sampleResultListSchema } from "./sampleSchemas.ts";
 export const idSchema = z.object({
   tb: z.string(),
   id: z.object({
-    String: z.string()
-  })
+    String: z.string(),
+  }),
 });
 
 export type Id = z.infer<typeof idSchema>;
@@ -13,7 +13,7 @@ export type Id = z.infer<typeof idSchema>;
 export const experimentSchema = z.object({
   id: idSchema,
   name: z.string(),
-  sample_ids: z.array(z.string())
+  sample_ids: z.array(z.string()),
 });
 
 export type Experiment = z.infer<typeof experimentSchema>;
@@ -24,7 +24,9 @@ export type ExperimentList = z.infer<typeof experimentListSchema>;
 
 export const experimentResultSchema = z.object({
   id: idSchema,
-  sample_results: sampleResultListSchema
+  sample_results: sampleResultListSchema,
+  training: z.boolean(),
+  user: z.string(),
 });
 
 export type ExperimentResult = z.infer<typeof experimentResultSchema>;
