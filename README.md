@@ -12,16 +12,21 @@ Baza danych to SurrealDB.
 ## Przygotowanie do uruchomienia
 
 Przed uruchomieniem produkcyjnym należy przygotować klucze RSA służące do podpisu i walidacji tokenów JWT oraz podać dane logowania administratora.
-Dane administratora są wykorzystywane tylko **przy pierwszym uruchomieniu** aplikacji.
+Podane dane administratora są wykorzystywane tylko **przy pierwszym uruchomieniu** aplikacji.
+
+### Docker compose
+
+Plik `docker-compsoe.yml.template` należy skopiować i usunąć człon `.template`.
+Zostanie on wypełniony danymi produkcyjnymi i jest wyłączony z kontroli wersji.
 
 ### Generacja kluczy produkcyjnych JWT
 
 1. Wygenerować klucz:
 ```sh
-mkdir keys
+mkdir keys # Folder `keys` jest wyłączony z kontroli wersji
 cd keys
-ssh-keygen -t rsa -b 4096 -m PEM -f jwt-auth-rsa.key # No password
-openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwt-auth-rsa.key.pub
+ssh-keygen -t rsa -b 4096 -m PEM -f jwt-auth-rsa.key # Bez passphrase
+openssl rsa -in jwt-auth-rsa.key -pubout -outform PEM -out jwt-auth-rsa.key.pub
 cd ..
 ```
 
@@ -64,11 +69,11 @@ Najprostsza obsługa sprowadza się do następujących poleceń:
 ```sh
 # Uruchom
 docker compose up -d
-# Przebuduj (ważne przy aktualizacji!) i uruchom
+# Przebuduj (ważne przy aktualizacji) i uruchom
 docker compose up --build -d
 # Zatrzymaj
 docker compose down
-# Zatrzymaj i usuń bazę danych
+# Zatrzymaj i usuń dane (konto administratora, audio, eksperymenty, wyniki)
 docker compose down -v
 ```
 
