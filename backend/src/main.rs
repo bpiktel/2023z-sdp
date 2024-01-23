@@ -38,7 +38,9 @@ async fn main() {
     };
 
     let repo = UserRepository::new(state.surreal_db.clone());
-    repo.try_create("root", "root").await.ok();
+    repo.try_create(&config.admin.username, &config.admin.password)
+        .await
+        .ok();
 
     run(
         config.app.url,

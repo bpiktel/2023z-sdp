@@ -9,12 +9,19 @@ use super::{
 };
 
 #[derive(Debug, Clone, Deserialize)]
+pub struct AdminConfig {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Config {
     pub app: AppConfig,
     pub tracing: TracingConfig,
     pub auth_keys: AuthKeysConfig,
     pub surreal_db: SurrealDbConfig,
     pub file_storage: FileStorageConfig,
+    pub admin: AdminConfig,
 }
 
 pub fn setup_config() -> Config {
