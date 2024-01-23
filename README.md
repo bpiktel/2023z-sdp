@@ -74,6 +74,29 @@ services:
       - <nowy port>:3000
 ```
 
+### Ustawienie adresu API serwera widocznego z zewnątrz
+
+Ponieważ kod frontendowy uruchamiany jest na przeglądarce użytkownika, musi znać publiczny adres API serwera.
+Adres zapisywany jest na stałe w momencie budowania aplikacji - przy zmianie serwera trzeba dokonać przebudowy obrazów.
+
+Adres należy wprowadzić do pliku `docker-compose.yml`:
+
+```yaml
+services:
+  sound-localization-tester-backend-frontend:
+    # [...]
+    build:
+      context: .
+      args:
+        BASE_API_URL: |wypełnić|/api
+```
+
+Poprawny adres API składa się z adresu, pod którym dostępna jest strona oraz ścieżki `/api`, np.:
+
+```yaml
+        BASE_API_URL: http://home.elka.pw.edu.pl/test-lokalizacji/api
+```
+
 ### Uruchomienie
 
 Podstawowy scenariusz użycia sprowadza się do następujących poleceń:

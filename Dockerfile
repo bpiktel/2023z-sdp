@@ -1,11 +1,14 @@
 FROM node:18-alpine AS frontend-build
 
+ARG BASE_API_URL
+
 WORKDIR /app
 COPY ./frontend .
 RUN npm install
 
 COPY . .
 
+ENV VITE_BASE_API_URL=$BASE_API_URL
 RUN npm run build
 
 FROM rust:1.71 AS backend-build
