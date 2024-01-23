@@ -71,7 +71,7 @@ impl ExperimentRepository {
         let mut result = self
             .surreal
             .query("begin")
-            .query("let $result = create only result content { experiment_id: $experiment_id }")
+            .query("let $result = create only result content { experiment_id: $experiment_id, training: $training, user: $user }")
             .query(
                 r"
                 for $sample_result in $sample_results {
@@ -83,6 +83,8 @@ impl ExperimentRepository {
             .query("commit")
             .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id")
             .bind(("experiment_id", experiment_id))
+            .bind(("training", result.training))
+            .bind(("user", result.user))
             .bind(("sample_results", result.sample_results))
             .await?
             .better_check()?;
@@ -288,6 +290,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "only with docker db instance"]
     async fn create_result() {
         let (sut, sample_repo) = setup().await;
         let info = SampleInfo {
@@ -318,6 +321,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "only with docker db instance"]
     async fn results() {
         let (sut, sample_repo) = setup().await;
         let info = SampleInfo {
