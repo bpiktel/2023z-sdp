@@ -11,6 +11,7 @@ use validator::{Validate, ValidationErrors};
 pub enum ResponseType<T = ()> {
     Data(T),
     Status(StatusCode),
+    JsonErr(ValidatedJsonRejection),
 }
 
 impl<T: IntoResponse> IntoResponse for ResponseType<T> {
@@ -18,6 +19,7 @@ impl<T: IntoResponse> IntoResponse for ResponseType<T> {
         match self {
             ResponseType::Status(r) => r.into_response(),
             ResponseType::Data(r) => r.into_response(),
+            ResponseType::JsonErr(e) => e.into_response(),
         }
     }
 }

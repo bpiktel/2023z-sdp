@@ -5,6 +5,7 @@ use axum::{
 };
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 use crate::services::database::{
     surreal::{BetterCheck, MapToNotFound, SurrealDb, WithId},
@@ -70,7 +71,7 @@ impl ExperimentRepository {
         let mut result = self
             .surreal
             .query("begin")
-            .query("let $result = create only result content { experiment_id: $experiment_id }")
+            .query("let $result = create only result content { experiment_id: $experiment_id, training: $training, user: $user }")
             .query(
                 r"
                 for $sample_result in $sample_results {
@@ -82,6 +83,8 @@ impl ExperimentRepository {
             .query("commit")
             .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id")
             .bind(("experiment_id", experiment_id))
+            .bind(("training", result.training))
+            .bind(("user", result.user))
             .bind(("sample_results", result.sample_results))
             .await?
             .better_check()?;
@@ -115,18 +118,23 @@ impl ExperimentRepository {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct Experiment {
+    #[validate(length(min = 1, max = 63))]
     pub name: String,
     pub sample_ids: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct ExperimentResult {
+    training: bool,
+    #[validate(length(min = 1, max = 63))]
+    user: String,
+    #[validate]
     sample_results: Vec<SampleResult>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct SampleResult {
     pub sample_id: String,
     pub azimuth: f32,
@@ -282,6 +290,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "only with docker db instance"]
     async fn create_result() {
         let (sut, sample_repo) = setup().await;
         let info = SampleInfo {
@@ -297,6 +306,8 @@ mod tests {
         };
         let experiment = sut.create(experiment).await.unwrap();
         let result = ExperimentResult {
+            training: false,
+            user: String::default(),
             sample_results: vec![SampleResult {
                 sample_id: sample.id(),
                 azimuth: 17.0,
@@ -310,6 +321,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "only with docker db instance"]
     async fn results() {
         let (sut, sample_repo) = setup().await;
         let info = SampleInfo {
@@ -325,6 +337,8 @@ mod tests {
         };
         let experiment = sut.create(experiment).await.unwrap();
         let result = ExperimentResult {
+            training: false,
+            user: String::default(),
             sample_results: vec![SampleResult {
                 sample_id: sample.id(),
                 azimuth: 17.0,
@@ -333,6 +347,8 @@ mod tests {
         };
         sut.create_result(experiment.id(), result).await.unwrap();
         let result = ExperimentResult {
+            training: false,
+            user: String::default(),
             sample_results: vec![SampleResult {
                 sample_id: sample.id(),
                 azimuth: 10.3,

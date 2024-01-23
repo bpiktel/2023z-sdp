@@ -14,7 +14,7 @@ use tracing::info;
 
 use self::{api::api_router, healthcheck::healthcheck_router, static_files::static_files_service};
 
-pub const MAIN_ROUTE_PATH: &'static str = "/api";
+pub const MAIN_ROUTE_PATH: &str = "/api";
 
 pub fn main_route<T>(config: &Config) -> Router<T>
 where

@@ -7,6 +7,10 @@ services:
     environment:
       app__cors: true
       surreal_db__address: ws://surrealdb:8000
+      auth_keys__encoding: devkeys/jwt-auth-rsa.key
+      auth_keys__decoding: devkeys/jwt-auth-rsa.key.pub
+      admin__username: root
+      admin__password: root
     ports:
       - 3000:3000
     volumes:

@@ -11,7 +11,7 @@ import {
   Sample,
   SampleList,
   sampleListSchema,
-  SampleResult
+  SampleResult,
 } from "schemas/sampleSchemas";
 import LoadingSpinner from "../../components/LoadingSpinner.tsx";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
@@ -30,7 +30,7 @@ const ExperimentPage = () => {
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["experiment", id],
-    queryFn: getExperiment
+    queryFn: getExperiment,
   });
 
   const audioList: string[] =
@@ -64,7 +64,7 @@ const ExperimentPage = () => {
         format: ["mp3"],
         volume: 1.0,
         loop: false,
-        autoplay: true
+        autoplay: true,
       });
     }
   }, [currentStep]);
@@ -88,7 +88,7 @@ const ExperimentPage = () => {
           if (!sample) return { azimuth: 0, elevation: 0 };
           const coords: SphericalCoordinates = {
             azimuth: sample.azimuth,
-            elevation: sample.elevation
+            elevation: sample.elevation,
           };
           return coords;
         })
@@ -104,8 +104,8 @@ const ExperimentPage = () => {
       {
         sample_id: data!.sample_ids[currentStep as number],
         azimuth: selection!.azimuth,
-        elevation: selection!.elevation
-      }
+        elevation: selection!.elevation,
+      },
     ];
   };
 
@@ -147,7 +147,13 @@ const ExperimentPage = () => {
     );
 
   if (currentStep === "end")
-    return <FinishInfo experimentId={id} results={results.current} />;
+    return (
+      <FinishInfo
+        experimentId={id}
+        results={results.current}
+        isTraining={trainingMode}
+      />
+    );
 
   return (
     <div className="w-screen h-screen flex flex-col items-center relative">
@@ -199,7 +205,7 @@ const ExperimentPage = () => {
 
 const ProgressWidget = ({
   currentStep,
-  totalSteps
+  totalSteps,
 }: {
   currentStep: number;
   totalSteps: number;
@@ -224,7 +230,7 @@ const ProgressWidget = ({
 const StartInfo = ({
   experimentName,
   onStart,
-  readyToStart
+  readyToStart,
 }: {
   experimentName: string;
   onStart: (isTrainingMode: boolean) => void;
@@ -270,6 +276,8 @@ const StartInfo = ({
 
 const createResult = async (
   experimentId: string,
+  username: string,
+  isTraining: boolean,
   results: SampleResult[],
   callback: (success: boolean) => void
 ): Promise<void> => {
@@ -280,7 +288,11 @@ const createResult = async (
     {
       ...defaultRequestInit,
       method: "POST",
-      body: JSON.stringify({ sample_results: results })
+      body: JSON.stringify({
+        sample_results: results,
+        training: isTraining,
+        user: username,
+      }),
     }
   );
 
@@ -294,15 +306,23 @@ const createResult = async (
 
 const FinishInfo = ({
   experimentId,
-  results
+  results,
+  isTraining: isTraining,
 }: {
   experimentId: string;
   results: SampleResult[];
+  isTraining: boolean;
 }) => {
   const [resultSent, setResultSent] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>("");
 
   const onResultsSave = () => {
-    createResult(experimentId, results, (success) => {
+    if (username.length === 0) {
+      fireAlert({ title: "Please enter your name" });
+      return;
+    }
+
+    createResult(experimentId, username, isTraining, results, (success) => {
       if (success) {
         fireAlert({ title: "Results saved" });
         setResultSent(true);
@@ -322,7 +342,18 @@ const FinishInfo = ({
             <FaArrowLeft /> Return to Experiments
           </Link>
         ) : (
-          <ButtonPrimary onClick={onResultsSave}>Save results</ButtonPrimary>
+          <>
+            <div className="flex flex-row items-center w-full">
+              <p className="pr-md">Name</p>
+              <input
+                className="flex-1 px-2 py-1"
+                type="text"
+                placeholder="name..."
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <ButtonPrimary onClick={onResultsSave}>Save results</ButtonPrimary>
+          </>
         )}
       </FrostedGlass>
     </div>

@@ -13,7 +13,7 @@ use crate::services::{
         repositories::experiment::{Experiment, ExperimentRepository, ExperimentResult},
         surreal::{SurrealDb, WithId},
     },
-    util::ResponseType,
+    util::{ResponseType, ValidatedJson},
 };
 
 pub fn router<T>() -> Router<T>
@@ -38,7 +38,7 @@ where
 async fn create_experiment(
     repo: ExperimentRepository,
     _: Claims,
-    Json(experiment): Json<Experiment>,
+    ValidatedJson(experiment): ValidatedJson<Experiment>,
 ) -> ResponseType<Json<WithId<Experiment>>> {
     let Ok(result) = repo
         .create(experiment)
@@ -123,7 +123,7 @@ async fn get_results(
 async fn post_result(
     repo: ExperimentRepository,
     Path(id): Path<String>,
-    Json(expr): Json<ExperimentResult>,
+    ValidatedJson(expr): ValidatedJson<ExperimentResult>,
 ) -> ResponseType<Json<WithId<ExperimentResult>>> {
     let Ok(result) = repo.create_result(id, expr).await.map_err(
         |e| error!({error = ?e}, "Encountered an error while creating experiment results."),
