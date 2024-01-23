@@ -5,15 +5,15 @@ services:
     container_name: sound-localization-tester
     build: .
     environment:
-      # auth_keys__encoding: keys/jwt-auth-rsa.key
-      # auth_keys__decoding: keys/jwt-auth-rsa.key.pub
-      # admin__username:
-      # admin__password:
+      auth_keys__encoding: keys/jwt-auth-rsa.key
+      auth_keys__decoding: keys/jwt-auth-rsa.key.pub
+      admin__username: |wypełnić|
+      admin__password: |wypełnić|
       surreal_db__address: ws://surrealdb:8000
     ports:
       - 80:3000
     volumes:
-      # - ./keys:/app/keys
+      - ./keys:/app/keys
       - ./backend/migrations:/app/migrations
     depends_on:
       sound-localization-tester-database:
