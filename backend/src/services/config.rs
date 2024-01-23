@@ -29,11 +29,13 @@ pub struct Config {
 }
 
 pub fn setup_config() -> Config {
-    config::Config::builder()
+    let config = config::Config::builder()
         .add_source(File::with_name("config/app.json").format(FileFormat::Json))
         .add_source(Environment::default().separator("__").list_separator(","))
         .build()
         .expect("Failed to load application configuration")
         .try_deserialize::<Config>()
-        .expect("Failed to deserialize application configuration")
+        .expect("Failed to deserialize application configuration");
+    config.validate().unwrap();
+    config
 }
