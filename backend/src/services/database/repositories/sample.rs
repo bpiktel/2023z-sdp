@@ -1,3 +1,5 @@
+use std::io::ErrorKind;
+
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
@@ -6,6 +8,7 @@ use axum::{
 use bytes::Bytes;
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
+use tracing::warn;
 use validator::Validate;
 
 use crate::services::database::{
@@ -43,16 +46,23 @@ impl SampleRepository {
     pub async fn delete(&self, id: String) -> RepoResult<bool> {
         let mut result = self
             .surreal
-            .query("select * from experiment_sample where meta::id(out) is $id")
+            .query("select count() from experiment_sample where meta::id(out) is $id group all")
             .bind(("id", &id))
             .await?;
-        let relations = result.take::<Vec<()>>(0)?;
-        if !relations.is_empty() {
+        let relations_count: Option<usize> = result.take("count")?;
+        if relations_count.unwrap_or(0) > 0 {
             return Ok(false);
         }
         // NOTE: Race condition
         // Someone can add this sample to an experiment between the check and deletion.
-        self.file_storage.delete(&id).await?;
+        self.file_storage.delete(&id).await.or_else(|err| {
+            if err.kind() == ErrorKind::NotFound {
+                warn!("{}", err);
+                Ok(())
+            } else {
+                Err(err)
+            }
+        })?;
         self.surreal
             .query("delete sample where meta::id(id) is $id")
             .bind(("id", &id))
