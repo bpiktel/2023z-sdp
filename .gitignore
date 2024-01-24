@@ -1,2 +1,3 @@
-keys
+keys/*
+!keys/.gitignore
 docker-compose.yml

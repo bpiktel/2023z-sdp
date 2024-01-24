@@ -27,11 +27,11 @@ Utworzony plik `docker-compose.yml` będzie zawierał wrażliwe dane produkcyjne
 
 ### Generowanie kluczy szyfrujących używanych w środowisku produkcyjnym
 
+Zawartość folderu `keys` jest wyłączona z systemu kontroli wersji.
+
 ```sh
-mkdir keys # Folder `keys` jest wyłączony z systemu kontroli wersji
-cd keys
-ssh-keygen -t rsa -b 4096 -m PEM -f jwt-auth-rsa.key -N "" # Bez passphrase
-openssl rsa -in jwt-auth-rsa.key -pubout -outform PEM -out jwt-auth-rsa.key.pub
+ssh-keygen -t rsa -b 4096 -m PEM -f keys/jwt-auth-rsa.key -N "" # Bez passphrase
+openssl rsa -in keys/jwt-auth-rsa.key -pubout -outform PEM -out keys/jwt-auth-rsa.key.pub
 cd ..
 ```
 
