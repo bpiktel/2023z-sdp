@@ -128,6 +128,7 @@ const CreateSamplePage = () => {
 
         <input
           type="file"
+          accept="audio/*"
           name="file"
           onChange={(e) => {
             setAudioFile(e.target.files?.[0]);
