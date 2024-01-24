@@ -18,6 +18,7 @@ services:
     volumes:
       - ./keys:/app/keys
       - ./backend/migrations:/app/migrations
+      - soundlocalization_volume:/app/storage
     depends_on:
       sound-localization-tester-database:
         condition: service_healthy
@@ -36,4 +37,5 @@ services:
       start_period: 5s
 
 volumes:
+  soundlocalization_volume:
   surrealdb_volume:
