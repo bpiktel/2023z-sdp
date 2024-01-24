@@ -9,7 +9,7 @@ use validator::Validate;
 
 use crate::services::database::{
     surreal::{BetterCheck, MapToNotFound, SurrealDb, WithId},
-    RepoResult,
+    ExtractNonUniqueIndex, RepoResult,
 };
 
 pub struct ExperimentRepository {
@@ -36,7 +36,7 @@ impl ExperimentRepository {
             .bind(("name", &experiment.name))
             .bind(("sample_ids", &experiment.sample_ids))
             .await?
-            .better_check()?;
+            .better_check().extract_non_unique_on_index("experiment_name_index")?;
         let experiment = result.take::<Option<WithId<Experiment>>>(2)?.found()?;
         Ok(experiment)
     }

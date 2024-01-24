@@ -13,7 +13,8 @@ use crate::services::{
     database::{
         files::FileStorage,
         repositories::sample::{SampleInfo, SampleRepository},
-        surreal::{SurrealDb, WithId},
+        surreal::{DbError, SurrealDb, WithId},
+        RepoError,
     },
     util::{ResponseType, ValidatedJsonRejection},
 };
@@ -78,14 +79,17 @@ async fn create_audio(
     }) {
         return ResponseType::JsonErr(ValidatedJsonRejection::Validation(err));
     }
-    let Ok(result) = audio_repo
-        .create(info, data)
-        .await
-        .map_err(|e| error!({error = ?e}, "Encountered an error while adding a sample"))
-    else {
-        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
-    };
-    ResponseType::Data(Json(result))
+    let result = audio_repo.create(info, data).await.map_err(|e| {
+        error!({error = ?e}, "Encountered an error while adding a sample");
+        e
+    });
+    match result {
+        Ok(result) => ResponseType::Data(Json(result)),
+        Err(RepoError::Surreal(DbError::NonUnique(_))) => {
+            ResponseType::Status(StatusCode::CONFLICT)
+        }
+        Err(_) => ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR),
+    }
 }
 
 /// Delete an audio sample

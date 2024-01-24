@@ -1,0 +1,1 @@
+define index experiment_name_index on table experiment columns name unique;

@@ -51,6 +51,8 @@ pub enum DbError {
     DatabaseCheck(HashMap<usize, surrealdb::Error>),
     #[error("Not found")]
     NotFound,
+    #[error("Non unique value {0}")]
+    NonUnique(String),
 }
 
 pub type DbResult<T> = Result<T, DbError>;
@@ -120,6 +122,23 @@ impl<T> Deref for WithId<T> {
 impl<T> DerefMut for WithId<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.entry
+    }
+}
+
+pub fn non_unique_value_on_index<'a>(error: &'a surrealdb::Error, index: &str) -> Option<&'a str> {
+    match error {
+        surrealdb::Error::Db(surrealdb::error::Db::IndexExists {
+            thing: _,
+            index: matched_index,
+            value,
+        }) => {
+            if matched_index == index {
+                Some(value)
+            } else {
+                None
+            }
+        }
+        _ => None,
     }
 }
 

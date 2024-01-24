@@ -13,8 +13,8 @@ use validator::Validate;
 
 use crate::services::database::{
     files::FileStorage,
-    surreal::{MapToNotFound, SurrealDb, WithId},
-    RepoResult,
+    surreal::{BetterCheck, MapToNotFound, SurrealDb, WithId},
+    ExtractNonUniqueIndex, RepoResult,
 };
 
 pub struct SampleRepository {
@@ -29,8 +29,11 @@ impl SampleRepository {
             .surreal
             .query("create only sample content $info")
             .bind(("info", &info))
-            .await?;
-        let sample = result.take::<Option<WithId<SampleInfo>>>(0)?.found()?;
+            .await?
+            .better_check()
+            .extract_non_unique_on_index("sample_name_index")?;
+        let sample = result.take::<Option<WithId<SampleInfo>>>(0)?;
+        let sample = sample.found()?;
         self.file_storage.create(sample.id(), data).await?;
         Ok(sample)
     }
@@ -115,7 +118,8 @@ mod tests {
             experiment::{Experiment, ExperimentRepository},
             sample::SampleInfo,
         },
-        surreal::tests::surreal_in_memory,
+        surreal::{tests::surreal_in_memory, DbError},
+        RepoError,
     };
 
     use super::SampleRepository;
@@ -160,7 +164,12 @@ mod tests {
         let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
         sut.create(info.clone(), data.clone()).await.unwrap();
 
-        sut.create(info, data).await.unwrap_err();
+        let result = sut.create(info, data).await;
+
+        assert!(matches!(
+            result,
+            Err(RepoError::Surreal(DbError::NonUnique(_)))
+        ));
     }
 
     #[tokio::test]
