@@ -5,6 +5,7 @@ import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { FaArrowLeft } from "react-icons/fa";
 import { signIn } from "../../utils/authUtils.ts";
 import { onEnterDown } from "utils/formUtils.ts";
+import { fireAlert } from "components/AlertDialogs.tsx";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -16,7 +17,7 @@ const LoginPage = () => {
     try {
       await signIn(username, password, setAuthenticated);
     } catch (error) {
-      console.error(error);
+      fireAlert("Could not log in.", "Check your username and password.");
     }
   };
 

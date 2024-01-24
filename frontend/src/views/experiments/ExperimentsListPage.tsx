@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { fireConfirmationModal } from "components/AlertDialogs";
+import { fireAlert, fireConfirmationModal } from "components/AlertDialogs";
 import { ButtonSecondary } from "components/Buttons";
 import { FaTrash, FaArrowLeft, FaPlus, FaFile } from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
@@ -19,9 +19,12 @@ const deleteExperiment = async (id: string, callback: () => void) => {
 
     if (response.ok) {
       callback();
+    } else {
+      fireAlert("Could not remove the experiment");
     }
   } catch (error) {
     console.error(error);
+    fireAlert("Error occured", String(error));
   }
 };
 

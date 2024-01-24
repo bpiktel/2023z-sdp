@@ -11,7 +11,7 @@ const createSample = async (
   azimuth: number,
   elevation: number,
   audio_file: File,
-  callback: (success: boolean) => void
+  callback: (success: boolean, statusCode: number) => void
 ): Promise<void> => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
@@ -28,10 +28,10 @@ const createSample = async (
   });
 
   if (response.ok) {
-    callback(true);
+    callback(true, response.status);
     return;
   }
-  callback(false);
+  callback(false, response.status);
 };
 
 const CreateSamplePage = () => {
@@ -43,11 +43,15 @@ const CreateSamplePage = () => {
 
   const [audioFile, setAudioFile] = useState<File>();
 
-  const onCreated = (success: boolean) => {
+  const onCreated = (success: boolean, statusCode: number) => {
     if (success) {
-      fireAlert({ title: "Sample added" });
+      fireAlert("Sample added");
       navigate({ to: "/samples" });
-    } else fireAlert({ title: "Sample name taken" });
+    } else if (statusCode === 409) {
+      fireAlert("Sample name already taken");
+    } else {
+      fireAlert("Error creating the sample");
+    }
   };
 
   const handleDegrees = (degrees: number, min: number, max: number, step: number, set?: (n: number) => void) => {
@@ -80,6 +84,7 @@ const CreateSamplePage = () => {
       await createSample(name, validatedAzimuth, validatedElevation, audioFile, onCreated);
     } catch (error) {
       console.error(error);
+      fireAlert("Error occured", String(error));
     }
   };
 

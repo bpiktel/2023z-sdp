@@ -14,7 +14,7 @@ import {
 } from "../../components/AlertDialogs.tsx";
 import { ButtonSecondary } from "../../components/Buttons.tsx";
 
-const deleteSample = async (id: string, callback: (arg0: boolean) => void) => {
+const deleteSample = async (id: string, callback: (arg0: boolean, statusCode: number) => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
   try {
@@ -23,9 +23,10 @@ const deleteSample = async (id: string, callback: (arg0: boolean) => void) => {
       method: "DELETE"
     });
 
-    callback(response.ok);
+    callback(response.ok, response.status);
   } catch (error) {
     console.error(error);
+    fireAlert("Error occured", String(error));
   }
 };
 
@@ -51,17 +52,14 @@ const SamplesListPage = () => {
       body: "Are you sure you want to delete this sample?"
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteSample(id, (success) => {
-          if (success)
-            fireAlert({
-              title: "Sample deleted successfully"
-            });
-          else
-            fireAlert({
-              title:
-                "Failed to delete sample, check if it's used in experiments"
-            });
-
+        deleteSample(id, (success, statusCode) => {
+          if (success) {
+            fireAlert("Sample deleted successfully");
+          } else if (statusCode === 409) {
+            fireAlert("Sample is used in experiments", "You can't remove it without removing those experiments");
+          } else {
+            fireAlert("Failed to delete sample, check if it's used in experiments");
+          }
           queryClient.invalidateQueries({ queryKey: ["samples"] });
         });
       }

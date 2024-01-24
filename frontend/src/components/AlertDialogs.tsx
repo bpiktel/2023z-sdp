@@ -76,12 +76,9 @@ export const fireConfirmationModal = async ({
   });
 };
 
-export async function fireAlert({
-  title
-}: {
-  title: string;
-}): Promise<SweetAlertResult> {
+export async function fireAlert(title: string, text?: string): Promise<SweetAlertResult> {
   return await Toast.fire({
-    title
+    title,
+    text
   });
 }

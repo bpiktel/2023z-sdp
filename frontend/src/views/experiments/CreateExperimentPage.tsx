@@ -13,7 +13,7 @@ import { onEnterDown } from "utils/formUtils.ts";
 const createExperiment = async (
   name: string,
   sample_ids: string[],
-  callback: (success: boolean) => void
+  callback: (success: boolean, statusCode: number) => void
 ): Promise<void> => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
@@ -24,11 +24,11 @@ const createExperiment = async (
   });
 
   if (response.ok) {
-    callback(true);
+    callback(true, response.status);
     return;
   }
 
-  callback(false);
+  callback(false, response.status);
 };
 
 const CreateExperimentPage = () => {
@@ -45,11 +45,15 @@ const CreateExperimentPage = () => {
     setSampleIds((prevState) => prevState.filter((sId) => sId !== id));
   };
 
-  const onCreated = (success: boolean) => {
+  const onCreated = (success: boolean, statusCode: number) => {
     if (success) {
-      fireAlert({ title: "Experiment created" });
+      fireAlert("Experiment created");
       navigate({ to: "/experiments" });
-    } else fireAlert({ title: "Failed to create experiment" });
+    } else if (statusCode === 409) {
+      fireAlert("Experiment name already taken");
+    } else {
+      fireAlert("Failed to create experiment");
+    }
   };
 
   const handleCreate = async () => {
@@ -57,6 +61,7 @@ const CreateExperimentPage = () => {
       await createExperiment(name, sampleIds, onCreated);
     } catch (error) {
       console.error(error);
+      fireAlert("Error occured", String(error));
     }
   };
 

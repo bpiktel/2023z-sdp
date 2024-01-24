@@ -330,13 +330,13 @@ const FinishInfo = ({
 
   const onResultsSave = () => {
     if (username.length === 0) {
-      fireAlert({ title: "Please enter your name" });
+      fireAlert("Please enter your name");
       return;
     }
 
     createResult(experimentId, username, isTraining, results, (success) => {
       if (success) {
-        fireAlert({ title: "Results saved" });
+        fireAlert("Results saved");
         setResultSent(true);
       }
     });
