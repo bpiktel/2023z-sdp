@@ -13,8 +13,8 @@ use validator::Validate;
 
 use crate::services::database::{
     files::FileStorage,
-    surreal::{BetterCheck, MapToNotFound, SurrealDb, WithId},
-    ExtractNonUniqueIndex, RepoResult,
+    surreal::{MapToNotFound, SurrealDb, WithId},
+    RepoResult,
 };
 
 pub struct SampleRepository {
@@ -29,9 +29,7 @@ impl SampleRepository {
             .surreal
             .query("create only sample content $info")
             .bind(("info", &info))
-            .await?
-            .better_check()
-            .extract_non_unique_on_index("sample_name_index")?;
+            .await?;
         let sample = result.take::<Option<WithId<SampleInfo>>>(0)?;
         let sample = sample.found()?;
         self.file_storage.create(sample.id(), data).await?;
@@ -118,8 +116,7 @@ mod tests {
             experiment::{Experiment, ExperimentRepository},
             sample::SampleInfo,
         },
-        surreal::{tests::surreal_in_memory, DbError},
-        RepoError,
+        surreal::tests::surreal_in_memory,
     };
 
     use super::SampleRepository;
@@ -164,12 +161,7 @@ mod tests {
         let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
         sut.create(info.clone(), data.clone()).await.unwrap();
 
-        let result = sut.create(info, data).await;
-
-        assert!(matches!(
-            result,
-            Err(RepoError::Surreal(DbError::NonUnique(_)))
-        ));
+        sut.create(info, data).await.unwrap_err();
     }
 
     #[tokio::test]

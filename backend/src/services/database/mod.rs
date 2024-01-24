@@ -1,4 +1,4 @@
-use self::surreal::{non_unique_value_on_index, DbError, DbResult};
+use self::surreal::DbError;
 
 pub mod files;
 pub mod migrations;
@@ -21,27 +21,40 @@ impl From<surrealdb::Error> for RepoError {
 
 pub type RepoResult<T = ()> = std::result::Result<T, RepoError>;
 
-pub trait ExtractNonUniqueIndex<T> {
-    fn extract_non_unique_on_index(self, index: &str) -> RepoResult<T>;
+fn non_unique_value_on_index(error: &surrealdb::Error) -> bool {
+    match error {
+        surrealdb::Error::Db(surrealdb::error::Db::IndexExists {
+            thing: _,
+            index: _,
+            value: _,
+        }) => true,
+        surrealdb::Error::Api(surrealdb::error::Api::Query(x)) => {
+            x.contains("Database index")
+                && x.contains("already contains")
+                && x.contains("with record")
+        }
+        _ => false,
+    }
 }
 
-impl<T> ExtractNonUniqueIndex<T> for DbResult<T> {
-    fn extract_non_unique_on_index(self, index: &str) -> RepoResult<T> {
+pub trait IsNonUnique<T> {
+    fn is_non_unique(&self) -> bool;
+}
+
+impl<T> IsNonUnique<T> for RepoResult<T> {
+    fn is_non_unique(&self) -> bool {
         match self {
-            Err(DbError::Database(e)) => match non_unique_value_on_index(&e, index) {
-                Some(v) => Err(RepoError::Surreal(DbError::NonUnique(v.to_string()))),
-                None => Err(RepoError::Surreal(DbError::Database(e))),
-            },
-            Err(DbError::DatabaseCheck(es)) => {
+            Err(RepoError::Surreal(DbError::Database(e))) => non_unique_value_on_index(&e),
+            Err(RepoError::Surreal(DbError::DatabaseCheck(es))) => {
                 for e in es.values() {
-                    if let Some(v) = non_unique_value_on_index(e, index) {
-                        return Err(RepoError::Surreal(DbError::NonUnique(v.to_string())));
+                    if non_unique_value_on_index(&e) {
+                        return true;
                     }
                 }
-                Err(DbError::DatabaseCheck(es).into())
+                false
             }
-            Ok(v) => Ok(v),
-            Err(e) => Err(e.into()),
+            Ok(_) => false,
+            Err(_) => false,
         }
     }
 }
