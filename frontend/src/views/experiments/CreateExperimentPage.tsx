@@ -19,7 +19,7 @@ const createExperiment = async (
   const response = await fetch(`${VITE_BASE_API_URL}/experiments`, {
     ...defaultRequestInit,
     method: "POST",
-    body: JSON.stringify({ name, sample_ids }),
+    body: JSON.stringify({ name, sample_ids })
   });
 
   if (response.ok) {
@@ -98,7 +98,7 @@ const CreateExperimentPage = () => {
 const AudioSelector = ({
   selectedSampleIds,
   addSample,
-  removeSample,
+  removeSample
 }: {
   selectedSampleIds: string[];
   addSample: (id: string) => void;
@@ -111,17 +111,13 @@ const AudioSelector = ({
       .then((res) => res.json())
       .then((data) => sampleListSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["samples"],
-    queryFn: getSamples,
+    queryFn: getSamples
   });
 
   if (isLoading || data == null) {
     return <p>Data is loading...</p>;
-  }
-
-  if (isFetching) {
-    return <p>Data is fetching...</p>;
   }
 
   if (error) {

@@ -28,7 +28,7 @@ const ExperimentPage = () => {
       .then((res) => res.json())
       .then((data) => experimentSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["experiment", id],
     queryFn: getExperiment,
   });
@@ -124,10 +124,6 @@ const ExperimentPage = () => {
 
   if (isLoading || data == null) {
     return <p>Data is loading...</p>;
-  }
-
-  if (isFetching) {
-    return <p>Data is fetching...</p>;
   }
 
   if (error) {

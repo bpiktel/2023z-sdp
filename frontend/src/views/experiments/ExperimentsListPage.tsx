@@ -14,7 +14,7 @@ const deleteExperiment = async (id: string, callback: () => void) => {
   try {
     const response = await fetch(`${VITE_BASE_API_URL}/experiments/${id}`, {
       ...defaultRequestInit,
-      method: "DELETE",
+      method: "DELETE"
     });
 
     if (response.ok) {
@@ -35,15 +35,15 @@ const ExperimentsListPage = () => {
       .then((res) => res.json())
       .then((data) => experimentListSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["experiments"],
-    queryFn: getExperiments,
+    queryFn: getExperiments
   });
 
   const onDelete = async (id: string) => {
     await fireConfirmationModal({
       title: "Delete experiment",
-      body: "Are you sure you want to delete this experiment?",
+      body: "Are you sure you want to delete this experiment?"
     }).then((result) => {
       if (result.isConfirmed) {
         deleteExperiment(id, () => {
@@ -55,10 +55,6 @@ const ExperimentsListPage = () => {
 
   if (isLoading) {
     return <p>Data is loading...</p>;
-  }
-
-  if (isFetching) {
-    return <p>Data is fetching...</p>;
   }
 
   if (error) {
