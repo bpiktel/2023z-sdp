@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { FaArrowLeft } from "react-icons/fa";
 import { signIn } from "../../utils/authUtils.ts";
+import { onEnterDown } from "utils/formUtils.ts";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -41,12 +42,14 @@ const LoginPage = () => {
                   type="text"
                   placeholder="Username"
                   onChange={(e) => setUsername(e.target.value)}
+                  onKeyDown={onEnterDown(handleSignIn)}
                 />
                 <input
                   className="mt-sm py-1 px-2"
                   type="password"
                   placeholder="Password"
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={onEnterDown(handleSignIn)}
                 />
               </div>
               <div className="flex flex-col mt-md">

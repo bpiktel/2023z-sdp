@@ -8,6 +8,7 @@ import { Sample, sampleListSchema } from "schemas/sampleSchemas";
 import SamplePreviewWidget from "views/samples/SamplePreviewWidget";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
+import { onEnterDown } from "utils/formUtils.ts";
 
 const createExperiment = async (
   name: string,
@@ -75,6 +76,7 @@ const CreateExperimentPage = () => {
             type="text"
             placeholder="experiment name..."
             onChange={(e) => setName(e.target.value)}
+            onKeyDown={onEnterDown(handleCreate)}
           />
         </div>
         <AudioSelector

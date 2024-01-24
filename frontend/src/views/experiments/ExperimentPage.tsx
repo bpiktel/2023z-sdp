@@ -18,6 +18,7 @@ import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { fireAlert } from "components/AlertDialogs.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
 import { FaArrowLeft } from "react-icons/fa";
+import { onEnterDown } from "utils/formUtils.ts";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -361,6 +362,7 @@ const FinishInfo = ({
                 type="text"
                 placeholder="name..."
                 onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={onEnterDown(onResultsSave)}
               />
             </div>
             <ButtonPrimary onClick={onResultsSave}>Save results</ButtonPrimary>
