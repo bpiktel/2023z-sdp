@@ -257,6 +257,8 @@ const StartInfo = ({
           that are coming from different directions. Your task is to identify
           the direction of the sound by clicking on the corresponding location
           on the sphere that will be displayed on the screen.
+          <br />
+          Training mode will show you the correct answer after each sample.
         </div>
         {readyToStart ? (
           <div className="flex gap-xl">
