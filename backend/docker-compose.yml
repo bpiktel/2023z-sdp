@@ -15,6 +15,11 @@ services:
       - 3000:3000
     volumes:
       - ./devkeys:/app/devkeys
+      - ./migrations:/app/migrations
+      - soundlocalization_volume:/app/storage
+    depends_on:
+      sound-localization-tester-database:
+        condition: service_healthy
 
   sound-localization-tester-database:
     container_name: sound-localization-tester-database
@@ -24,6 +29,13 @@ services:
       - 8000:8000
     volumes:
       - surrealdb_volume:/data
+    healthcheck:
+      test: [ "CMD", "/surreal", "isready" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
 
 volumes:
+  soundlocalization_volume:
   surrealdb_volume:
