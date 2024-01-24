@@ -96,7 +96,7 @@ async fn delete_audio(
     _: Claims,
     Path(id): Path<String>,
 ) -> ResponseType<()> {
-    let Ok(_) = audio_repo
+    let Ok(deleted) = audio_repo
         .delete(id)
         .await
         .map_err(|e| error!({error = ?e}, "Encountered an error while deleting a sample"))
@@ -104,7 +104,11 @@ async fn delete_audio(
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
     };
 
-    ResponseType::Status(StatusCode::OK)
+    if deleted {
+        ResponseType::Status(StatusCode::OK)
+    } else {
+        ResponseType::Status(StatusCode::CONFLICT)
+    }
 }
 
 /// List all audio samples
