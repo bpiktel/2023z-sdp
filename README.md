@@ -27,11 +27,11 @@ Utworzony plik `docker-compose.yml` będzie zawierał wrażliwe dane produkcyjne
 
 ### Generowanie kluczy szyfrujących używanych w środowisku produkcyjnym
 
+Zawartość folderu `keys` jest wyłączona z systemu kontroli wersji.
+
 ```sh
-mkdir keys # Folder `keys` jest wyłączony z systemu kontroli wersji
-cd keys
-ssh-keygen -t rsa -b 4096 -m PEM -f jwt-auth-rsa.key -N "" # Bez passphrase
-openssl rsa -in jwt-auth-rsa.key -pubout -outform PEM -out jwt-auth-rsa.key.pub
+ssh-keygen -t rsa -b 4096 -m PEM -f keys/jwt-auth-rsa.key -N "" # Bez passphrase
+openssl rsa -in keys/jwt-auth-rsa.key -pubout -outform PEM -out keys/jwt-auth-rsa.key.pub
 cd ..
 ```
 
@@ -72,6 +72,29 @@ services:
     # [...]
     ports:
       - <nowy port>:3000
+```
+
+### Ustawienie adresu API serwera widocznego z zewnątrz
+
+Ponieważ kod frontendowy uruchamiany jest na przeglądarce użytkownika, musi znać publiczny adres API serwera.
+Adres zapisywany jest na stałe w momencie budowania aplikacji - przy zmianie serwera trzeba dokonać przebudowy obrazów.
+
+Adres należy wprowadzić do pliku `docker-compose.yml`:
+
+```yaml
+services:
+  sound-localization-tester-backend-frontend:
+    # [...]
+    build:
+      context: .
+      args:
+        BASE_API_URL: |wypełnić|/api
+```
+
+Poprawny adres API składa się z adresu, pod którym dostępna jest strona oraz ścieżki `/api`, np.:
+
+```yaml
+        BASE_API_URL: http://home.elka.pw.edu.pl/test-lokalizacji/api
 ```
 
 ### Uruchomienie

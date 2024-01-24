@@ -3,7 +3,10 @@ version: '3.9'
 services:
   sound-localization-tester-backend-frontend:
     container_name: sound-localization-tester
-    build: .
+    build:
+      context: .
+      args:
+        BASE_API_URL: |wypełnić|/api
     environment:
       auth_keys__encoding: keys/jwt-auth-rsa.key
       auth_keys__decoding: keys/jwt-auth-rsa.key.pub
