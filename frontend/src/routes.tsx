@@ -1,6 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 import { Outlet, RootRoute, Route, Router } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import LoginPage from "views/auth/LoginPage";
 import ExperimentPage from "views/experiments/ExperimentPage";
 import ExperimentsListPage from "views/experiments/ExperimentsListPage";
@@ -15,7 +14,6 @@ const rootRoute = new RootRoute({
   component: () => (
     <>
       <Outlet />
-      <TanStackRouterDevtools />
     </>
   )
 });
