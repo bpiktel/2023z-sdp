@@ -8,26 +8,27 @@ import { Sample, sampleListSchema } from "schemas/sampleSchemas";
 import SamplePreviewWidget from "views/samples/SamplePreviewWidget";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
+import { onEnterDown } from "utils/formUtils.ts";
 
 const createExperiment = async (
   name: string,
   sample_ids: string[],
-  callback: (success: boolean) => void
+  callback: (success: boolean, statusCode: number) => void
 ): Promise<void> => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
   const response = await fetch(`${VITE_BASE_API_URL}/experiments`, {
     ...defaultRequestInit,
     method: "POST",
-    body: JSON.stringify({ name, sample_ids }),
+    body: JSON.stringify({ name, sample_ids })
   });
 
   if (response.ok) {
-    callback(true);
+    callback(true, response.status);
     return;
   }
 
-  callback(false);
+  callback(false, response.status);
 };
 
 const CreateExperimentPage = () => {
@@ -44,11 +45,15 @@ const CreateExperimentPage = () => {
     setSampleIds((prevState) => prevState.filter((sId) => sId !== id));
   };
 
-  const onCreated = (success: boolean) => {
+  const onCreated = (success: boolean, statusCode: number) => {
     if (success) {
-      fireAlert({ title: "Experiment created" });
+      fireAlert("Experiment created");
       navigate({ to: "/experiments" });
-    } else fireAlert({ title: "Failed to create experiment" });
+    } else if (statusCode === 409) {
+      fireAlert("Experiment name already taken");
+    } else {
+      fireAlert("Failed to create experiment");
+    }
   };
 
   const handleCreate = async () => {
@@ -56,6 +61,7 @@ const CreateExperimentPage = () => {
       await createExperiment(name, sampleIds, onCreated);
     } catch (error) {
       console.error(error);
+      fireAlert("Error occured", String(error));
     }
   };
 
@@ -75,6 +81,7 @@ const CreateExperimentPage = () => {
             type="text"
             placeholder="experiment name..."
             onChange={(e) => setName(e.target.value)}
+            onKeyDown={onEnterDown(handleCreate)}
           />
         </div>
         <AudioSelector
@@ -98,7 +105,7 @@ const CreateExperimentPage = () => {
 const AudioSelector = ({
   selectedSampleIds,
   addSample,
-  removeSample,
+  removeSample
 }: {
   selectedSampleIds: string[];
   addSample: (id: string) => void;
@@ -111,17 +118,13 @@ const AudioSelector = ({
       .then((res) => res.json())
       .then((data) => sampleListSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["samples"],
-    queryFn: getSamples,
+    queryFn: getSamples
   });
 
   if (isLoading || data == null) {
     return <p>Data is loading...</p>;
-  }
-
-  if (isFetching) {
-    return <p>Data is fetching...</p>;
   }
 
   if (error) {

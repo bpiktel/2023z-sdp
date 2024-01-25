@@ -30,7 +30,8 @@ impl SampleRepository {
             .query("create only sample content $info")
             .bind(("info", &info))
             .await?;
-        let sample = result.take::<Option<WithId<SampleInfo>>>(0)?.found()?;
+        let sample = result.take::<Option<WithId<SampleInfo>>>(0)?;
+        let sample = sample.found()?;
         self.file_storage.create(sample.id(), data).await?;
         Ok(sample)
     }

@@ -37,7 +37,7 @@ const ExperimentResultsPage = () => {
       .then((res) => res.json())
       .then((data) => experimentResultListSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["results", id],
     queryFn: getResults,
   });
@@ -50,8 +50,7 @@ const ExperimentResultsPage = () => {
   const {
     data: samplesData,
     isLoading: samplesLoading,
-    isFetching: samplesFetching,
-    error: samplesError,
+    error: samplesError
   } = useQuery({
     queryKey: ["samples"],
     queryFn: getSamples,
@@ -98,7 +97,7 @@ const ExperimentResultsPage = () => {
     link.click();
   };
 
-  if (isLoading || isFetching || samplesLoading || samplesFetching) {
+  if (isLoading || samplesLoading) {
     return <p>Data is loading...</p>;
   }
 

@@ -4,13 +4,14 @@ import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ButtonSecondary } from "components/Buttons";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
+import { onEnterDown } from "utils/formUtils.ts";
 
 const createSample = async (
   name: string,
   azimuth: number,
   elevation: number,
   audio_file: File,
-  callback: (success: boolean) => void
+  callback: (success: boolean, statusCode: number) => void
 ): Promise<void> => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
@@ -23,14 +24,14 @@ const createSample = async (
     // headers: {"Content-Type": "multipart/form-data"}, #Fun fact. By setting "Content-Type" to "multipart/form-data"
     // you also have to define "boundary" (which postman does on it own), BUT IF YOU SIMPLY DO NOT DEFINE CONTENT-TYPE THE WEB BROWSER WILL DO IT ALL FOR YOU.
     body: formData,
-    credentials: "include",
+    credentials: "include"
   });
 
   if (response.ok) {
-    callback(true);
+    callback(true, response.status);
     return;
   }
-  callback(false);
+  callback(false, response.status);
 };
 
 const CreateSamplePage = () => {
@@ -42,26 +43,65 @@ const CreateSamplePage = () => {
 
   const [audioFile, setAudioFile] = useState<File>();
 
-  const onCreated = (success: boolean) => {
+  const onCreated = (success: boolean, statusCode: number) => {
     if (success) {
-      fireAlert({ title: "Sample added" });
+      fireAlert("Sample added");
       navigate({ to: "/samples" });
-    } else fireAlert({ title: "Sample name taken" });
+    } else if (statusCode === 409) {
+      fireAlert("Sample name already taken");
+    } else {
+      fireAlert("Error creating the sample");
+    }
   };
 
-  const handleDegrees = (degrees: number, set: (n: number) => void) => {
-    const rest = degrees % 15;
-    if (rest < 8) set(degrees - rest);
-    else set(degrees + 15 - rest);
+  const handleDegrees = (
+    degrees: number,
+    min: number,
+    max: number,
+    step: number,
+    set?: (n: number) => void
+  ) => {
+    if (min > max || step < 1) {
+      throw new Error(
+        `Invalid arguments: min: ${min}, max: ${max}, step: ${step}`
+      );
+    }
+    if (degrees < min) {
+      degrees = min;
+    }
+    if (degrees > max) {
+      degrees = max;
+    }
+    const rest = (degrees - min) % step;
+    degrees = degrees - rest;
+    if (rest / step >= 0.5) {
+      degrees += step;
+    }
+    if (set) {
+      set(degrees);
+    }
+    return degrees;
   };
 
   const handleCreate = async () => {
+    const validatedAzimuth = handleDegrees(azimuth, 0, 345, 15);
+    const validatedElevation = handleDegrees(elevation, -90, 90, 15);
     try {
-      if (!audioFile) return;
+      if (!audioFile || name === "") {
+        fireAlert("Please fill all the fields");
+        return;
+      }
 
-      await createSample(name, azimuth, elevation, audioFile, onCreated);
+      await createSample(
+        name,
+        validatedAzimuth,
+        validatedElevation,
+        audioFile,
+        onCreated
+      );
     } catch (error) {
       console.error(error);
+      fireAlert("Error occured", String(error));
     }
   };
 
@@ -86,6 +126,7 @@ const CreateSamplePage = () => {
                   type="text"
                   placeholder="name..."
                   onChange={(e) => setName(e.target.value)}
+                  onKeyDown={onEnterDown(handleCreate)}
                 />
               </td>
             </tr>
@@ -102,7 +143,16 @@ const CreateSamplePage = () => {
                   max="345"
                   step="15"
                   placeholder="azimuth"
-                  onChange={(e) => handleDegrees(+e.target.value, setAzimuth)}
+                  onChange={(e) =>
+                    handleDegrees(+e.target.value, 0, 345, 15, setAzimuth)
+                  }
+                  onBlur={(e) =>
+                    handleDegrees(+e.target.value, 0, 345, 15, (n) => {
+                      setAzimuth(n);
+                      e.target.value = `${n}`;
+                    })
+                  }
+                  onKeyDown={onEnterDown(handleCreate)}
                 />
               </td>
             </tr>
@@ -119,7 +169,16 @@ const CreateSamplePage = () => {
                   max="90"
                   step="15"
                   placeholder="elevation"
-                  onChange={(e) => handleDegrees(+e.target.value, setElevation)}
+                  onChange={(e) =>
+                    handleDegrees(+e.target.value, -90, 90, 15, setElevation)
+                  }
+                  onBlur={(e) =>
+                    handleDegrees(+e.target.value, -90, 90, 15, (n) => {
+                      setElevation(n);
+                      e.target.value = `${n}`;
+                    })
+                  }
+                  onKeyDown={onEnterDown(handleCreate)}
                 />
               </td>
             </tr>
@@ -128,6 +187,7 @@ const CreateSamplePage = () => {
 
         <input
           type="file"
+          accept="audio/*"
           name="file"
           onChange={(e) => {
             setAudioFile(e.target.files?.[0]);

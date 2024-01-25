@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { fireConfirmationModal } from "components/AlertDialogs";
+import { fireAlert, fireConfirmationModal } from "components/AlertDialogs";
 import { ButtonSecondary } from "components/Buttons";
 import { FaTrash, FaArrowLeft, FaPlus, FaFile } from "react-icons/fa";
 import { experimentListSchema } from "schemas/experimentSchemas";
@@ -14,14 +14,17 @@ const deleteExperiment = async (id: string, callback: () => void) => {
   try {
     const response = await fetch(`${VITE_BASE_API_URL}/experiments/${id}`, {
       ...defaultRequestInit,
-      method: "DELETE",
+      method: "DELETE"
     });
 
     if (response.ok) {
       callback();
+    } else {
+      fireAlert("Could not remove the experiment");
     }
   } catch (error) {
     console.error(error);
+    fireAlert("Error occured", String(error));
   }
 };
 
@@ -35,15 +38,15 @@ const ExperimentsListPage = () => {
       .then((res) => res.json())
       .then((data) => experimentListSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["experiments"],
-    queryFn: getExperiments,
+    queryFn: getExperiments
   });
 
   const onDelete = async (id: string) => {
     await fireConfirmationModal({
       title: "Delete experiment",
-      body: "Are you sure you want to delete this experiment?",
+      body: "Are you sure you want to delete this experiment?"
     }).then((result) => {
       if (result.isConfirmed) {
         deleteExperiment(id, () => {
@@ -55,10 +58,6 @@ const ExperimentsListPage = () => {
 
   if (isLoading) {
     return <p>Data is loading...</p>;
-  }
-
-  if (isFetching) {
-    return <p>Data is fetching...</p>;
   }
 
   if (error) {
@@ -94,27 +93,23 @@ const ExperimentsListPage = () => {
               </Link>
 
               <div className="flex gap-xs">
-                {/*<Link*/}
-                {/*  to={`/experiments/$id`}*/}
-                {/*  params={{id: experiment.id.id.String}}*/}
-                {/*>*/}
-                {/*  <FaEdit className="size-md"/>*/}
-                {/*</Link>*/}
                 {authenticated && (
                   <FaTrash
                     className="size-md text-red-500 cursor-pointer"
                     onClick={() => onDelete(experiment.id.id.String)}
                   />
                 )}
-                <Link
-                  to={`/experiments/$id/results`}
-                  params={{ id: experiment.id.id.String }}
-                >
-                  <FaFile
-                    className="size-md text-white cursor-pointer"
-                    onClick={() => {}}
-                  />
-                </Link>
+                {authenticated && (
+                  <Link
+                    to={`/experiments/$id/results`}
+                    params={{ id: experiment.id.id.String }}
+                  >
+                    <FaFile
+                      className="size-md text-white cursor-pointer"
+                      onClick={() => {}}
+                    />
+                  </Link>
+                )}
               </div>
             </div>
           ))}

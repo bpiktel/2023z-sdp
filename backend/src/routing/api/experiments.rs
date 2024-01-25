@@ -12,6 +12,7 @@ use crate::services::{
         files::FileStorage,
         repositories::experiment::{Experiment, ExperimentRepository, ExperimentResult},
         surreal::{SurrealDb, WithId},
+        IsNonUnique,
     },
     util::{ResponseType, ValidatedJson},
 };
@@ -40,14 +41,19 @@ async fn create_experiment(
     _: Claims,
     ValidatedJson(experiment): ValidatedJson<Experiment>,
 ) -> ResponseType<Json<WithId<Experiment>>> {
-    let Ok(result) = repo
-        .create(experiment)
-        .await
-        .map_err(|e| error!({error = ?e}, "Encountered an error while creating an experiment."))
-    else {
-        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
-    };
-    ResponseType::Data(Json(result))
+    let result = repo.create(experiment).await.map_err(|e| {
+        error!({error = ?e}, "Encountered an error while creating an experiment.");
+        e
+    });
+    if result.is_non_unique() {
+        return ResponseType::Status(StatusCode::CONFLICT);
+    } else {
+        if let Ok(result) = result {
+            ResponseType::Data(Json(result))
+        } else {
+            ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
 }
 
 /// Delete experiment

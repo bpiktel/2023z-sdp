@@ -11,13 +11,14 @@ import {
   Sample,
   SampleList,
   sampleListSchema,
-  SampleResult,
+  SampleResult
 } from "schemas/sampleSchemas";
 import LoadingSpinner from "../../components/LoadingSpinner.tsx";
 import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { fireAlert } from "components/AlertDialogs.tsx";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
 import { FaArrowLeft } from "react-icons/fa";
+import { onEnterDown } from "utils/formUtils.ts";
 
 const ExperimentPage = () => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -28,15 +29,20 @@ const ExperimentPage = () => {
       .then((res) => res.json())
       .then((data) => experimentSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["experiment", id],
-    queryFn: getExperiment,
+    queryFn: getExperiment
   });
 
-  const audioList: string[] =
-    data?.sample_ids
-      .map((sampleId) => getAudioPath(sampleId))
-      .sort(() => Math.random() - 0.5) ?? [];
+  const [audioList, setAudioList] = useState<string[]>([]);
+
+  useEffect(() => {
+    setAudioList(
+      data?.sample_ids
+        .map((sampleId) => getAudioPath(sampleId))
+        .sort(() => Math.random() - 0.5) ?? []
+    );
+  }, [data]);
 
   const [sampleCoordinatesList, setSampleCoordinatesList] = useState<
     SphericalCoordinates[]
@@ -57,14 +63,14 @@ const ExperimentPage = () => {
   const [trainingMode, setTrainingMode] = useState<boolean>(false);
 
   useEffect(() => {
-    if (typeof currentStep === "number") {
+    if (typeof currentStep === "number" && currentStep >= 0) {
       playerRef.current?.stop();
       playerRef.current = new Howl({
         src: [audioList[currentStep]],
         format: ["mp3"],
         volume: 1.0,
         loop: false,
-        autoplay: true,
+        autoplay: true
       });
     }
   }, [currentStep]);
@@ -88,7 +94,7 @@ const ExperimentPage = () => {
           if (!sample) return { azimuth: 0, elevation: 0 };
           const coords: SphericalCoordinates = {
             azimuth: sample.azimuth,
-            elevation: sample.elevation,
+            elevation: sample.elevation
           };
           return coords;
         })
@@ -104,8 +110,8 @@ const ExperimentPage = () => {
       {
         sample_id: data!.sample_ids[currentStep as number],
         azimuth: selection!.azimuth,
-        elevation: selection!.elevation,
-      },
+        elevation: selection!.elevation
+      }
     ];
   };
 
@@ -126,10 +132,6 @@ const ExperimentPage = () => {
     return <p>Data is loading...</p>;
   }
 
-  if (isFetching) {
-    return <p>Data is fetching...</p>;
-  }
-
   if (error) {
     return <p>There was an error when fetching your data.</p>;
   }
@@ -140,7 +142,7 @@ const ExperimentPage = () => {
         experimentName={data.name}
         onStart={(isTrainingMode: boolean) => {
           setTrainingMode(isTrainingMode);
-          setCurrentStep(0);
+          setCurrentStep(-1);
         }}
         readyToStart={audioList.length > 0}
       />
@@ -166,9 +168,20 @@ const ExperimentPage = () => {
       </div>
       <Stage
         selection={selection}
-        setSelection={setSelection}
+        setSelection={currentStep >= 0 ? setSelection : () => {}}
         highlight={highlight}
+        currentSample={currentStep}
       />
+      {currentStep === -1 && (
+        <div className="absolute w-full h-full flex pointer-events-none">
+          <ButtonSecondary
+            className="pointer-events-auto m-lg mt-auto ml-auto"
+            onClick={() => setCurrentStep(0)}
+          >
+            Start
+          </ButtonSecondary>
+        </div>
+      )}
       {selection !== null && (
         <div className="absolute w-full h-full flex pointer-events-none">
           <FrostedGlass
@@ -205,7 +218,7 @@ const ExperimentPage = () => {
 
 const ProgressWidget = ({
   currentStep,
-  totalSteps,
+  totalSteps
 }: {
   currentStep: number;
   totalSteps: number;
@@ -230,7 +243,7 @@ const ProgressWidget = ({
 const StartInfo = ({
   experimentName,
   onStart,
-  readyToStart,
+  readyToStart
 }: {
   experimentName: string;
   onStart: (isTrainingMode: boolean) => void;
@@ -240,14 +253,13 @@ const StartInfo = ({
     <div className="w-full h-full flex flex-col items-center justify-center">
       <FrostedGlass className="flex flex-col items-center justify-center mx-xxl gap-xl">
         <h1>You are about to start {experimentName}</h1>
-        <div className="max-w-[64rem]">
-          You will hear ... Lorem ipsum dolor sit amet, consectetur adipiscing
-          elit, sed do eiusmod tempor incididunt ut labore et dolore magna
-          aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-          laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-          in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
+        <div className="max-w-[48rem]">
+          After starting the test you will be presented with a series of sounds
+          that are coming from different directions. Your task is to identify
+          the direction of the sound by clicking on the corresponding location
+          on the sphere that will be displayed on the screen.
+          <br />
+          Training mode will show you the correct answer after each sample.
         </div>
         {readyToStart ? (
           <div className="flex gap-xl">
@@ -291,8 +303,8 @@ const createResult = async (
       body: JSON.stringify({
         sample_results: results,
         training: isTraining,
-        user: username,
-      }),
+        user: username
+      })
     }
   );
 
@@ -307,7 +319,7 @@ const createResult = async (
 const FinishInfo = ({
   experimentId,
   results,
-  isTraining: isTraining,
+  isTraining: isTraining
 }: {
   experimentId: string;
   results: SampleResult[];
@@ -318,13 +330,13 @@ const FinishInfo = ({
 
   const onResultsSave = () => {
     if (username.length === 0) {
-      fireAlert({ title: "Please enter your name" });
+      fireAlert("Please enter your name");
       return;
     }
 
     createResult(experimentId, username, isTraining, results, (success) => {
       if (success) {
-        fireAlert({ title: "Results saved" });
+        fireAlert("Results saved");
         setResultSent(true);
       }
     });
@@ -350,6 +362,7 @@ const FinishInfo = ({
                 type="text"
                 placeholder="name..."
                 onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={onEnterDown(onResultsSave)}
               />
             </div>
             <ButtonPrimary onClick={onResultsSave}>Save results</ButtonPrimary>

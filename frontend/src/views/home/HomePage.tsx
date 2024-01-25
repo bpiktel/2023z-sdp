@@ -4,6 +4,7 @@ import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { FaArrowRight, FaDoorOpen } from "react-icons/fa";
 import { signOut } from "../../utils/authUtils.ts";
 import { ButtonSecondary } from "../../components/Buttons.tsx";
+import { fireAlert } from "components/AlertDialogs.tsx";
 
 const HomePage = () => {
   const { authenticated, setAuthenticated } = useAuth();
@@ -13,6 +14,7 @@ const HomePage = () => {
       await signOut(setAuthenticated);
     } catch (error) {
       console.error(error);
+      fireAlert("Error occured", String(error));
     }
   };
 

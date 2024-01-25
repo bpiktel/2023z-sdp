@@ -14,6 +14,7 @@ use crate::services::{
         files::FileStorage,
         repositories::sample::{SampleInfo, SampleRepository},
         surreal::{SurrealDb, WithId},
+        IsNonUnique,
     },
     util::{ResponseType, ValidatedJsonRejection},
 };
@@ -78,14 +79,19 @@ async fn create_audio(
     }) {
         return ResponseType::JsonErr(ValidatedJsonRejection::Validation(err));
     }
-    let Ok(result) = audio_repo
-        .create(info, data)
-        .await
-        .map_err(|e| error!({error = ?e}, "Encountered an error while adding a sample"))
-    else {
-        return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
-    };
-    ResponseType::Data(Json(result))
+    let result = audio_repo.create(info, data).await.map_err(|e| {
+        error!({error = ?e}, "Encountered an error while adding a sample");
+        e
+    });
+    if result.is_non_unique() {
+        return ResponseType::Status(StatusCode::CONFLICT);
+    } else {
+        if let Ok(result) = result {
+            ResponseType::Data(Json(result))
+        } else {
+            ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
 }
 
 /// Delete an audio sample

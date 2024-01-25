@@ -8,23 +8,25 @@ import { FrostedGlass } from "../../components/FrostedGlass.tsx";
 import { useRef, useState } from "react";
 import { Howl } from "howler";
 import { defaultRequestInit } from "utils/fetchUtils.ts";
-import { fireConfirmationModal } from "../../components/AlertDialogs.tsx";
+import {
+  fireAlert,
+  fireConfirmationModal
+} from "../../components/AlertDialogs.tsx";
 import { ButtonSecondary } from "../../components/Buttons.tsx";
 
-const deleteSample = async (id: string, callback: () => void) => {
+const deleteSample = async (id: string, callback: (arg0: boolean, statusCode: number) => void) => {
   const { VITE_BASE_API_URL } = import.meta.env;
 
   try {
     const response = await fetch(`${VITE_BASE_API_URL}/audio/${id}`, {
       ...defaultRequestInit,
-      method: "DELETE",
+      method: "DELETE"
     });
 
-    if (response.ok) {
-      callback();
-    }
+    callback(response.ok, response.status);
   } catch (error) {
     console.error(error);
+    fireAlert("Error occured", String(error));
   }
 };
 
@@ -39,18 +41,25 @@ const SamplesListPage = () => {
       .then((res) => res.json())
       .then((data) => sampleListSchema.parse(data));
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["samples"],
-    queryFn: getSamples,
+    queryFn: getSamples
   });
 
   const onDelete = async (id: string) => {
     await fireConfirmationModal({
       title: "Delete sample",
-      body: "Are you sure you want to delete this sample?",
+      body: "Are you sure you want to delete this sample?"
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteSample(id, () => {
+        deleteSample(id, (success, statusCode) => {
+          if (success) {
+            fireAlert("Sample deleted successfully");
+          } else if (statusCode === 409) {
+            fireAlert("Sample is used in experiments", "You can't remove it without removing those experiments");
+          } else {
+            fireAlert("Failed to delete sample, check if it's used in experiments");
+          }
           queryClient.invalidateQueries({ queryKey: ["samples"] });
         });
       }
@@ -59,10 +68,6 @@ const SamplesListPage = () => {
 
   if (isLoading || data == null) {
     return <p>Data is loading...</p>;
-  }
-
-  if (isFetching) {
-    return <p>Data is fetching...</p>;
   }
 
   if (error) {
