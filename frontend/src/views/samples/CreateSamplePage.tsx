@@ -24,7 +24,7 @@ const createSample = async (
     // headers: {"Content-Type": "multipart/form-data"}, #Fun fact. By setting "Content-Type" to "multipart/form-data"
     // you also have to define "boundary" (which postman does on it own), BUT IF YOU SIMPLY DO NOT DEFINE CONTENT-TYPE THE WEB BROWSER WILL DO IT ALL FOR YOU.
     body: formData,
-    credentials: "include",
+    credentials: "include"
   });
 
   if (response.ok) {
@@ -54,9 +54,17 @@ const CreateSamplePage = () => {
     }
   };
 
-  const handleDegrees = (degrees: number, min: number, max: number, step: number, set?: (n: number) => void) => {
+  const handleDegrees = (
+    degrees: number,
+    min: number,
+    max: number,
+    step: number,
+    set?: (n: number) => void
+  ) => {
     if (min > max || step < 1) {
-      throw new Error(`Invalid arguments: min: ${min}, max: ${max}, step: ${step}`);
+      throw new Error(
+        `Invalid arguments: min: ${min}, max: ${max}, step: ${step}`
+      );
     }
     if (degrees < min) {
       degrees = min;
@@ -79,9 +87,18 @@ const CreateSamplePage = () => {
     const validatedAzimuth = handleDegrees(azimuth, 0, 345, 15);
     const validatedElevation = handleDegrees(elevation, -90, 90, 15);
     try {
-      if (!audioFile) return;
+      if (!audioFile || name === "") {
+        fireAlert("Please fill all the fields");
+        return;
+      }
 
-      await createSample(name, validatedAzimuth, validatedElevation, audioFile, onCreated);
+      await createSample(
+        name,
+        validatedAzimuth,
+        validatedElevation,
+        audioFile,
+        onCreated
+      );
     } catch (error) {
       console.error(error);
       fireAlert("Error occured", String(error));
@@ -126,8 +143,15 @@ const CreateSamplePage = () => {
                   max="345"
                   step="15"
                   placeholder="azimuth"
-                  onChange={e => handleDegrees(+e.target.value, 0, 345, 15, setAzimuth)}
-                  onBlur={e => handleDegrees(+e.target.value, 0, 345, 15, n => { setAzimuth(n); e.target.value = `${n}`; })}
+                  onChange={(e) =>
+                    handleDegrees(+e.target.value, 0, 345, 15, setAzimuth)
+                  }
+                  onBlur={(e) =>
+                    handleDegrees(+e.target.value, 0, 345, 15, (n) => {
+                      setAzimuth(n);
+                      e.target.value = `${n}`;
+                    })
+                  }
                   onKeyDown={onEnterDown(handleCreate)}
                 />
               </td>
@@ -145,8 +169,15 @@ const CreateSamplePage = () => {
                   max="90"
                   step="15"
                   placeholder="elevation"
-                  onChange={e => handleDegrees(+e.target.value, -90, 90, 15, setElevation)}
-                  onBlur={e => handleDegrees(+e.target.value, -90, 90, 15, n => { setElevation(n); e.target.value = `${n}`; })}
+                  onChange={(e) =>
+                    handleDegrees(+e.target.value, -90, 90, 15, setElevation)
+                  }
+                  onBlur={(e) =>
+                    handleDegrees(+e.target.value, -90, 90, 15, (n) => {
+                      setElevation(n);
+                      e.target.value = `${n}`;
+                    })
+                  }
                   onKeyDown={onEnterDown(handleCreate)}
                 />
               </td>
