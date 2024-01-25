@@ -93,27 +93,23 @@ const ExperimentsListPage = () => {
               </Link>
 
               <div className="flex gap-xs">
-                {/*<Link*/}
-                {/*  to={`/experiments/$id`}*/}
-                {/*  params={{id: experiment.id.id.String}}*/}
-                {/*>*/}
-                {/*  <FaEdit className="size-md"/>*/}
-                {/*</Link>*/}
                 {authenticated && (
                   <FaTrash
                     className="size-md text-red-500 cursor-pointer"
                     onClick={() => onDelete(experiment.id.id.String)}
                   />
                 )}
-                <Link
-                  to={`/experiments/$id/results`}
-                  params={{ id: experiment.id.id.String }}
-                >
-                  <FaFile
-                    className="size-md text-white cursor-pointer"
-                    onClick={() => {}}
-                  />
-                </Link>
+                {authenticated && (
+                  <Link
+                    to={`/experiments/$id/results`}
+                    params={{ id: experiment.id.id.String }}
+                  >
+                    <FaFile
+                      className="size-md text-white cursor-pointer"
+                      onClick={() => {}}
+                    />
+                  </Link>
+                )}
               </div>
             </div>
           ))}
