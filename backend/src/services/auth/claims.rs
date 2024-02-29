@@ -13,6 +13,8 @@ use uuid::Uuid;
 
 use super::AuthKeys;
 
+/// JWT claims
+/// If retrieved successfuly, the client is authenticated
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Claims {
@@ -59,5 +61,30 @@ where
             })?;
 
         Ok(token_data.claims)
+    }
+}
+
+/// Optional JWT claims
+/// Claims are available if retrieved succesfully
+/// Retrieval never fails
+pub struct OptClaims(Option<Claims>);
+
+#[async_trait]
+impl<S> FromRequestParts<S> for OptClaims
+where
+    AuthKeys: FromRef<S>,
+    S: Send + Sync,
+{
+    type Rejection = StatusCode;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let claims = Claims::from_request_parts(parts, state).await;
+        Ok(Self(claims.ok()))
+    }
+}
+
+impl OptClaims {
+    pub fn logged_in(&self) -> bool {
+        self.0.is_some()
     }
 }

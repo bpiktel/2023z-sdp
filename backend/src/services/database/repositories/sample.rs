@@ -218,7 +218,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn delete_fail_attachedk_to_experiment() {
+    async fn delete_fail_attached_to_experiment() {
         let (sut, experiment_repo) = setup().await;
         let info = SampleInfo {
             name: "delete.mp4".to_owned(),
@@ -230,6 +230,7 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: false,
         };
         experiment_repo.create(experiment).await.unwrap();
 

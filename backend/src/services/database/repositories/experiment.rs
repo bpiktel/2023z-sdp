@@ -22,10 +22,10 @@ impl ExperimentRepository {
         let mut result = self
             .surreal
             .query("begin")
-            .query("let $experiment = create only experiment content { name: $name }")
+            .query("let $experiment = create only experiment content { name: $experiment.name, is_public: $experiment.is_public }")
             .query(
                 r"
-                for $sample_id in $sample_ids {
+                for $sample_id in $experiment.sample_ids {
                     let $sample = select value id from only sample where meta::id(id) is $sample_id;
                     relate ($experiment)->experiment_sample->($sample);
                 }
@@ -33,8 +33,7 @@ impl ExperimentRepository {
             )
             .query("commit")
             .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $experiment.id")
-            .bind(("name", &experiment.name))
-            .bind(("sample_ids", &experiment.sample_ids))
+            .bind(("experiment", &experiment))
             .await?
             .better_check()?;
         let experiment = result.take::<Option<WithId<Experiment>>>(2)?.found()?;
@@ -50,6 +49,16 @@ impl ExperimentRepository {
             .await?;
         let experiment = result.take::<Option<WithId<Experiment>>>(0)?.found()?;
         Ok(experiment)
+    }
+
+    /// Return existing public experiments
+    pub async fn public_infos(&self) -> RepoResult<Vec<WithId<Experiment>>> {
+        let mut result = self
+            .surreal
+            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment where is_public is true")
+            .await?;
+        let experiments = result.take::<Vec<WithId<Experiment>>>(0)?;
+        Ok(experiments)
     }
 
     /// Return existing experiments
@@ -123,6 +132,7 @@ pub struct Experiment {
     #[validate(length(min = 1, max = 63))]
     pub name: String,
     pub sample_ids: Vec<String>,
+    pub is_public: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
@@ -205,6 +215,7 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: false,
         };
 
         let experiment = sut.create(experiment).await.unwrap();
@@ -218,6 +229,7 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec!["aaa".to_owned()],
+            is_public: false,
         };
 
         sut.create(experiment).await.unwrap_err();
@@ -236,6 +248,7 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
 
@@ -255,15 +268,17 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: true,
         };
         sut.create(experiment).await.unwrap();
         let experiment = Experiment {
             name: "exp-2".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: true,
         };
         sut.create(experiment).await.unwrap();
 
-        let result = sut.infos().await.unwrap();
+        let result = sut.public_infos().await.unwrap();
 
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].sample_ids.len(), 1);
@@ -283,6 +298,7 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
 
@@ -303,6 +319,7 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
         let result = ExperimentResult {
@@ -334,6 +351,7 @@ mod tests {
         let experiment = Experiment {
             name: "exp-1".to_owned(),
             sample_ids: vec![sample.id()],
+            is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
         let result = ExperimentResult {
