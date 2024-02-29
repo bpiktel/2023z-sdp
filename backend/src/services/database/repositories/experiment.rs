@@ -22,17 +22,17 @@ impl ExperimentRepository {
         let mut result = self
             .surreal
             .query("begin")
-            .query("let $experiment = create only experiment content { name: $experiment.name, is_public: $experiment.is_public }")
+            .query("let $exp = create only experiment content { name: $experiment.name, is_public: $experiment.is_public } RETURN AFTER")
             .query(
                 r"
                 for $sample_id in $experiment.sample_ids {
-                    let $sample = select value id from only sample where meta::id(id) is $sample_id;
-                    relate ($experiment)->experiment_sample->($sample);
+                    let $sample = select value id from only sample where meta::id(id) is $sample_id limit 1;
+                    relate ($exp)->experiment_sample->($sample);
                 }
                 ",
             )
             .query("commit")
-            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $experiment.id")
+            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $exp.id limit 1")
             .bind(("experiment", &experiment))
             .await?
             .better_check()?;
@@ -84,13 +84,13 @@ impl ExperimentRepository {
             .query(
                 r"
                 for $sample_result in $sample_results {
-                    let $experiment_sample = select value id from only experiment_sample where meta::id(in) is $experiment_id and meta::id(out) is $sample_result.sample_id;
+                    let $experiment_sample = select value id from only experiment_sample where meta::id(in) is $experiment_id and meta::id(out) is $sample_result.sample_id limit 1;
                     relate ($experiment_sample)->sample_result->($result) content { azimuth: $sample_result.azimuth , elevation: $sample_result.elevation };
                 }
                 ",
             )
             .query("commit")
-            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id")
+            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id limit 1")
             .bind(("experiment_id", experiment_id))
             .bind(("training", result.training))
             .bind(("user", result.user))

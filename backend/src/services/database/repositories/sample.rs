@@ -234,6 +234,7 @@ mod tests {
         };
         experiment_repo.create(experiment).await.unwrap();
 
-        sut.delete(sample.id()).await.unwrap_err();
+        let result = sut.delete(sample.id()).await;
+        assert_eq!(result.unwrap(), false);
     }
 }

@@ -1,4 +1,4 @@
-FROM surrealdb/surrealdb:1.0.0 AS final
+FROM surrealdb/surrealdb:v1.2.1 AS final
 
 ENV SURREAL_AUTH=false
 ENV SURREAL_STRICT=false
