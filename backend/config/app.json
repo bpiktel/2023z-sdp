@@ -18,13 +18,5 @@
     },
     "file_storage": {
         "folder": "storage"
-    },
-    "auth_keys": {
-        "encoding": "devkeys/jwt-auth-rsa.key",
-        "decoding": "devkeys/jwt-auth-rsa.key.pub"
-    },
-    "admin": {
-        "username": "admin",
-        "password": "admin"
     }
 }
