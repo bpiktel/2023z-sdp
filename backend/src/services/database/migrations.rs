@@ -138,8 +138,8 @@ impl<'a> Migrator<'a> {
 
         let query = PRE.to_owned() + &migration.query + POST;
         db.query(&query)
-            .bind(("id", &migration.id))
-            .bind(("hash", &migration.hash))
+            .bind(("id", migration.id.clone()))
+            .bind(("hash", migration.hash.clone()))
             .await
             .map_err(|e| {
                 error!(error = ?e, query = &query);
