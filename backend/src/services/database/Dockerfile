@@ -1,10 +1,10 @@
-FROM surrealdb/surrealdb:v1.2.1 AS final
+FROM surrealdb/surrealdb:v2.0.2 AS final
 
-ENV SURREAL_AUTH=false
+ENV SURREAL_UNAUTHENTICATED=true
 ENV SURREAL_STRICT=false
 ENV SURREAL_NO_BANNER=true
 ENV SURREAL_LOG=info
-ENV SURREAL_PATH=file://data
+ENV SURREAL_PATH=rocksdb://data
 
 USER root
 

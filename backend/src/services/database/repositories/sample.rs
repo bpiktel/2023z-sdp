@@ -28,7 +28,7 @@ impl SampleRepository {
         let mut result = self
             .surreal
             .query("create only sample content $info")
-            .bind(("info", &info))
+            .bind(("info", info.clone()))
             .await?;
         let sample = result.take::<Option<WithId<SampleInfo>>>(0)?;
         let sample = sample.found()?;
@@ -48,7 +48,7 @@ impl SampleRepository {
         let mut result = self
             .surreal
             .query("select count() from experiment_sample where meta::id(out) is $id group all")
-            .bind(("id", &id))
+            .bind(("id", id.clone()))
             .await?;
         let relations_count: Option<usize> = result.take("count")?;
         if relations_count.unwrap_or(0) > 0 {
@@ -66,7 +66,7 @@ impl SampleRepository {
         })?;
         self.surreal
             .query("delete sample where meta::id(id) is $id")
-            .bind(("id", &id))
+            .bind(("id", id.clone()))
             .await?;
         Ok(true)
     }

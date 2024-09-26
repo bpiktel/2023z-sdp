@@ -84,13 +84,11 @@ async fn create_audio(
         e
     });
     if result.is_non_unique() {
-        return ResponseType::Status(StatusCode::CONFLICT);
+        ResponseType::Status(StatusCode::CONFLICT)
+    } else if let Ok(result) = result {
+        ResponseType::Data(Json(result))
     } else {
-        if let Ok(result) = result {
-            ResponseType::Data(Json(result))
-        } else {
-            ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR)
-        }
+        ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR)
     }
 }
 

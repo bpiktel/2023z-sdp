@@ -61,7 +61,7 @@ impl UserRepository {
             .surreal
             .query("select * from user where meta::id(id) is $id and username is $username and password_hash is $password_hash")
             .bind(("id", ADMIN_ID))
-            .bind(("username", username))
+            .bind(("username", username.to_owned()))
             .bind(("password_hash", Self::hash_password(password)))
             .await?;
         let mby_user = result.take::<Option<WithId>>(0)?;

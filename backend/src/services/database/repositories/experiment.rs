@@ -33,7 +33,7 @@ impl ExperimentRepository {
             )
             .query("commit")
             .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $exp.id limit 1")
-            .bind(("experiment", &experiment))
+            .bind(("experiment", experiment.clone()))
             .await?
             .better_check()?;
         let experiment = result.take::<Option<WithId<Experiment>>>(2)?.found()?;
@@ -121,13 +121,13 @@ impl ExperimentRepository {
     pub async fn delete(&self, experiment_id: String) -> RepoResult {
         self.surreal
             .query("delete from experiment where meta::id(id) is $experiment_id")
-            .bind(("experiment_id", &experiment_id))
+            .bind(("experiment_id", experiment_id))
             .await?;
         Ok(())
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Validate)]
+#[derive(Clone, Debug, Serialize, Deserialize, Validate)]
 pub struct Experiment {
     #[validate(length(min = 1, max = 63))]
     pub name: String,
