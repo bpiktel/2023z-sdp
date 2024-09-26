@@ -7,7 +7,10 @@ use hyper::StatusCode;
 use tracing::error;
 
 use crate::services::{
-    auth::{claims::Claims, AuthKeys},
+    auth::{
+        claims::{Claims, OptClaims},
+        AuthKeys,
+    },
     database::{
         files::FileStorage,
         repositories::experiment::{Experiment, ExperimentRepository, ExperimentResult},
@@ -74,17 +77,23 @@ async fn delete_experiment(
     ResponseType::Status(StatusCode::OK)
 }
 
-/// List all experiments
+/// List experiments
 ///
-/// List all existing experiments.
+/// List existing experiments.
+/// If user is logged in lists all experiments.
+/// If user is not logged in, lists only public experiments.
 async fn list_experiments(
     repo: ExperimentRepository,
+    claims: OptClaims,
 ) -> ResponseType<Json<Vec<WithId<Experiment>>>> {
-    let Ok(result) = repo
-        .infos()
-        .await
-        .map_err(|e| error!({error = ?e}, "Encountered an error while listing experiments."))
-    else {
+    let result = if claims.logged_in() {
+        repo.infos().await
+    } else {
+        repo.public_infos().await
+    }
+    .map_err(|e| error!({error = ?e}, "Encountered an error while listing experiments."));
+
+    let Ok(result) = result else {
         return ResponseType::Status(StatusCode::INTERNAL_SERVER_ERROR);
     };
     ResponseType::Data(Json(result))
