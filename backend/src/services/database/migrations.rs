@@ -59,7 +59,7 @@ struct AppliedMigration {
 struct Migration {
     id: String,
     query: String,
-    hash: Bytes,
+    hash: String,
 }
 
 impl<'a> Migrator<'a> {
@@ -90,7 +90,7 @@ impl<'a> Migrator<'a> {
             .map(|entry| {
                 let id = entry.file_name().to_string_lossy().into_owned();
                 let query = std::fs::read_to_string(entry.path())?;
-                let hash = Self::sha256(query.as_bytes());
+                let hash = hex::encode(Self::sha256(query.as_bytes()));
                 Ok(Migration { id, query, hash })
             })
             .collect::<MigrationResult<_>>()?;
@@ -130,16 +130,16 @@ impl<'a> Migrator<'a> {
         db: &Surreal<T>,
         migration: &Migration,
     ) -> MigrationResult<()> {
-        const PRE: &str = "BEGIN TRANSACTION;";
-        const POST: &str = r#"
-            INSERT INTO migrations (id, applied_at, hash) VALUES (type::thing(migrations, $id), time::now(), $hash);
-            COMMIT TRANSACTION;
-        "#;
+        const PRE: &str = r#"BEGIN TRANSACTION;
+"#;
+        const POST: &str = r#"INSERT INTO migrations (id, applied_at, hash) VALUES (type::thing(migrations, $mig_id), time::now(), $mig_hash);
+COMMIT TRANSACTION;
+"#;
 
         let query = PRE.to_owned() + &migration.query + POST;
         db.query(&query)
-            .bind(("id", migration.id.clone()))
-            .bind(("hash", migration.hash.clone()))
+            .bind(("mig_id", migration.id.clone()))
+            .bind(("mig_hash", migration.hash.clone()))
             .await
             .map_err(|e| {
                 error!(error = ?e, query = &query);

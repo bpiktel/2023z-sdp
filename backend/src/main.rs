@@ -24,6 +24,7 @@ async fn main() {
     let surreal_db = SurrealDb::setup(&config.surreal_db)
         .await
         .expect("Failed to setup SurrealDB");
+    surreal_db.query("select * from a").await.unwrap();
     Migrator::new(&config.surreal_db.migrations)
         .migrate(&surreal_db)
         .await

@@ -44,10 +44,10 @@ pub trait IsNonUnique<T> {
 impl<T> IsNonUnique<T> for RepoResult<T> {
     fn is_non_unique(&self) -> bool {
         match self {
-            Err(RepoError::Surreal(DbError::Database(e))) => non_unique_value_on_index(&e),
+            Err(RepoError::Surreal(DbError::Database(e))) => non_unique_value_on_index(e),
             Err(RepoError::Surreal(DbError::DatabaseCheck(es))) => {
                 for e in es.values() {
-                    if non_unique_value_on_index(&e) {
+                    if non_unique_value_on_index(e) {
                         return true;
                     }
                 }
