@@ -8,6 +8,7 @@ services:
       args:
         BASE_API_URL: |wypełnić|/api
     environment:
+      app__permissive_cors: false
       auth_keys__encoding: keys/jwt-auth-rsa.key
       auth_keys__decoding: keys/jwt-auth-rsa.key.pub
       admin__username: |wypełnić|
