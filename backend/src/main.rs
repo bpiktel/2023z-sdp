@@ -4,10 +4,9 @@ mod services;
 use axum::extract::DefaultBodyLimit;
 use routing::main_route;
 use services::{
-    database::{
-        files::FileStorage, migrations::Migrator, repositories::user::UserRepository,
-        surreal::SurrealDb,
-    },
+    database::{migrator::Migrator, surreal::Database},
+    file_storage::FileStorage,
+    repositories::user::UserRepository,
     runner::run,
 };
 
@@ -21,11 +20,11 @@ async fn main() {
     let config = setup_config();
     setup_tracing(&config.tracing);
     let auth_keys = (&config.auth_keys).try_into().expect("Missing PEMs");
-    let surreal_db = SurrealDb::setup(&config.surreal_db)
+    let database = Database::setup(&config.database)
         .await
         .expect("Failed to setup SurrealDB");
-    Migrator::new(&config.surreal_db.migrations)
-        .migrate(&surreal_db)
+    Migrator::new(&config.database.migrations)
+        .migrate(&database)
         .await
         .expect("Failed to migrate SurrealDB");
     let file_storage = FileStorage::setup(&config.file_storage)
@@ -33,17 +32,17 @@ async fn main() {
         .expect("Failed to setup FileStorage");
     let state = AppState {
         auth_keys,
-        surreal_db,
+        database,
         file_storage,
     };
 
-    let repo = UserRepository::new(state.surreal_db.clone());
+    let repo = UserRepository::new(state.database.clone());
     repo.try_create(&config.admin.username, &config.admin.password)
         .await
         .ok();
 
     run(
-        config.app.url,
+        config.app.endpoint,
         main_route(&config)
             .layer(DefaultBodyLimit::max(REQUEST_SIZE_LIMIT))
             .with_state(state),

@@ -104,17 +104,17 @@ impl<'a> Migrator<'a> {
     ) -> MigrationResult<&'b [Migration]> {
         let applied_count = applied_migrations.len();
         if applied_count > all_migrations.len() {
-            Err(Error::Mismatch)?
+            Err(MigrationError::Mismatch)?
         }
         let mut applied_migrations: Vec<_> = applied_migrations.to_vec();
         applied_migrations.sort_by(|a, b| a.id.cmp(&b.id));
         for (i, applied_migration) in applied_migrations.iter().enumerate() {
             let migration_id = &all_migrations[i];
             if migration_id.id != applied_migration.id {
-                Err(Error::Mismatch)?
+                Err(MigrationError::Mismatch)?
             }
             if migration_id.hash != applied_migration.hash {
-                Err(Error::Mismatch)?
+                Err(MigrationError::Mismatch)?
             }
             info!(
                 "Migration `{}` was applied at `{}`",
@@ -161,7 +161,7 @@ COMMIT TRANSACTION;
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum Error {
+pub enum MigrationError {
     #[error("{0}")]
     SurrealDB(#[from] surrealdb::Error),
     #[error("{0}")]
@@ -170,4 +170,4 @@ pub enum Error {
     Mismatch,
 }
 
-pub type MigrationResult<T> = Result<T, Error>;
+pub type MigrationResult<T> = Result<T, MigrationError>;

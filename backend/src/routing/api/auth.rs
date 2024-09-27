@@ -19,7 +19,8 @@ use crate::{
             claims::{create_token, Claims, JWT_TOKEN_COOKIE},
             AuthKeys,
         },
-        database::{repositories::user::UserRepository, surreal::SurrealDb},
+        database::surreal::Database,
+        repositories::user::UserRepository,
         util::{ResponseType, ValidatedJson},
     },
 };
@@ -27,7 +28,7 @@ use crate::{
 pub fn auth_router<T>() -> Router<T>
 where
     AuthKeys: FromRef<T>,
-    SurrealDb: FromRef<T>,
+    Database: FromRef<T>,
     T: 'static + Send + Sync + Clone,
 {
     Router::new()

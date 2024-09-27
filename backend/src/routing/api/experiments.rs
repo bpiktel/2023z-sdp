@@ -11,11 +11,11 @@ use crate::services::{
         claims::{Claims, OptClaims},
         AuthKeys,
     },
-    database::{
-        files::FileStorage,
-        repositories::experiment::{Experiment, ExperimentRepository, ExperimentResult},
-        surreal::{SurrealDb, WithId},
-        IsNonUnique,
+    database::{identified::StringIdentified, surreal::Database},
+    file_storage::FileStorage,
+    repositories::{
+        experiment::{Experiment, ExperimentRepository, ExperimentResult},
+        IsViolatingUnique,
     },
     util::{ResponseType, ValidatedJson},
 };
@@ -23,7 +23,7 @@ use crate::services::{
 pub fn router<T>() -> Router<T>
 where
     AuthKeys: FromRef<T>,
-    SurrealDb: FromRef<T>,
+    Database: FromRef<T>,
     FileStorage: FromRef<T>,
     T: 'static + Send + Sync + Clone,
 {
@@ -43,12 +43,12 @@ async fn create_experiment(
     repo: ExperimentRepository,
     _: Claims,
     ValidatedJson(experiment): ValidatedJson<Experiment>,
-) -> ResponseType<Json<WithId<Experiment>>> {
+) -> ResponseType<Json<StringIdentified<Experiment>>> {
     let result = repo.create(experiment).await.map_err(|e| {
         error!({error = ?e}, "Encountered an error while creating an experiment.");
         e
     });
-    if result.is_non_unique() {
+    if result.is_violating_unique() {
         ResponseType::Status(StatusCode::CONFLICT)
     } else if let Ok(result) = result {
         ResponseType::Data(Json(result))
@@ -83,7 +83,7 @@ async fn delete_experiment(
 async fn list_experiments(
     repo: ExperimentRepository,
     claims: OptClaims,
-) -> ResponseType<Json<Vec<WithId<Experiment>>>> {
+) -> ResponseType<Json<Vec<StringIdentified<Experiment>>>> {
     let result = if claims.logged_in() {
         repo.infos().await
     } else {
@@ -103,7 +103,7 @@ async fn list_experiments(
 async fn get_experiment(
     repo: ExperimentRepository,
     Path(id): Path<String>,
-) -> ResponseType<Json<WithId<Experiment>>> {
+) -> ResponseType<Json<StringIdentified<Experiment>>> {
     let Ok(result) = repo
         .info(id)
         .await
@@ -121,7 +121,7 @@ async fn get_results(
     repo: ExperimentRepository,
     _: Claims,
     Path(id): Path<String>,
-) -> ResponseType<Json<Vec<WithId<ExperimentResult>>>> {
+) -> ResponseType<Json<Vec<StringIdentified<ExperimentResult>>>> {
     let Ok(result) = repo.results(id).await.map_err(
         |e| error!({error = ?e}, "Encountered an error while getting experiment results."),
     ) else {
@@ -137,7 +137,7 @@ async fn post_result(
     repo: ExperimentRepository,
     Path(id): Path<String>,
     ValidatedJson(expr): ValidatedJson<ExperimentResult>,
-) -> ResponseType<Json<WithId<ExperimentResult>>> {
+) -> ResponseType<Json<StringIdentified<ExperimentResult>>> {
     let Ok(result) = repo.create_result(id, expr).await.map_err(
         |e| error!({error = ?e}, "Encountered an error while creating experiment results."),
     ) else {

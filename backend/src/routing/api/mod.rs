@@ -6,10 +6,7 @@ pub mod experiments;
 
 use axum::{extract::FromRef, http::StatusCode, response::IntoResponse, Router};
 
-use crate::services::{
-    auth::AuthKeys,
-    database::{files::FileStorage, surreal::SurrealDb},
-};
+use crate::services::{auth::AuthKeys, database::surreal::Database, file_storage::FileStorage};
 
 use self::audio::audio_router;
 use self::auth::auth_router;
@@ -18,7 +15,7 @@ use self::experiments::router;
 pub fn api_router<T>() -> Router<T>
 where
     AuthKeys: FromRef<T>,
-    SurrealDb: FromRef<T>,
+    Database: FromRef<T>,
     FileStorage: FromRef<T>,
     T: 'static + Send + Sync + Clone,
 {

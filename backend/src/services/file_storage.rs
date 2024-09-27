@@ -18,13 +18,13 @@ pub struct FileStorage {
 }
 
 impl FileStorage {
-    pub async fn setup(config: &FileStorageConfig) -> std::io::Result<Self> {
+    pub async fn setup(config: &FileStorageConfig) -> FsResult<Self> {
         tokio::fs::create_dir_all(&config.folder).await?;
         let folder = tokio::fs::canonicalize(&config.folder).await?;
         Ok(Self { folder })
     }
 
-    async fn preprocess_path(&self, path: impl AsRef<Path>) -> std::io::Result<PathBuf> {
+    async fn preprocess_path(&self, path: impl AsRef<Path>) -> FsResult<PathBuf> {
         let path = path.as_ref();
         let path = path
             .components()
@@ -35,7 +35,7 @@ impl FileStorage {
     }
 
     /// Create a file
-    pub async fn create(&self, path: impl AsRef<Path>, data: Bytes) -> std::io::Result<()> {
+    pub async fn create(&self, path: impl AsRef<Path>, data: Bytes) -> FsResult<()> {
         let path = self.preprocess_path(path).await?;
         let mut file = tokio::fs::OpenOptions::new()
             .create_new(true)
@@ -47,7 +47,7 @@ impl FileStorage {
     }
 
     /// Get a file
-    pub async fn get(&self, path: impl AsRef<Path>) -> std::io::Result<Bytes> {
+    pub async fn get(&self, path: impl AsRef<Path>) -> FsResult<Bytes> {
         let path = self.preprocess_path(path).await?;
         let mut file = tokio::fs::OpenOptions::new().read(true).open(path).await?;
         let mut buf = BytesMut::new();
@@ -56,9 +56,12 @@ impl FileStorage {
     }
 
     /// Delete a file
-    pub async fn delete(&self, path: impl AsRef<Path>) -> std::io::Result<()> {
+    pub async fn delete(&self, path: impl AsRef<Path>) -> FsResult<()> {
         let path = self.preprocess_path(path).await?;
         tokio::fs::remove_file(path).await?;
         Ok(())
     }
 }
+
+pub type FsError = std::io::Error;
+pub type FsResult<T> = Result<T, FsError>;

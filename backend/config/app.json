@@ -5,10 +5,10 @@
         "json": "logs"
     },
     "app": {
-        "url": "0.0.0.0:3000",
+        "endpoint": "0.0.0.0:3000",
         "permissive_cors": true
     },
-    "surreal_db": {
+    "database": {
         "address": "ws://127.0.0.1:8000",
         "namespace": "default",
         "database": "default",
@@ -17,7 +17,7 @@
         }
     },
     "file_storage": {
-        "folder": "storage"
+        "folder": "file_storage"
     },
     "auth_keys": {
         "encoding": "devkeys/jwt-auth-rsa.key",

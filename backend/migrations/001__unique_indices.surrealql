@@ -1,0 +1,3 @@
+define index sample_name_index on table sample columns name unique;
+define index experiment_sample_experiment_index on table experiment_sample columns in, out unique;
+define index experiment_name_index on table experiment columns name unique;

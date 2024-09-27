@@ -8,12 +8,14 @@ use serde::{Deserialize, Serialize};
 use sha3::{Digest, Keccak256};
 
 use crate::services::database::{
-    surreal::{MapToNotFound, SurrealDb, WithId},
-    RepoResult,
+    identified::Identified,
+    surreal::{Database, MapToNotFound},
 };
 
+use super::RepoResult;
+
 pub struct UserRepository {
-    surreal: SurrealDb,
+    surreal: Database,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,7 +28,7 @@ struct CreateUser {
 const ADMIN_ID: &str = "admin";
 
 impl UserRepository {
-    pub fn new(surreal: SurrealDb) -> Self {
+    pub fn new(surreal: Database) -> Self {
         Self { surreal }
     }
 
@@ -51,7 +53,7 @@ impl UserRepository {
                 },
             ))
             .await?;
-        result.take::<Option<WithId>>(0)?.found()?;
+        result.take::<Option<Identified>>(0)?.found()?;
         Ok(())
     }
 
@@ -59,12 +61,12 @@ impl UserRepository {
     pub async fn is_admin(&self, username: &str, password: &str) -> RepoResult<bool> {
         let mut result = self
             .surreal
-            .query("select * from user where meta::id(id) is $id and username is $username and password_hash is $password_hash")
-            .bind(("id", ADMIN_ID))
+            .query("select * from user where record::id(id) is $user_id and username is $username and password_hash is $password_hash")
+            .bind(("user_id", ADMIN_ID))
             .bind(("username", username.to_owned()))
             .bind(("password_hash", Self::hash_password(password)))
             .await?;
-        let mby_user = result.take::<Option<WithId>>(0)?;
+        let mby_user = result.take::<Option<Identified>>(0)?;
         Ok(mby_user.is_some())
     }
 }
@@ -72,14 +74,14 @@ impl UserRepository {
 #[async_trait]
 impl<S> FromRequestParts<S> for UserRepository
 where
-    SurrealDb: FromRef<S>,
+    Database: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = StatusCode;
 
     async fn from_request_parts(_: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         Ok(Self {
-            surreal: SurrealDb::from_ref(state),
+            surreal: Database::from_ref(state),
         })
     }
 }

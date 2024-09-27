@@ -5,8 +5,9 @@ services:
     container_name: sound-localization-tester-backend
     build: .
     environment:
+      app__endpoint: 0.0.0.0:3000
       app__permissive_cors: true
-      surreal_db__address: ws://surrealdb:8000
+      database__address: ws://database:8000
       auth_keys__encoding: devkeys/jwt-auth-rsa.key
       auth_keys__decoding: devkeys/jwt-auth-rsa.key.pub
       admin__username: root
@@ -16,19 +17,19 @@ services:
     volumes:
       - ./devkeys:/app/devkeys
       - ./migrations:/app/migrations
-      - soundlocalization_volume:/app/storage
+      - file_storage_volume:/app/file_storage
     depends_on:
       sound-localization-tester-database:
         condition: service_healthy
 
   sound-localization-tester-database:
     container_name: sound-localization-tester-database
-    hostname: surrealdb
+    hostname: database
     build: src/services/database
     ports:
       - 8000:8000
     volumes:
-      - surrealdb_volume:/data
+      - database_volume:/data
     healthcheck:
       test: [ "CMD", "/surreal", "isready" ]
       interval: 10s
@@ -37,5 +38,5 @@ services:
       start_period: 5s
 
 volumes:
-  soundlocalization_volume:
-  surrealdb_volume:
+  file_storage_volume:
+  database_volume:
