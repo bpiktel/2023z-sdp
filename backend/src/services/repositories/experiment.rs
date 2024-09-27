@@ -322,7 +322,6 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore = "only with docker db instance"]
     async fn create_result() {
         let (sut, sample_repo) = setup().await;
         let info = SampleInfo {
@@ -354,7 +353,6 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore = "only with docker db instance"]
     async fn results() {
         let (sut, sample_repo) = setup().await;
         let info = SampleInfo {
