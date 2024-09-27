@@ -6,7 +6,7 @@
     },
     "app": {
         "url": "0.0.0.0:3000",
-        "cors": false
+        "cors": true
     },
     "surreal_db": {
         "address": "ws://127.0.0.1:8000",
@@ -18,5 +18,13 @@
     },
     "file_storage": {
         "folder": "storage"
+    },
+    "auth_keys": {
+        "encoding": "devkeys/jwt-auth-rsa.key",
+        "decoding": "devkeys/jwt-auth-rsa.key.pub"
+    },
+    "admin": {
+        "username": "admin",
+        "password": "admin"
     }
 }

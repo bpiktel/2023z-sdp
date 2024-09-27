@@ -32,7 +32,7 @@ impl<'a> Migrator<'a> {
 struct AppliedMigrationRaw {
     id: Thing,
     applied_at: DateTime<Utc>,
-    hash: Bytes,
+    hash: String,
 }
 
 impl From<AppliedMigrationRaw> for AppliedMigration {
@@ -52,7 +52,7 @@ impl From<AppliedMigrationRaw> for AppliedMigration {
 struct AppliedMigration {
     id: String,
     applied_at: DateTime<Utc>,
-    hash: Bytes,
+    hash: String,
 }
 
 #[derive(Debug, Clone)]
