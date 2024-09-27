@@ -61,8 +61,8 @@ impl UserRepository {
     pub async fn is_admin(&self, username: &str, password: &str) -> RepoResult<bool> {
         let mut result = self
             .surreal
-            .query("select * from user where meta::id(id) is $id and username is $username and password_hash is $password_hash")
-            .bind(("id", ADMIN_ID))
+            .query("select * from user where record::id(id) is $user_id and username is $username and password_hash is $password_hash")
+            .bind(("user_id", ADMIN_ID))
             .bind(("username", username.to_owned()))
             .bind(("password_hash", Self::hash_password(password)))
             .await?;

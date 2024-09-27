@@ -42,7 +42,7 @@ async fn main() {
         .ok();
 
     run(
-        config.app.url,
+        config.app.endpoint,
         main_route(&config)
             .layer(DefaultBodyLimit::max(REQUEST_SIZE_LIMIT))
             .with_state(state),

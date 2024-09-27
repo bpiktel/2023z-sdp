@@ -29,13 +29,13 @@ impl ExperimentRepository {
             .query(
                 r"
                 for $sample_id in $experiment.sample_ids {
-                    let $sample = select value id from only sample where meta::id(id) is $sample_id limit 1;
+                    let $sample = select value id from only sample where record::id(id) is $sample_id limit 1;
                     relate ($exp)->experiment_sample->($sample);
                 }
                 ",
             )
             .query("commit")
-            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $exp.id limit 1")
+            .query("select *, (select value record::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $exp.id limit 1")
             .bind(("experiment", experiment.clone()))
             .await?
             .validate()?;
@@ -50,7 +50,7 @@ impl ExperimentRepository {
     pub async fn info(&self, experiment_id: String) -> RepoResult<StringIdentified<Experiment>> {
         let mut result = self
             .surreal
-            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment where meta::id(id) is $experiment_id")
+            .query("select *, (select value record::id(out) from ->experiment_sample) as sample_ids from experiment where record::id(id) is $experiment_id")
             .bind(("experiment_id", experiment_id))
             .await?;
         let experiment = result
@@ -64,7 +64,7 @@ impl ExperimentRepository {
     pub async fn public_infos(&self) -> RepoResult<Vec<StringIdentified<Experiment>>> {
         let mut result = self
             .surreal
-            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment where is_public is true")
+            .query("select *, (select value record::id(out) from ->experiment_sample) as sample_ids from experiment where is_public is true")
             .await?;
         let experiments = result
             .take::<Vec<Identified<Experiment>>>(0)?
@@ -76,7 +76,7 @@ impl ExperimentRepository {
     pub async fn infos(&self) -> RepoResult<Vec<StringIdentified<Experiment>>> {
         let mut result = self
             .surreal
-            .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment")
+            .query("select *, (select value record::id(out) from ->experiment_sample) as sample_ids from experiment")
             .await?;
         let experiments = result
             .take::<Vec<Identified<Experiment>>>(0)?
@@ -97,13 +97,13 @@ impl ExperimentRepository {
             .query(
                 r"
                 for $sample_result in $sample_results {
-                    let $experiment_sample = select value id from only experiment_sample where meta::id(in) is $experiment_id and meta::id(out) is $sample_result.sample_id limit 1;
+                    let $experiment_sample = select value id from only experiment_sample where record::id(in) is $experiment_id and record::id(out) is $sample_result.sample_id limit 1;
                     relate ($experiment_sample)->sample_result->($result) content { azimuth: $sample_result.azimuth , elevation: $sample_result.elevation };
                 }
                 ",
             )
             .query("commit")
-            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id limit 1")
+            .query("select *, (select record::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from only result where id is $result.id limit 1")
             .bind(("experiment_id", experiment_id))
             .bind(("training", result.training))
             .bind(("user", result.user))
@@ -124,7 +124,7 @@ impl ExperimentRepository {
     ) -> RepoResult<Vec<StringIdentified<ExperimentResult>>> {
         let mut result = self
             .surreal
-            .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id")
+            .query("select *, (select record::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id")
             .bind(("experiment_id", experiment_id))
             .await?;
         let results = result
@@ -136,7 +136,7 @@ impl ExperimentRepository {
     /// Delete the entire experiment
     pub async fn delete(&self, experiment_id: String) -> RepoResult {
         self.surreal
-            .query("delete from experiment where meta::id(id) is $experiment_id")
+            .query("delete from experiment where record::id(id) is $experiment_id")
             .bind(("experiment_id", experiment_id))
             .await?;
         Ok(())

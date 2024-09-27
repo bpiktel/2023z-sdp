@@ -57,8 +57,10 @@ impl SampleRepository {
     pub async fn delete(&self, id: String) -> RepoResult<bool> {
         let mut result = self
             .database
-            .query("select count() from experiment_sample where meta::id(out) is $id group all")
-            .bind(("id", id.clone()))
+            .query(
+                "select count() from experiment_sample where record::id(out) is $sample_id group all",
+            )
+            .bind(("sample_id", id.clone()))
             .await?;
         let relations_count: Option<usize> = result.take("count")?;
         if relations_count.unwrap_or(0) > 0 {
@@ -75,8 +77,8 @@ impl SampleRepository {
             }
         })?;
         self.database
-            .query("delete sample where meta::id(id) is $id")
-            .bind(("id", id.clone()))
+            .query("delete sample where record::id(id) is $sample_id")
+            .bind(("sample_id", id.clone()))
             .await?;
         Ok(true)
     }

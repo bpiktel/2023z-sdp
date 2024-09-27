@@ -14,6 +14,6 @@ pub struct AppState {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
-    pub url: SocketAddr,
+    pub endpoint: SocketAddr,
     pub permissive_cors: bool,
 }
