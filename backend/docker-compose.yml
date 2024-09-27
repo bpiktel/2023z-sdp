@@ -5,7 +5,7 @@ services:
     container_name: sound-localization-tester-backend
     build: .
     environment:
-      app__cors: true
+      app__permissive_cors: true
       surreal_db__address: ws://surrealdb:8000
       auth_keys__encoding: devkeys/jwt-auth-rsa.key
       auth_keys__decoding: devkeys/jwt-auth-rsa.key.pub

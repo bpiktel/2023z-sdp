@@ -29,7 +29,7 @@ where
         .fallback_service(static_files_service())
         .layer(TraceLayer::new_for_http());
 
-    if config.app.cors {
+    if config.app.permissive_cors {
         router = router.layer(CorsLayer::very_permissive());
         info!("Applying very permissive CORS");
     } else {
