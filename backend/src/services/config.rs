@@ -3,10 +3,8 @@ use serde::Deserialize;
 use validator::Validate;
 
 use super::{
-    app::AppConfig,
-    auth::AuthKeysConfig,
-    database::{files::FileStorageConfig, surreal::SurrealDbConfig},
-    tracing::TracingConfig,
+    app::AppConfig, auth::AuthKeysConfig, database::surreal::DatabaseConfig,
+    file_storage::FileStorageConfig, tracing::TracingConfig,
 };
 
 #[derive(Debug, Clone, Deserialize, Validate)]
@@ -22,7 +20,7 @@ pub struct Config {
     pub app: AppConfig,
     pub tracing: TracingConfig,
     pub auth_keys: AuthKeysConfig,
-    pub surreal_db: SurrealDbConfig,
+    pub database: DatabaseConfig,
     pub file_storage: FileStorageConfig,
     #[validate]
     pub admin: AdminConfig,

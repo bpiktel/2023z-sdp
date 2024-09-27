@@ -7,7 +7,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - surrealdb_volume:/data
+      - database_volume:/data
 
 volumes:
-  surrealdb_volume:
+  database_volume:

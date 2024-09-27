@@ -41,6 +41,7 @@ hyper = "1.0.1"
 bytes = { version = "1.5.0", features = ["serde"] }
 surrealdb = { version = "2.0.2", features = ["kv-rocksdb"] }
 sha3 = "0.10.8"
+derive_more = { version = "1.0.0", features = ["deref", "deref_mut"] }
 
 [dev-dependencies]
 surrealdb = { version = "2.0.2", features = ["kv-mem"] }

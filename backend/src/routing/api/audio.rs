@@ -10,11 +10,11 @@ use validator::Validate;
 
 use crate::services::{
     auth::{claims::Claims, AuthKeys},
-    database::{
-        files::FileStorage,
-        repositories::sample::{SampleInfo, SampleRepository},
-        surreal::{SurrealDb, WithId},
-        IsNonUnique,
+    database::{identified::StringIdentified, surreal::Database},
+    file_storage::FileStorage,
+    repositories::{
+        sample::{SampleInfo, SampleRepository},
+        IsViolatingUnique,
     },
     util::{ResponseType, ValidatedJsonRejection},
 };
@@ -22,7 +22,7 @@ use crate::services::{
 pub fn audio_router<T>() -> Router<T>
 where
     AuthKeys: FromRef<T>,
-    SurrealDb: FromRef<T>,
+    Database: FromRef<T>,
     FileStorage: FromRef<T>,
     T: 'static + Send + Sync + Clone,
 {
@@ -40,7 +40,7 @@ async fn create_audio(
     audio_repo: SampleRepository,
     _: Claims,
     mut multipart: Multipart,
-) -> ResponseType<Json<WithId<SampleInfo>>> {
+) -> ResponseType<Json<StringIdentified<SampleInfo>>> {
     let Ok(Some(info)) = multipart
         .next_field()
         .await
@@ -83,7 +83,7 @@ async fn create_audio(
         error!({error = ?e}, "Encountered an error while adding a sample");
         e
     });
-    if result.is_non_unique() {
+    if result.is_violating_unique() {
         ResponseType::Status(StatusCode::CONFLICT)
     } else if let Ok(result) = result {
         ResponseType::Data(Json(result))
@@ -118,7 +118,9 @@ async fn delete_audio(
 /// List all audio samples
 ///
 /// List all available audio sample identifiers
-async fn get_all(audio_repo: SampleRepository) -> ResponseType<Json<Vec<WithId<SampleInfo>>>> {
+async fn get_all(
+    audio_repo: SampleRepository,
+) -> ResponseType<Json<Vec<StringIdentified<SampleInfo>>>> {
     let Ok(samples) = audio_repo
         .infos()
         .await

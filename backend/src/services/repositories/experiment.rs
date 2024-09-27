@@ -8,17 +8,20 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use crate::services::database::{
-    surreal::{BetterCheck, MapToNotFound, SurrealDb, WithId},
-    RepoResult,
+    error::ValidateDbResponse,
+    identified::{Identified, StringIdentified, TryIntoStringId},
+    surreal::{Database, MapToNotFound},
 };
 
+use super::RepoResult;
+
 pub struct ExperimentRepository {
-    pub surreal: SurrealDb,
+    pub surreal: Database,
 }
 
 impl ExperimentRepository {
     /// Create a new experiment and return it with an identifier
-    pub async fn create(&self, experiment: Experiment) -> RepoResult<WithId<Experiment>> {
+    pub async fn create(&self, experiment: Experiment) -> RepoResult<StringIdentified<Experiment>> {
         let mut result = self
             .surreal
             .query("begin")
@@ -35,39 +38,49 @@ impl ExperimentRepository {
             .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from only experiment where id is $exp.id limit 1")
             .bind(("experiment", experiment.clone()))
             .await?
-            .better_check()?;
-        let experiment = result.take::<Option<WithId<Experiment>>>(2)?.found()?;
+            .validate()?;
+        let experiment = result
+            .take::<Option<Identified<Experiment>>>(2)?
+            .found()?
+            .try_into_string_id()?;
         Ok(experiment)
     }
 
     /// Return a specific experiment
-    pub async fn info(&self, experiment_id: String) -> RepoResult<WithId<Experiment>> {
+    pub async fn info(&self, experiment_id: String) -> RepoResult<StringIdentified<Experiment>> {
         let mut result = self
             .surreal
             .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment where meta::id(id) is $experiment_id")
             .bind(("experiment_id", experiment_id))
             .await?;
-        let experiment = result.take::<Option<WithId<Experiment>>>(0)?.found()?;
+        let experiment = result
+            .take::<Option<Identified<Experiment>>>(0)?
+            .found()?
+            .try_into_string_id()?;
         Ok(experiment)
     }
 
     /// Return existing public experiments
-    pub async fn public_infos(&self) -> RepoResult<Vec<WithId<Experiment>>> {
+    pub async fn public_infos(&self) -> RepoResult<Vec<StringIdentified<Experiment>>> {
         let mut result = self
             .surreal
             .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment where is_public is true")
             .await?;
-        let experiments = result.take::<Vec<WithId<Experiment>>>(0)?;
+        let experiments = result
+            .take::<Vec<Identified<Experiment>>>(0)?
+            .try_into_string_id()?;
         Ok(experiments)
     }
 
     /// Return existing experiments
-    pub async fn infos(&self) -> RepoResult<Vec<WithId<Experiment>>> {
+    pub async fn infos(&self) -> RepoResult<Vec<StringIdentified<Experiment>>> {
         let mut result = self
             .surreal
             .query("select *, (select value meta::id(out) from ->experiment_sample) as sample_ids from experiment")
             .await?;
-        let experiments = result.take::<Vec<WithId<Experiment>>>(0)?;
+        let experiments = result
+            .take::<Vec<Identified<Experiment>>>(0)?
+            .try_into_string_id()?;
         Ok(experiments)
     }
 
@@ -76,7 +89,7 @@ impl ExperimentRepository {
         &self,
         experiment_id: String,
         result: ExperimentResult,
-    ) -> RepoResult<WithId<ExperimentResult>> {
+    ) -> RepoResult<StringIdentified<ExperimentResult>> {
         let mut result = self
             .surreal
             .query("begin")
@@ -96,10 +109,11 @@ impl ExperimentRepository {
             .bind(("user", result.user))
             .bind(("sample_results", result.sample_results))
             .await?
-            .better_check()?;
+            .validate()?;
         let result = result
-            .take::<Option<WithId<ExperimentResult>>>(2)?
-            .found()?;
+            .take::<Option<Identified<ExperimentResult>>>(2)?
+            .found()?
+            .try_into_string_id()?;
         Ok(result)
     }
 
@@ -107,13 +121,15 @@ impl ExperimentRepository {
     pub async fn results(
         &self,
         experiment_id: String,
-    ) -> RepoResult<Vec<WithId<ExperimentResult>>> {
+    ) -> RepoResult<Vec<StringIdentified<ExperimentResult>>> {
         let mut result = self
             .surreal
             .query("select *, (select meta::id(in.out) as sample_id, azimuth, elevation from <-sample_result) as sample_results from result where experiment_id is $experiment_id")
             .bind(("experiment_id", experiment_id))
             .await?;
-        let results = result.take::<Vec<WithId<ExperimentResult>>>(0)?;
+        let results = result
+            .take::<Vec<Identified<ExperimentResult>>>(0)?
+            .try_into_string_id()?;
         Ok(results)
     }
 
@@ -154,14 +170,14 @@ pub struct SampleResult {
 #[async_trait]
 impl<S> FromRequestParts<S> for ExperimentRepository
 where
-    SurrealDb: FromRef<S>,
+    Database: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = StatusCode;
 
     async fn from_request_parts(_: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         Ok(Self {
-            surreal: SurrealDb::from_ref(state),
+            surreal: Database::from_ref(state),
         })
     }
 }
@@ -173,13 +189,13 @@ mod tests {
     use bytes::Bytes;
     use uuid::Uuid;
 
-    use crate::services::database::{
-        files::{FileStorage, FileStorageConfig},
+    use crate::services::{
+        database::surreal::tests::surreal_in_memory,
+        file_storage::{FileStorage, FileStorageConfig},
         repositories::{
             experiment::{Experiment, ExperimentResult, SampleResult},
             sample::{SampleInfo, SampleRepository},
         },
-        surreal::tests::surreal_in_memory,
     };
 
     use super::ExperimentRepository;
@@ -196,7 +212,7 @@ mod tests {
                 surreal: surreal.clone(),
             },
             SampleRepository {
-                surreal,
+                database: surreal,
                 file_storage,
             },
         )
@@ -214,7 +230,7 @@ mod tests {
         let sample = sample_repo.create(info, data).await.unwrap();
         let experiment = Experiment {
             name: "exp-1".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id],
             is_public: false,
         };
 
@@ -247,12 +263,12 @@ mod tests {
         let sample = sample_repo.create(info, data).await.unwrap();
         let experiment = Experiment {
             name: "exp-1".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id],
             is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
 
-        sut.info(experiment.id()).await.unwrap();
+        sut.info(experiment.id).await.unwrap();
     }
 
     #[tokio::test]
@@ -267,13 +283,13 @@ mod tests {
         let sample = sample_repo.create(info, data).await.unwrap();
         let experiment = Experiment {
             name: "exp-1".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id.clone()],
             is_public: true,
         };
         sut.create(experiment).await.unwrap();
         let experiment = Experiment {
             name: "exp-2".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id],
             is_public: true,
         };
         sut.create(experiment).await.unwrap();
@@ -297,12 +313,12 @@ mod tests {
         let sample = sample_repo.create(info, data).await.unwrap();
         let experiment = Experiment {
             name: "exp-1".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id],
             is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
 
-        sut.delete(experiment.id()).await.unwrap();
+        sut.delete(experiment.id).await.unwrap();
     }
 
     #[tokio::test]
@@ -318,7 +334,7 @@ mod tests {
         let sample = sample_repo.create(info, data).await.unwrap();
         let experiment = Experiment {
             name: "exp-1".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id.clone()],
             is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
@@ -326,13 +342,13 @@ mod tests {
             training: false,
             user: String::default(),
             sample_results: vec![SampleResult {
-                sample_id: sample.id(),
+                sample_id: sample.id,
                 azimuth: 17.0,
                 elevation: 9.3,
             }],
         };
 
-        let result = sut.create_result(experiment.id(), result).await.unwrap();
+        let result = sut.create_result(experiment.id, result).await.unwrap();
 
         assert_eq!(result.sample_results.len(), 1);
     }
@@ -350,7 +366,7 @@ mod tests {
         let sample = sample_repo.create(info, data).await.unwrap();
         let experiment = Experiment {
             name: "exp-1".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id.clone()],
             is_public: false,
         };
         let experiment = sut.create(experiment).await.unwrap();
@@ -358,28 +374,32 @@ mod tests {
             training: false,
             user: String::default(),
             sample_results: vec![SampleResult {
-                sample_id: sample.id(),
+                sample_id: sample.id.clone(),
                 azimuth: 17.0,
                 elevation: 9.3,
             }],
         };
-        sut.create_result(experiment.id(), result).await.unwrap();
+        sut.create_result(experiment.id.clone(), result)
+            .await
+            .unwrap();
         let result = ExperimentResult {
             training: false,
             user: String::default(),
             sample_results: vec![SampleResult {
-                sample_id: sample.id(),
+                sample_id: sample.id.clone(),
                 azimuth: 10.3,
                 elevation: 1.5,
             }],
         };
-        sut.create_result(experiment.id(), result).await.unwrap();
+        sut.create_result(experiment.id.clone(), result)
+            .await
+            .unwrap();
 
-        let result = sut.results(experiment.id()).await.unwrap();
+        let result = sut.results(experiment.id).await.unwrap();
 
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].sample_results.len(), 1);
         assert_eq!(result[1].sample_results.len(), 1);
-        assert_eq!(result[0].sample_results[0].sample_id, sample.id());
+        assert_eq!(result[0].sample_results[0].sample_id, sample.id);
     }
 }

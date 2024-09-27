@@ -11,42 +11,52 @@ use serde::{Deserialize, Serialize};
 use tracing::warn;
 use validator::Validate;
 
-use crate::services::database::{
-    files::FileStorage,
-    surreal::{MapToNotFound, SurrealDb, WithId},
-    RepoResult,
+use crate::services::{
+    database::{
+        identified::{Identified, StringIdentified, TryIntoStringId},
+        surreal::{Database, MapToNotFound},
+    },
+    file_storage::FileStorage,
 };
 
+use super::RepoResult;
+
 pub struct SampleRepository {
-    pub surreal: SurrealDb,
+    pub database: Database,
     pub file_storage: FileStorage,
 }
 
 impl SampleRepository {
     /// Create sample
-    pub async fn create(&self, info: SampleInfo, data: Bytes) -> RepoResult<WithId<SampleInfo>> {
+    pub async fn create(
+        &self,
+        info: SampleInfo,
+        data: Bytes,
+    ) -> RepoResult<StringIdentified<SampleInfo>> {
         let mut result = self
-            .surreal
+            .database
             .query("create only sample content $info")
             .bind(("info", info.clone()))
             .await?;
-        let sample = result.take::<Option<WithId<SampleInfo>>>(0)?;
-        let sample = sample.found()?;
-        self.file_storage.create(sample.id(), data).await?;
+        let sample = result.take::<Option<Identified<SampleInfo>>>(0)?;
+        let sample = sample.found()?.try_into_string_id()?;
+        self.file_storage.create(&sample.id, data).await?;
         Ok(sample)
     }
 
     /// List sample infos
-    pub async fn infos(&self) -> RepoResult<Vec<WithId<SampleInfo>>> {
-        let mut result = self.surreal.query("select * from sample").await?;
-        let samples = result.take::<Vec<WithId<SampleInfo>>>(0)?;
+    pub async fn infos(&self) -> RepoResult<Vec<StringIdentified<SampleInfo>>> {
+        let mut result = self.database.query("select * from sample").await?;
+        let samples = result
+            .take::<Vec<Identified<SampleInfo>>>(0)?
+            .try_into_string_id()?;
         Ok(samples)
     }
 
     /// Delete sample
     pub async fn delete(&self, id: String) -> RepoResult<bool> {
         let mut result = self
-            .surreal
+            .database
             .query("select count() from experiment_sample where meta::id(out) is $id group all")
             .bind(("id", id.clone()))
             .await?;
@@ -64,7 +74,7 @@ impl SampleRepository {
                 Err(err)
             }
         })?;
-        self.surreal
+        self.database
             .query("delete sample where meta::id(id) is $id")
             .bind(("id", id.clone()))
             .await?;
@@ -90,7 +100,7 @@ pub struct SampleInfo {
 #[async_trait]
 impl<S> FromRequestParts<S> for SampleRepository
 where
-    SurrealDb: FromRef<S>,
+    Database: FromRef<S>,
     FileStorage: FromRef<S>,
     S: Send + Sync,
 {
@@ -98,7 +108,7 @@ where
 
     async fn from_request_parts(_: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         Ok(Self {
-            surreal: SurrealDb::from_ref(state),
+            database: Database::from_ref(state),
             file_storage: FileStorage::from_ref(state),
         })
     }
@@ -110,13 +120,13 @@ mod tests {
 
     use bytes::Bytes;
 
-    use crate::services::database::{
-        files::{FileStorage, FileStorageConfig},
+    use crate::services::{
+        database::surreal::tests::surreal_in_memory,
+        file_storage::{FileStorage, FileStorageConfig},
         repositories::{
             experiment::{Experiment, ExperimentRepository},
             sample::SampleInfo,
         },
-        surreal::tests::surreal_in_memory,
     };
 
     use super::SampleRepository;
@@ -130,7 +140,7 @@ mod tests {
 
         (
             SampleRepository {
-                surreal: surreal.clone(),
+                database: surreal.clone(),
                 file_storage,
             },
             ExperimentRepository { surreal },
@@ -198,7 +208,7 @@ mod tests {
         let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
         let sample = sut.create(info, data.clone()).await.unwrap();
 
-        let result_data = sut.data(sample.id()).await.unwrap();
+        let result_data = sut.data(sample.id).await.unwrap();
 
         assert_eq!(result_data, data);
     }
@@ -214,7 +224,7 @@ mod tests {
         let data = Bytes::from_static(&[7, 6, 5, 4, 3, 2, 1, 0]);
         let sample = sut.create(info, data).await.unwrap();
 
-        sut.delete(sample.id()).await.unwrap();
+        sut.delete(sample.id).await.unwrap();
     }
 
     #[tokio::test]
@@ -229,12 +239,12 @@ mod tests {
         let sample = sut.create(info, data).await.unwrap();
         let experiment = Experiment {
             name: "exp-1".to_owned(),
-            sample_ids: vec![sample.id()],
+            sample_ids: vec![sample.id.clone()],
             is_public: false,
         };
         experiment_repo.create(experiment).await.unwrap();
 
-        let result = sut.delete(sample.id()).await;
+        let result = sut.delete(sample.id).await;
         assert_eq!(result.unwrap(), false);
     }
 }

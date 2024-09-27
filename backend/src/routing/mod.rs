@@ -6,9 +6,7 @@ use axum::{extract::FromRef, Router};
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 use crate::services::{
-    auth::AuthKeys,
-    config::Config,
-    database::{files::FileStorage, surreal::SurrealDb},
+    auth::AuthKeys, config::Config, database::surreal::Database, file_storage::FileStorage,
 };
 use tracing::info;
 
@@ -19,7 +17,7 @@ pub const MAIN_ROUTE_PATH: &str = "/api";
 pub fn main_route<T>(config: &Config) -> Router<T>
 where
     AuthKeys: FromRef<T>,
-    SurrealDb: FromRef<T>,
+    Database: FromRef<T>,
     FileStorage: FromRef<T>,
     T: 'static + Send + Sync + Clone,
 {
