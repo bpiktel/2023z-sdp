@@ -20,7 +20,7 @@ pub struct UserRepository {
 struct CreateUser {
     id: String,
     username: String,
-    password_hash: Vec<u8>,
+    password_hash: String,
 }
 
 const ADMIN_ID: &str = "admin";
@@ -30,11 +30,11 @@ impl UserRepository {
         Self { surreal }
     }
 
-    fn hash_password(password: &str) -> Vec<u8> {
+    fn hash_password(password: &str) -> String {
         let mut hasher = Keccak256::default();
         hasher.update(password);
         let password_hash = hasher.finalize();
-        password_hash.to_vec()
+        hex::encode(password_hash.as_slice())
     }
 
     /// Create admin account if it doesn't exist
