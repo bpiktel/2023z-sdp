@@ -89,7 +89,7 @@ const SamplesListPage = () => {
         <ul className="mt-md grid grid-cols-4 gap-lg">
           {data?.length === 0 && <p>No samples found.</p>}
           {data?.map((sample) => (
-            <li key={sample.id.id.String} className="py-sm">
+            <li key={sample.id} className="py-sm">
               <FrostedGlass
                 className="flex flex-col items-center"
                 theme="overlay"
@@ -97,7 +97,7 @@ const SamplesListPage = () => {
                 <div className="flex flex-row justify-end self-stretch pb-xs">
                   <div className="flex-1" />
                   <SamplePlayer
-                    assetPath={getAudioPath(sample.id.id.String)}
+                    assetPath={getAudioPath(sample.id)}
                     name={sample.name}
                     playerRef={playerRef}
                     status={playerStatus}
@@ -109,7 +109,7 @@ const SamplesListPage = () => {
                 <p>Elevation: {sample.elevation}</p>
                 <FaTrash
                   className="size-md text-red-500 cursor-pointer mt-sm"
-                  onClick={() => onDelete(sample.id.id.String)}
+                  onClick={() => onDelete(sample.id)}
                 />
               </FrostedGlass>
             </li>

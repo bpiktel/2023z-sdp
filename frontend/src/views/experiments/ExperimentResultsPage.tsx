@@ -17,7 +17,7 @@ const combineResultsWithSample = (
 ) => {
   return results.map((result) => {
     const matchingSample = samples.find(
-      (sample) => sample.id.id.String === result.sample_id
+      (sample) => sample.id === result.sample_id
     );
     return {
       ...result,

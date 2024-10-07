@@ -81,13 +81,13 @@ const ExperimentsListPage = () => {
         <div className="mt-md flex flex-col gap-sm items-center w-full">
           {data?.map((experiment) => (
             <div
-              key={experiment.id.id.String}
+              key={experiment.id}
               className="flex w-full justify-between items-center"
             >
               <Link
                 className="text-lg min-w-48 pr-xs"
                 to={`/experiments/$id`}
-                params={{ id: experiment.id.id.String }}
+                params={{ id: experiment.id }}
               >
                 {experiment.name}
               </Link>
@@ -96,13 +96,13 @@ const ExperimentsListPage = () => {
                 {authenticated && (
                   <FaTrash
                     className="size-md text-red-500 cursor-pointer"
-                    onClick={() => onDelete(experiment.id.id.String)}
+                    onClick={() => onDelete(experiment.id)}
                   />
                 )}
                 {authenticated && (
                   <Link
                     to={`/experiments/$id/results`}
-                    params={{ id: experiment.id.id.String }}
+                    params={{ id: experiment.id }}
                   >
                     <FaFile
                       className="size-md text-white cursor-pointer"

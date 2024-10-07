@@ -89,7 +89,7 @@ const ExperimentPage = () => {
       setSampleCoordinatesList(
         data.sample_ids.map((sampleId) => {
           const sample: Sample | undefined = allSamplesOfTheWorld.find(
-            (sample) => sample.id.id.String === sampleId
+            (sample) => sample.id === sampleId
           );
           if (!sample) return { azimuth: 0, elevation: 0 };
           const coords: SphericalCoordinates = {

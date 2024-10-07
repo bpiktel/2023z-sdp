@@ -13,6 +13,7 @@ import { onEnterDown } from "utils/formUtils.ts";
 const createExperiment = async (
   name: string,
   sample_ids: string[],
+  is_public: boolean,
   callback: (success: boolean, statusCode: number) => void
 ): Promise<void> => {
   const { VITE_BASE_API_URL } = import.meta.env;
@@ -20,7 +21,7 @@ const createExperiment = async (
   const response = await fetch(`${VITE_BASE_API_URL}/experiments`, {
     ...defaultRequestInit,
     method: "POST",
-    body: JSON.stringify({ name, sample_ids })
+    body: JSON.stringify({ name, sample_ids, is_public })
   });
 
   if (response.ok) {
@@ -36,6 +37,7 @@ const CreateExperimentPage = () => {
 
   const [name, setName] = useState<string>("");
   const [sampleIds, setSampleIds] = useState<Array<string>>([]);
+  const [isPublic, setIsPublic] = useState<boolean>(true);
 
   const addSample = (id: string) => {
     setSampleIds((prevState) => [...prevState, id]);
@@ -58,7 +60,7 @@ const CreateExperimentPage = () => {
 
   const handleCreate = async () => {
     try {
-      await createExperiment(name, sampleIds, onCreated);
+      await createExperiment(name, sampleIds, isPublic, onCreated);
     } catch (error) {
       console.error(error);
       fireAlert("Error occured", String(error));
@@ -74,15 +76,25 @@ const CreateExperimentPage = () => {
       </div>
       <FrostedGlass className="flex flex-col items-center gap-xl">
         <h1>Create experiment</h1>
-        <div className="flex flex-row items-center w-full">
-          <p className="pr-md">Experiment name</p>
-          <input
-            className="flex-1 px-2 py-1"
-            type="text"
-            placeholder="experiment name..."
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={onEnterDown(handleCreate)}
-          />
+        <div className="flex flex-col items-center gap-md w-full">
+          <div className="flex flex-row items-center w-full">
+            <p className="pr-md">Experiment name</p>
+            <input
+              className="flex-1 px-2 py-1"
+              type="text"
+              placeholder="experiment name..."
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={onEnterDown(handleCreate)}
+            />
+          </div>
+          <div className="flex flex-row items-center w-full">
+            <p className="pr-md">Is hidden?</p>
+            <input
+              type="checkbox"
+              checked={!isPublic}
+              onChange={() => setIsPublic((prevValue) => !prevValue)}
+            />
+          </div>
         </div>
         <AudioSelector
           selectedSampleIds={sampleIds}
@@ -132,11 +144,11 @@ const AudioSelector = ({
   }
 
   const selectedSamples: Sample[] = selectedSampleIds
-    .map((id) => data.find((sample) => sample.id.id.String === id))
+    .map((id) => data.find((sample) => sample.id === id))
     .filter((o) => o !== undefined) as Sample[];
 
   const unselectedSamples: Sample[] = data.filter(
-    (sample) => !selectedSampleIds.includes(sample.id.id.String)
+    (sample) => !selectedSampleIds.includes(sample.id)
   );
 
   return (
@@ -145,14 +157,14 @@ const AudioSelector = ({
         <h3 className="mb-sm">Available samples</h3>
         {unselectedSamples.map((sample) => (
           <div
-            key={sample.id.id.String}
+            key={sample.id}
             className="flex items-center justify-between gap-sm py-sm border-b last:border-0 border-white/60"
           >
-            <SamplePreviewWidget sample={sample} />
+            <SamplePreviewWidget sample={sample}/>
             <div>
               <FaPlus
                 className="cursor-pointer"
-                onClick={() => addSample(sample.id.id.String)}
+                onClick={() => addSample(sample.id)}
               />
             </div>
           </div>
@@ -162,14 +174,14 @@ const AudioSelector = ({
         <h3 className="mb-sm">Selected samples</h3>
         {selectedSamples.map((sample) => (
           <div
-            key={sample.id.id.String}
+            key={sample.id}
             className="flex items-center justify-between gap-sm py-sm border-b last:border-0 border-white/60"
           >
-            <SamplePreviewWidget sample={sample} />
+            <SamplePreviewWidget sample={sample}/>
             <div>
               <FaMinus
                 className="cursor-pointer"
-                onClick={() => removeSample(sample.id.id.String)}
+                onClick={() => removeSample(sample.id)}
               />
             </div>
           </div>
